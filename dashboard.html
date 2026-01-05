@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Dashboard - CompassAI</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 1000px; margin: 2rem auto; padding: 0 1rem; }
+    .project { border: 1px solid #ddd; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem; }
+    .project h2 { margin-top: 0; }
+    dl { display: grid; grid-template-columns: 120px 1fr; gap: 0.5rem; }
+    dt { font-weight: bold; color: #666; }
+    .actions { margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    button { padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer; }
+    .primary { background: #0066cc; color: white; }
+    .secondary { background: #eee; color: #333; }
+    .danger { background: #cc0000; color: white; }
+    .progress-bar { background: #eee; border-radius: 4px; height: 8px; margin-top: 0.25rem; }
+    .progress-fill { background: #0066cc; height: 100%; border-radius: 4px; }
+    .new-project { background: #f5f5f5; padding: 1.5rem; border-radius: 8px; }
+    .new-project input { padding: 0.5rem; margin-right: 0.5rem; border: 1px solid #ddd; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <!-- Page-level metadata -->
+  <script type="application/json" data-agent-meta>
+  {
+    "provider": {
+      "name": "IKANGAI GmbH",
+      "url": "https://ikangai.com"
+    },
+    "defaults": {
+      "currency": "EUR",
+      "timezone": "Europe/Vienna",
+      "locale": "de-AT"
+    },
+    "page": {
+      "type": "project-dashboard"
+    },
+    "agent_policies": {
+      "require_auth": true,
+      "auth_method": "session",
+      "rate_limit": {
+        "requests_per_minute": 60
+      }
+    }
+  }
+  </script>
+
+  <h1>Project Dashboard</h1>
+  
+  <main data-agent-trust="system">
+    
+    <!-- 
+      Project Resource with Multiple Actions
+      Demonstrates the "shared operation" model where:
+      - Agent can execute primary actions autonomously
+      - Human-preferred actions should be presented to user
+      - Danger actions require explicit confirmation
+    -->
+    <section class="project"
+             data-agent="resource"
+             data-agent-type="project"
+             data-agent-id="PRJ-2025-001">
+      
+      <h2 data-agent-prop="name">Website Redesign</h2>
+      
+      <dl>
+        <dt>Status</dt>
+        <dd data-agent-prop="status">active</dd>
+        
+        <dt>Phase</dt>
+        <dd data-agent-prop="phase">development</dd>
+        
+        <dt>Owner</dt>
+        <dd data-agent-prop="owner" 
+            data-agent-typehint="email">maria.schmidt@example.com</dd>
+        
+        <dt>Budget</dt>
+        <dd data-agent-prop="budget" 
+            data-agent-typehint="currency"
+            data-agent-currency="EUR">50,000</dd>
+        
+        <dt>Due Date</dt>
+        <!-- Display format differs from machine format -->
+        <dd data-agent-prop="due_date" 
+            data-agent-typehint="date"
+            data-agent-value="2025-03-31">31. März 2025</dd>
+        
+        <dt>Progress</dt>
+        <dd>
+          <span data-agent-prop="progress" 
+                data-agent-typehint="integer">65</span>%
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 65%"></div>
+          </div>
+        </dd>
+      </dl>
+      
+      <div class="actions">
+        <!-- 
+          PRIMARY ACTION: Update Progress
+          Agent may execute if context is appropriate.
+          The "motor" can turn this one.
+        -->
+        <button data-agent="action"
+                data-agent-name="update_progress"
+                data-agent-method="PATCH"
+                data-agent-endpoint="/api/projects/PRJ-2025-001"
+                data-agent-params="progress"
+                data-agent-role="primary"
+                class="primary">
+          Update Progress
+        </button>
+        
+        <!-- 
+          HUMAN-PREFERRED ACTION: Mark Complete
+          Agent should present this to the human rather than 
+          executing automatically. This is a "hand wheel" moment.
+        -->
+        <button data-agent="action"
+                data-agent-name="mark_complete"
+                data-agent-method="POST"
+                data-agent-endpoint="/api/projects/PRJ-2025-001/complete"
+                data-agent-role="primary"
+                data-agent-human-preferred="true"
+                class="primary"
+                aria-label="Mark this project as complete">
+          ✓ Complete Project
+        </button>
+        
+        <!-- 
+          SECONDARY ACTION: Archive
+          Lower priority, reversible, medium risk.
+          Agent should inform user before executing.
+        -->
+        <button data-agent="action"
+                data-agent-name="archive"
+                data-agent-method="POST"
+                data-agent-endpoint="/api/projects/PRJ-2025-001/archive"
+                data-agent-role="secondary"
+                data-agent-risk="medium"
+                data-agent-reversible="true"
+                class="secondary"
+                aria-label="Archive this project">
+          📦 Archive
+        </button>
+        
+        <!-- 
+          DANGER ACTION: Delete
+          High risk, irreversible, human-preferred.
+          Agent MUST confirm with user before executing.
+          Multiple safety signals: role, risk, reversible, human-preferred.
+        -->
+        <button data-agent="action"
+                data-agent-name="delete"
+                data-agent-method="DELETE"
+                data-agent-endpoint="/api/projects/PRJ-2025-001"
+                data-agent-role="danger"
+                data-agent-risk="high"
+                data-agent-reversible="false"
+                data-agent-human-preferred="true"
+                data-agent-description="Permanently delete this project and all associated data including tasks, files, and history"
+                class="danger">
+          🗑 Delete
+        </button>
+      </div>
+    </section>
+    
+    <!-- Second project example -->
+    <section class="project"
+             data-agent="resource"
+             data-agent-type="project"
+             data-agent-id="PRJ-2025-002">
+      
+      <h2 data-agent-prop="name">Mobile App v2</h2>
+      
+      <dl>
+        <dt>Status</dt>
+        <dd data-agent-prop="status">planning</dd>
+        
+        <dt>Phase</dt>
+        <dd data-agent-prop="phase">requirements</dd>
+        
+        <dt>Owner</dt>
+        <dd data-agent-prop="owner" 
+            data-agent-typehint="email">thomas.weber@example.com</dd>
+        
+        <dt>Budget</dt>
+        <dd data-agent-prop="budget" 
+            data-agent-typehint="currency"
+            data-agent-currency="EUR">120,000</dd>
+        
+        <dt>Due Date</dt>
+        <dd data-agent-prop="due_date" 
+            data-agent-typehint="date"
+            data-agent-value="2025-09-30">30. September 2025</dd>
+        
+        <dt>Progress</dt>
+        <dd>
+          <span data-agent-prop="progress" 
+                data-agent-typehint="integer">10</span>%
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 10%"></div>
+          </div>
+        </dd>
+      </dl>
+      
+      <div class="actions">
+        <button data-agent="action"
+                data-agent-name="update_progress"
+                data-agent-method="PATCH"
+                data-agent-endpoint="/api/projects/PRJ-2025-002"
+                data-agent-params="progress"
+                data-agent-role="primary"
+                class="primary">
+          Update Progress
+        </button>
+        
+        <button data-agent="action"
+                data-agent-name="start_project"
+                data-agent-method="POST"
+                data-agent-endpoint="/api/projects/PRJ-2025-002/start"
+                data-agent-role="primary"
+                data-agent-human-preferred="true"
+                class="primary">
+          🚀 Start Project
+        </button>
+      </div>
+    </section>
+    
+    <!-- 
+      STANDALONE ACTION: Create New Project
+      This action is not within a resource - it creates one.
+      Form demonstrates nested parameters with dot notation.
+    -->
+    <aside class="new-project">
+      <h3>Create New Project</h3>
+      
+      <form data-agent="action"
+            data-agent-name="create_project"
+            data-agent-method="POST"
+            data-agent-endpoint="/api/projects"
+            data-agent-headers='{"Content-Type": "application/json"}'
+            data-agent-role="primary"
+            action="/api/projects"
+            method="POST">
+        
+        <input data-agent-param="name" 
+               name="name" 
+               placeholder="Project name"
+               required>
+        
+        <input data-agent-param="owner" 
+               data-agent-typehint="email"
+               name="owner" 
+               type="email"
+               placeholder="Owner email"
+               required>
+        
+        <input data-agent-param="budget" 
+               data-agent-typehint="number"
+               name="budget" 
+               type="number"
+               placeholder="Budget (EUR)">
+        
+        <button type="submit" class="primary">+ Create Project</button>
+      </form>
+    </aside>
+    
+  </main>
+
+</body>
+</html>

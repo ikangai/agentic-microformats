@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Settings - Nested Parameters Example</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 600px; margin: 2rem auto; padding: 0 1rem; }
+    .form-section { background: #f9f9f9; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem; }
+    fieldset { border: 1px solid #ddd; padding: 1rem; border-radius: 4px; margin-bottom: 1rem; }
+    legend { font-weight: bold; padding: 0 0.5rem; }
+    label { display: block; margin-bottom: 0.75rem; }
+    input[type="text"], input[type="email"], select { 
+      width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; margin-top: 0.25rem; 
+    }
+    input[type="checkbox"] { margin-right: 0.5rem; }
+    button { padding: 0.75rem 1.5rem; background: #0066cc; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    .code-output { background: #1e1e1e; color: #d4d4d4; padding: 1rem; border-radius: 4px; font-family: monospace; font-size: 0.85rem; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <script type="application/json" data-agent-meta>
+  {
+    "provider": { "name": "Example App" },
+    "defaults": { "locale": "en-US" },
+    "page": { "type": "user-settings" }
+  }
+  </script>
+
+  <h1>User Settings</h1>
+  <p>This example demonstrates nested parameters using dot notation.</p>
+
+  <main data-agent-trust="system">
+    
+    <!-- 
+      NESTED PARAMETERS EXAMPLE
+      
+      Parameters use dot notation to create nested JSON structure:
+      - user.profile.display_name
+      - user.profile.bio
+      - user.preferences.theme
+      - user.preferences.language
+      - user.notifications.email
+      - user.notifications.push
+      
+      Agent will construct:
+      {
+        "user": {
+          "profile": { "display_name": "...", "bio": "..." },
+          "preferences": { "theme": "...", "language": "..." },
+          "notifications": { "email": true, "push": false }
+        }
+      }
+    -->
+    <form class="form-section"
+          data-agent="action"
+          data-agent-name="update_user_settings"
+          data-agent-method="PUT"
+          data-agent-endpoint="/api/users/current/settings"
+          data-agent-headers='{"Content-Type": "application/json"}'
+          data-agent-description="Update all user settings including profile, preferences, and notification options">
+      
+      <fieldset>
+        <legend>Profile</legend>
+        
+        <label>
+          Display Name
+          <input data-agent-param="user.profile.display_name" 
+                 type="text"
+                 name="display_name" 
+                 value="Martin Konzett"
+                 required>
+        </label>
+        
+        <label>
+          Bio
+          <input data-agent-param="user.profile.bio" 
+                 type="text"
+                 name="bio" 
+                 value="AI Consultant & Developer">
+        </label>
+        
+        <label>
+          Email
+          <input data-agent-param="user.profile.email" 
+                 data-agent-typehint="email"
+                 type="email"
+                 name="email" 
+                 value="martin@ikangai.com"
+                 required>
+        </label>
+      </fieldset>
+      
+      <fieldset>
+        <legend>Preferences</legend>
+        
+        <label>
+          Theme
+          <!-- Agent extracts valid values from options -->
+          <select data-agent-param="user.preferences.theme" name="theme">
+            <option value="light">Light</option>
+            <option value="dark" selected>Dark</option>
+            <option value="system">System Default</option>
+          </select>
+        </label>
+        
+        <label>
+          Language
+          <select data-agent-param="user.preferences.language" name="language">
+            <option value="en">English</option>
+            <option value="de" selected>Deutsch</option>
+            <option value="fr">Français</option>
+          </select>
+        </label>
+        
+        <label>
+          Timezone
+          <select data-agent-param="user.preferences.timezone" name="timezone">
+            <option value="Europe/Vienna" selected>Europe/Vienna</option>
+            <option value="Europe/Berlin">Europe/Berlin</option>
+            <option value="America/New_York">America/New York</option>
+            <option value="Asia/Tokyo">Asia/Tokyo</option>
+          </select>
+        </label>
+      </fieldset>
+      
+      <fieldset>
+        <legend>Notifications</legend>
+        
+        <label>
+          <!-- Checkbox params become boolean -->
+          <input data-agent-param="user.notifications.email" 
+                 data-agent-typehint="boolean"
+                 type="checkbox" 
+                 name="email_notifications"
+                 checked>
+          Email notifications
+        </label>
+        
+        <label>
+          <input data-agent-param="user.notifications.push" 
+                 data-agent-typehint="boolean"
+                 type="checkbox" 
+                 name="push_notifications">
+          Push notifications
+        </label>
+        
+        <label>
+          <input data-agent-param="user.notifications.weekly_digest" 
+                 data-agent-typehint="boolean"
+                 type="checkbox" 
+                 name="weekly_digest"
+                 checked>
+          Weekly digest
+        </label>
+      </fieldset>
+      
+      <button type="submit">Save Settings</button>
+    </form>
+    
+    <h3>Expected JSON Payload</h3>
+    <p>An agent would construct this nested structure from the dot-notation parameters:</p>
+    
+    <div class="code-output">{
+  "user": {
+    "profile": {
+      "display_name": "Martin Konzett",
+      "bio": "AI Consultant & Developer",
+      "email": "martin@ikangai.com"
+    },
+    "preferences": {
+      "theme": "dark",
+      "language": "de",
+      "timezone": "Europe/Vienna"
+    },
+    "notifications": {
+      "email": true,
+      "push": false,
+      "weekly_digest": true
+    }
+  }
+}</div>
+
+  </main>
+
+</body>
+</html>
