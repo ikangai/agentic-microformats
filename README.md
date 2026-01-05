@@ -109,7 +109,7 @@ The semantic annotations don't control agents or define automation rules. They h
 
 📄 **[Read the full specification →](SPECIFICATION.md)**
 
-Current version: **0.1** (Working Draft, January 2026)
+Current version: **0.1.0** (Working Draft, January 2026)
 
 ## Core Concepts
 
