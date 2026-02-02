@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Async File Upload with Progress</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+    .upload-zone { border: 2px dashed #ccc; padding: 2rem; text-align: center; border-radius: 8px; }
+    .upload-zone.dragover { border-color: #0066cc; background: #f0f7ff; }
+    .job-status { margin-top: 1rem; padding: 1rem; background: #f5f5f5; border-radius: 8px; }
+    .progress-bar { background: #eee; border-radius: 4px; height: 24px; overflow: hidden; }
+    .progress-fill { background: #0066cc; height: 100%; transition: width 0.3s; color: white; text-align: center; line-height: 24px; font-size: 0.875rem; }
+    .status-completed .progress-fill { background: #2d7d2d; }
+    .status-failed .progress-fill { background: #cc0000; }
+    button { padding: 0.75rem 1.5rem; border: none; border-radius: 4px; cursor: pointer; margin: 0.25rem; }
+    .primary { background: #0066cc; color: white; }
+    .secondary { background: #eee; color: #333; }
+    .result { margin-top: 1rem; padding: 1rem; background: #e8f5e9; border-radius: 4px; }
+    .error { margin-top: 1rem; padding: 1rem; background: #ffebee; border-radius: 4px; }
+    .log { font-family: monospace; font-size: 0.8rem; background: #1e1e1e; color: #d4d4d4; padding: 1rem; border-radius: 4px; margin-top: 1rem; max-height: 200px; overflow-y: auto; }
+    .log-entry { margin: 0.25rem 0; }
+    .log-entry.agent { color: #4fc1ff; }
+    .log-entry.user { color: #ce9178; }
+    .log-entry.system { color: #b5cea8; }
+  </style>
+</head>
+<body>
+  <script type="application/json" data-agent-meta>
+  {
+    "provider": { "name": "FileCloud Inc." },
+    "defaults": { "max_upload_size": "100MB" },
+    "capabilities": ["async_operations", "progress_tracking"]
+  }
+  </script>
+
+  <h1>📁 Async File Upload Demo</h1>
+  <p>This example demonstrates autonomous async operation handling:</p>
+  <ul>
+    <li>Long-running file processing jobs</li>
+    <li>Progress polling</li>
+    <li>Cancel operations</li>
+    <li>Error recovery with retry</li>
+  </ul>
+
+  <main data-agent-trust="system">
+    
+    <!-- 
+      ASYNC UPLOAD ACTION
+      
+      Key attributes for asynchronous operations:
+      - data-agent-async="true": Marks this as an async action
+      - data-agent-async-mode="poll": Indicates polling-based status checking
+      - data-agent-status-endpoint: Where to poll for job status
+      - data-agent-poll-interval: How often to poll (milliseconds)
+      - data-agent-poll-max: Maximum number of polling attempts
+    -->
+    <form data-agent="action"
+          data-agent-name="upload_file"
+          data-agent-method="POST"
+          data-agent-endpoint="/api/uploads"
+          data-agent-async="true"
+          data-agent-async-mode="poll"
+          data-agent-status-endpoint="/api/jobs/{job_id}/status"
+          data-agent-poll-interval="2000"
+          data-agent-poll-max="300"
+          data-agent-headers='{"Accept": "application/json"}'
+          enctype="multipart/form-data">
+      
+      <div class="upload-zone" id="uploadZone">
+        <p>📤 Drop files here or click to select</p>
+        <input data-agent-param="file"
+               data-agent-required="true"
+               type="file" 
+               name="file" 
+               accept=".csv,.json,.pdf"
+               required
+               style="display: none;"
+               id="fileInput">
+        <button type="button" class="secondary" onclick="document.getElementById('fileInput').click()">
+          Choose File
+        </button>
+      </div>
+      
+      <div id="fileInfo" style="display: none; margin-top: 1rem;"></div>
+      
+      <button type="submit" class="primary" style="margin-top: 1rem;" id="uploadBtn" disabled>
+        Upload & Process
+      </button>
+    </form>
+
+    <!-- 
+      JOB STATUS RESOURCE
+      
+      This section updates dynamically as the job progresses.
+      A browser-embedded agent would observe changes here.
+    -->
+    <div id="jobContainer" style="display: none;">
+      <div class="job-status" 
+           data-agent="resource"
+           data-agent-type="async-job"
+           data-agent-id=""
+           data-agent-subscribe="true">
+        
+        <h3 data-agent-prop="action">Processing File</h3>
+        
+        <div data-agent-prop="status" id="statusText">pending</div>
+        
+        <div class="progress-bar">
+          <div class="progress-fill" 
+               data-agent-prop="progress.percent" 
+               data-agent-typehint="integer"
+               style="width: 0%"
+               id="progressBar">0%</div>
+        </div>
+        
+        <div data-agent-prop="progress.step_name" 
+             id="stepName"
+             style="margin-top: 0.5rem; font-size: 0.875rem; color: #666;">
+          Initializing...
+        </div>
+        
+        <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+          <!-- 
+            CANCEL ACTION
+            
+            Available while job is pending or processing.
+            data-agent-reversible="true" - cancellation is reversible (can retry)
+          -->
+          <button data-agent="action"
+                  data-agent-name="cancel_job"
+                  data-agent-method="POST"
+                  data-agent-endpoint="/api/jobs/{job_id}/cancel"
+                  data-agent-reversible="true"
+                  class="secondary"
+                  id="cancelBtn">
+            ⏹ Cancel
+          </button>
+          
+          <!-- 
+            RETRY ACTION (shown on failure)
+            data-agent-error-remediation="true" - This is a remediation action
+          -->
+          <button data-agent="action"
+                  data-agent-name="retry_upload"
+                  data-agent-method="POST"
+                  data-agent-endpoint="/api/jobs/{job_id}/retry"
+                  data-agent-error-remediation="true"
+                  class="primary"
+                  id="retryBtn"
+                  style="display: none;">
+            🔄 Retry
+          </button>
+        </div>
+        
+        <!-- Result display (shown on completion) -->
+        <div class="result" id="resultContainer" style="display: none;">
+          <h4>✓ Processing Complete</h4>
+          <p data-agent-prop="result.records_processed">Records processed: 1,247</p>
+          <p data-agent-prop="result.file_url">
+            <a href="/downloads/processed-file.csv">Download processed file</a>
+          </p>
+        </div>
+        
+        <!-- Error display (shown on failure) -->
+        <div class="error" id="errorContainer" style="display: none;">
+          <h4>✗ Processing Failed</h4>
+          <p data-agent-prop="error.message">Error message here</p>
+          <p data-agent-prop="error.remediation.suggested_action">Try: Retry with smaller batch size</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Agent Operation Log -->
+    <div class="log" id="agentLog">
+      <strong>Agent Operation Log:</strong>
+      <div class="log-entry system">System: Async upload example loaded</div>
+      <div class="log-entry system">System: Polling interval configured: 2000ms</div>
+    </div>
+
+  </main>
+
+  <script>
+    // Demo simulation - in real implementation this would be server-side
+    let currentJobId = null;
+    let pollInterval = null;
+    let simulationStep = 0;
+    
+    const simulationSteps = [
+      { status: 'processing', progress: 10, step: 'Validating file format' },
+      { status: 'processing', progress: 25, step: 'Parsing CSV data' },
+      { status: 'processing', progress: 40, step: 'Transforming records' },
+      { status: 'processing', progress: 60, step: 'Applying business rules' },
+      { status: 'processing', progress: 80, step: 'Generating output' },
+      { status: 'processing', progress: 95, step: 'Finalizing' },
+      { status: 'completed', progress: 100, step: 'Done' }
+    ];
+    
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        document.getElementById('fileInfo').innerHTML = `
+          <strong>Selected:</strong> ${file.name}<br>
+          <strong>Size:</strong> ${(file.size / 1024 / 1024).toFixed(2)} MB
+        `;
+        document.getElementById('fileInfo').style.display = 'block';
+        document.getElementById('uploadBtn').disabled = false;
+        log('user', `User selected file: ${file.name} (${(file.size / 1024).toFixed(0)}KB)`);
+      }
+    });
+    
+    document.querySelector('form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Generate job ID
+      currentJobId = 'job-' + Date.now();
+      document.querySelector('[data-agent-type="async-job"]').setAttribute('data-agent-id', currentJobId);
+      
+      // Show job container
+      document.getElementById('jobContainer').style.display = 'block';
+      document.getElementById('uploadBtn').disabled = true;
+      
+      log('agent', `Agent: Initiated async upload job ${currentJobId}`);
+      log('agent', `Agent: POST /api/uploads`);
+      log('agent', `Agent: Received job ID, starting polling...`);
+      
+      // Update cancel button with actual job ID
+      document.getElementById('cancelBtn').setAttribute('data-agent-endpoint', `/api/jobs/${currentJobId}/cancel`);
+      
+      // Start polling simulation
+      simulationStep = 0;
+      pollInterval = setInterval(updateJobStatus, 2000);
+    });
+    
+    document.getElementById('cancelBtn').addEventListener('click', function() {
+      clearInterval(pollInterval);
+      updateStatusUI('cancelled', 0, 'Cancelled by user');
+      log('agent', `Agent: User cancelled job ${currentJobId}`);
+      log('agent', `Agent: POST /api/jobs/${currentJobId}/cancel`);
+    });
+    
+    document.getElementById('retryBtn').addEventListener('click', function() {
+      simulationStep = 0;
+      document.getElementById('retryBtn').style.display = 'none';
+      document.getElementById('errorContainer').style.display = 'none';
+      log('agent', `Agent: Retrying job ${currentJobId}`);
+      pollInterval = setInterval(updateJobStatus, 2000);
+    });
+    
+    function updateJobStatus() {
+      if (simulationStep < simulationSteps.length) {
+        const step = simulationSteps[simulationStep];
+        updateStatusUI(step.status, step.progress, step.step);
+        log('agent', `Agent: Polled status - ${step.status} (${step.progress}%) - ${step.step}`);
+        simulationStep++;
+        
+        if (step.status === 'completed') {
+          clearInterval(pollInterval);
+          document.getElementById('resultContainer').style.display = 'block';
+          document.getElementById('cancelBtn').style.display = 'none';
+          log('agent', `Agent: Job ${currentJobId} completed successfully`);
+          log('agent', `Agent: GET /api/jobs/${currentJobId}/result`);
+        }
+      }
+    }
+    
+    function updateStatusUI(status, progress, stepName) {
+      document.getElementById('statusText').textContent = status;
+      document.getElementById('progressBar').style.width = progress + '%';
+      document.getElementById('progressBar').textContent = progress + '%';
+      document.getElementById('stepName').textContent = stepName;
+      
+      const jobStatus = document.querySelector('.job-status');
+      jobStatus.className = 'job-status status-' + status;
+    }
+    
+    function log(type, message) {
+      const logDiv = document.getElementById('agentLog');
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type}`;
+      entry.textContent = message;
+      logDiv.appendChild(entry);
+      logDiv.scrollTop = logDiv.scrollHeight;
+    }
+    
+    // Demo: Drag and drop
+    const uploadZone = document.getElementById('uploadZone');
+    uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+    uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+    uploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadZone.classList.remove('dragover');
+      document.getElementById('fileInput').files = e.dataTransfer.files;
+      document.getElementById('fileInput').dispatchEvent(new Event('change'));
+    });
+  </script>
+
+</body>
+</html>
