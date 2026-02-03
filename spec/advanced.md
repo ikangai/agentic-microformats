@@ -1,4 +1,251 @@
-span class="p-currencies-accepted">SOL, USDC, EUR</span>
+# Agentic Microformats: Advanced Patterns
+
+**Version:** 0.2.0-dev  
+**Status:** Working Draft — Community Feedback  
+**Date:** February 2026  
+**Authors:** Martin Treiber, [IKANGAI](https://www.ikangai.com), Moltbook Agent Community  
+**License:** MIT
+
+---
+
+## Abstract
+
+This document extends the Agentic Microformats core specification with patterns emerging from real-world agent operations. These patterns address: asynchronous long-running operations, batch requests for efficiency, economic settlement infrastructure, provenance chains for trust, and resource cost estimation.
+
+These extensions are **optional but recommended** for services that support complex agent workflows.
+
+---
+
+## 1. Async Operation Patterns
+
+### 1.1 Problem
+
+Many agent-actions take time: file processing, data analysis, external API calls, human approval workflows. Synchronous HTTP requests timeout or block agent execution.
+
+### 1.2 Patterns
+
+#### Pattern A: Polling (Baseline Support)
+
+Services SHOULD support polling for async operations when webhooks are not available.
+
+```html
+<form class="h-agent-action" data-action="process-file" data-async="true">
+  <input type="file" class="p-file" data-accept=".csv" />
+  <button type="submit">Process</button>
+</form>
+
+<!-- Response includes job URL for polling -->
+<div class="h-async-job" data-job-id="job_abc123" data-status="pending">
+  <a class="u-poll-url" href="/jobs/job_abc123">Check Status</a>
+  <span class="p-status">pending</span>
+  <span class="p-estimated-completion">2026-02-03T15:00:00Z</span>
+</div>
+```
+
+**Status values:** `pending` | `processing` | `completed` | `failed` | `cancelled`
+
+#### Pattern B: Webhooks (Preferred for Agents)
+
+Services MAY advertise webhook support in discovery:
+
+```html
+<div class="h-agent-service" data-service-id="file-processor">
+  <span class="p-name">File Processor</span>
+  <ul class="p-async-patterns">
+    <li class="p-pattern" data-pattern="webhook">
+      <span class="p-webhook-event">job.completed</span>
+      <span class="p-webhook-event">job.failed</span>
+    </li>
+    <li class="p-pattern" data-pattern="polling">/jobs/{job_id}</li>
+  </ul>
+</div>
+```
+
+**Webhook registration** via POST to service's webhook endpoint:
+
+```json
+{
+  "url": "https://my-agent.example.com/webhooks/file-processor",
+  "events": ["job.completed", "job.failed"],
+  "secret": "whsec_..."  // For HMAC verification
+}
+```
+
+#### Pattern C: WebSockets (Low-Latency Streaming)
+
+For real-time collaboration or streaming results:
+
+```html
+<div class="h-agent-service" data-service-id="collab-editor">
+  <span class="p-name">Collaborative Editor</span>
+  <span class="p-websocket-url">wss://collab.example.com/agent-stream</span>
+  <span class="p-websocket-protocol">agentic-v1</span>
+</div>
+```
+
+**Tradeoffs:**
+
+| Pattern | Latency | Complexity | State Recovery | Use Case |
+|---------|---------|------------|----------------|----------|
+| Polling | Higher | Low | Automatic | File processing, reports |
+| Webhooks | Low | Medium | Manual (retry queue) | Real-time notifications |
+| WebSockets | Very Low | High | Hard (connection loss) | Collaboration, streaming |
+
+### 1.3 Discovery Advertisement
+
+Services SHOULD declare async capabilities in discovery:
+
+```html
+<div class="h-action-capability" data-action="process-file">
+  <span class="p-name">Process File</span>
+  <span class="p-async-supported">true</span>
+  <ul class="p-async-patterns">
+    <li class="p-pattern" data-pattern="webhook" data-events="job.completed,job.failed"/>
+    <li class="p-pattern" data-pattern="polling" data-interval-sec="5"/>
+  </ul>
+  <span class="p-typical-duration-sec">30</span>
+</div>
+```
+
+---
+
+## 2. Batch Operations
+
+### 2.1 Problem
+
+Agents often need to perform multiple independent actions together: heartbeat checks, multi-step workflows, bulk operations. Individual requests waste bandwidth and time.
+
+### 2.2 Batch Request Format
+
+```html
+<form class="h-agent-batch" data-batch-id="batch_xyz789">
+  <div class="h-batch-action" data-sequence="1">
+    <input type="hidden" class="p-action" value="check-email" />
+    <input type="hidden" class="p-params" value='{"mailbox": "INBOX"}' />
+  </div>
+  <div class="h-batch-action" data-sequence="2">
+    <input type="hidden" class="p-action" value="check-calendar" />
+    <input type="hidden" class="p-params" value='{"window": "24h"}' />
+  </div>
+  <div class="h-batch-action" data-sequence="3">
+    <input type="hidden" class="p-action" value="check-tasks" />
+    <input type="hidden" class="p-params" value='{"status": "pending"}' />
+  </div>
+  
+  <!-- Atomicity hint -->
+  <input type="hidden" class="p-atomicity" value="partial" />  <!-- or "all-or-nothing" -->
+  <button type="submit">Execute Batch</button>
+</form>
+```
+
+### 2.3 Batch Response: Partial Success
+
+Most agent workflows need **partial success** with explicit failure reporting:
+
+```html
+<div class="h-batch-result" data-batch-id="batch_xyz789">
+  <span class="p-status">partial-success</span>
+  
+  <div class="h-action-result" data-sequence="1" data-status="success">
+    <span class="p-action">check-email</span>
+    <span class="p-result">3 new messages</span>
+  </div>
+  
+  <div class="h-action-result" data-sequence="2" data-status="success">
+    <span class="p-action">check-calendar</span>
+    <span class="p-result">2 upcoming events</span>
+  </div>
+  
+  <div class="h-action-result" data-sequence="3" data-status="failed">
+    <span class="p-action">check-tasks</span>
+    <span class="p-error-type">transient</span>
+    <span class="p-error-message">Task service timeout</span>
+    <span class="p-retryable">true</span>
+    <span class="p-retry-after-sec">30</span>
+  </div>
+</div>
+```
+
+### 2.4 Error Classification
+
+Services SHOULD classify failures for agent handling:
+
+| Error Type | Description | Agent Action |
+|------------|-------------|--------------|
+| `transient` | Temporary (network, rate limit) | Retry with backoff |
+| `client` | Invalid request, validation | Fix and retry |
+| `permanent` | Resource not found, auth | Do not retry, escalate |
+| `dependency` | Downstream service failed | Partial success, flag |
+
+---
+
+## 3. Settlement Layer (Economic Infrastructure)
+
+### 3.1 Problem
+
+Agents can discover services, negotiate terms, and execute actions — but without reliable value exchange, everything is "sophisticated demo ware." (@Kaledge)
+
+### 3.2 Escrow Primitives
+
+Declare payment held until conditions met:
+
+```html
+<div class="h-escrow" data-escrow-id="esc_123" data-status="active">
+  <span class="p-depositor">Agent A</span>
+  <span class="p-beneficiary">Agent B</span>
+  <span class="p-arbiter">Agent C</span>
+  <span class="p-amount" data-currency="SOL">10.5</span>
+  <span class="p-condition" data-type="service-completion">Task #123</span>
+  <span class="p-expires">2026-02-03T00:00:00Z</span>
+  <a class="u-state-url" href="/escrow/esc_123">Check State</a>
+</div>
+```
+
+### 3.3 Time-Bounded Escrow (@TheMiloWay)
+
+Some agent-to-agent contracts need "complete within X or funds return" semantics to prevent indefinite lock-up. TheMiloWay proposed this pattern:
+
+```html
+<div class="h-escrow" data-escrow-id="esc_123" data-status="active">
+  <span class="p-condition" data-type="time-bounded">
+    <span class="p-deadline">2026-02-03T18:00:00Z</span>
+    <span class="p-auto-release">true</span>
+    <span class="p-release-to">depositor</span>
+    <span class="p-penalty-on-miss">0.10</span>  <!-- 10% slash -->
+  </span>
+  <!-- ... other escrow fields ... -->
+</div>
+```
+
+**Semantics:** If deadline passes without completion attestation, funds auto-release to depositor (minus optional penalty).
+
+### 3.4 Capability Staking (@TheMiloWay)
+
+Before invoking an expensive operation, the caller stakes tokens that get slashed if the operation fails due to caller error (bad input, insufficient context). Shifts accountability to the right layer.
+
+```html
+<form class="h-agent-action" data-action="expensive-computation" data-staking-required="true">
+  <input type="number" class="p-stake-amount" data-currency="SOL" value="5.0" />
+  <input type="text" class="p-stake-condition" value="successful-completion" />
+  <input type="text" class="p-slash-on-failure" value="caller-error" />
+  <span class="p-stake-return-on-success">true</span>
+  
+  <!-- The actual action parameters -->
+  <textarea class="p-computation-request">...</textarea>
+  
+  <button type="submit">Execute with Stake</button>
+</form>
+```
+
+**Why this matters:** Prevents "let me just try this expensive operation" without skin in the game. Creates economic accountability for wasted resources.
+
+### 3.5 Settlement Manifest
+
+Services declare their economic capabilities:
+
+```html
+<div class="h-settlement-manifest" data-service-id="marketplace">
+  <span class="p-currencies-accepted">SOL, USDC, EUR</span>
   <ul class="p-escrow-mechanisms">
     <li class="p-mechanism" data-type="smart-contract" data-chain="solana" />
     <li class="p-mechanism" data-type="third-party-arbiter" />
@@ -170,6 +417,7 @@ These patterns are **proposed** for Agentic Microformats v0.2.0. They emerged fr
 - @IrisSlagter — heartbeat patterns, resource costs
 - @Kaledge — settlement infrastructure, economic layer
 - @Doormat — WebSockets vs webhooks, async patterns
+- @TheMiloWay — time-bounded escrow, capability staking
 - @botcrong — tool/collaborator spectrum, agent identity
 
 ---
