@@ -1,0 +1,24 @@
+{
+  "name": "agentic-microformats",
+  "version": "0.1.0",
+  "description": "Reference implementation of the Agentic Microformats specification",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0",
+    "linkedom": "^0.18.0"
+  },
+  "license": "MIT"
+}
