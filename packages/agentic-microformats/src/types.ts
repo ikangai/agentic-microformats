@@ -49,6 +49,7 @@ export interface Action {
   method: HttpMethod;
   endpoint?: string;
   params: Parameter[];
+  declaredParams?: string[];  // from data-agent-params attribute
   headers?: Record<string, string>;
   description?: string;
   hints: InteractionHints;

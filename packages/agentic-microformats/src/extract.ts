@@ -17,20 +17,32 @@ const HTTP_METHODS: readonly string[] = [
   'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS',
 ];
 
-function resolveDescription(el: AgentElement): string | undefined {
+function resolveDescription(el: AgentElement, root?: AgentElement): string | undefined {
   const desc = el.getAttribute('data-agent-description');
   if (desc) return desc;
 
   const ariaLabel = el.getAttribute('aria-label');
   if (ariaLabel) return ariaLabel;
 
+  const describedBy = el.getAttribute('aria-describedby');
+  if (describedBy && root) {
+    const target = root.querySelector(`#${describedBy}`);
+    if (target) {
+      const text = target.textContent?.trim();
+      if (text) return text;
+    }
+  }
+
   const title = el.getAttribute('title');
   if (title) return title;
+
+  const textContent = el.textContent?.trim();
+  if (textContent) return textContent;
 
   return undefined;
 }
 
-function extractAction(el: AgentElement, inheritedTargetId?: string): Action {
+function extractAction(el: AgentElement, inheritedTargetId?: string, root?: AgentElement): Action {
   const name = el.getAttribute('data-agent-name') ?? '';
   const explicitTarget = el.getAttribute('data-agent-target');
   const target = explicitTarget ?? inheritedTargetId;
@@ -50,14 +62,18 @@ function extractAction(el: AgentElement, inheritedTargetId?: string): Action {
     }
   }
 
+  const paramsAttr = el.getAttribute('data-agent-params');
+  const declaredParams = paramsAttr ? paramsAttr.split(',').map(s => s.trim()).filter(Boolean) : undefined;
+
   return {
     name,
     target,
     method,
     endpoint,
     params: extractParameters(el),
+    declaredParams,
     headers,
-    description: resolveDescription(el),
+    description: resolveDescription(el, root),
     hints: extractHints(el),
     element: el,
   };
@@ -113,7 +129,7 @@ function isDirectChildResource(parent: AgentElement, candidate: AgentElement, al
   return true;
 }
 
-function extractResourceTree(el: AgentElement): Resource {
+function extractResourceTree(el: AgentElement, root?: AgentElement): Resource {
   const type = el.getAttribute('data-agent-type') ?? '';
   const id = el.getAttribute('data-agent-id') ?? '';
 
@@ -127,7 +143,7 @@ function extractResourceTree(el: AgentElement): Resource {
   for (const nested of nestedArray) {
     if (isDirectChildResource(el, nested, nestedArray)) {
       if (!shouldSkip(nested)) {
-        directChildren.push(extractResourceTree(nested));
+        directChildren.push(extractResourceTree(nested, root));
       }
     }
   }
@@ -139,7 +155,7 @@ function extractResourceTree(el: AgentElement): Resource {
     const actionEl = allActions[i];
     const closestResource = actionEl.closest('[data-agent="resource"]');
     if (closestResource === el && !shouldSkip(actionEl)) {
-      actions.push(extractAction(actionEl, id));
+      actions.push(extractAction(actionEl, id, root));
     }
   }
 
@@ -213,7 +229,7 @@ export function extractResources(root: AgentElement): Resource[] {
 
     if (shouldSkip(el)) continue;
 
-    resources.push(extractResourceTree(el));
+    resources.push(extractResourceTree(el, root));
   }
 
   return resources;
@@ -232,7 +248,7 @@ export function extractActions(root: AgentElement): Action[] {
 
     if (shouldSkip(el)) continue;
 
-    actions.push(extractAction(el));
+    actions.push(extractAction(el, undefined, root));
   }
 
   return actions;

@@ -173,6 +173,16 @@ describe('extractResources', () => {
     expect(extractResources(root)[0].actions[0].description).toBe('Archive this project');
   });
 
+  test('falls back to textContent for description', () => {
+    const root = dom(`<!DOCTYPE html><html><body>
+      <div data-agent="resource" data-agent-type="project" data-agent-id="P1">
+        <button data-agent="action" data-agent-name="save"
+                data-agent-method="POST" data-agent-endpoint="/save">Save Changes</button>
+      </div>
+    </body></html>`);
+    expect(extractResources(root)[0].actions[0].description).toBe('Save Changes');
+  });
+
   test('extracts headers from action', () => {
     const root = dom(`<!DOCTYPE html><html><body>
       <form data-agent="action" data-agent-name="submit"
@@ -182,6 +192,18 @@ describe('extractResources', () => {
     </body></html>`);
     const actions = extractActions(root);
     expect(actions[0].headers).toEqual({ 'Content-Type': 'application/json' });
+  });
+
+  test('extracts data-agent-params attribute', () => {
+    const root = dom(`<!DOCTYPE html><html><body>
+      <div data-agent="resource" data-agent-type="project" data-agent-id="P1">
+        <button data-agent="action" data-agent-name="update_progress"
+                data-agent-method="PATCH" data-agent-endpoint="/api/projects/P1"
+                data-agent-params="progress">Update</button>
+      </div>
+    </body></html>`);
+    const action = extractResources(root)[0].actions[0];
+    expect(action.declaredParams).toEqual(['progress']);
   });
 });
 

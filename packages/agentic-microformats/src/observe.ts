@@ -63,6 +63,20 @@ export function observe(
             });
           }
         }
+
+        // Check for action changes within the resource
+        const prevActionKeys = new Set(prev.actions.map(a => a.name));
+        const currActionKeys = new Set(r.actions.map(a => a.name));
+        for (const a of r.actions) {
+          if (!prevActionKeys.has(a.name)) {
+            agentMutations.push({ type: 'action-added', element: a.element, action: a });
+          }
+        }
+        for (const a of prev.actions) {
+          if (!currActionKeys.has(a.name)) {
+            agentMutations.push({ type: 'action-removed', element: a.element, action: a });
+          }
+        }
       }
     }
 
