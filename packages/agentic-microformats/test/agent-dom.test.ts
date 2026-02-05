@@ -1,9 +1,13 @@
 import { describe, test, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { parseHTML } from 'linkedom';
 import { AgentDOM } from '../src/agent-dom.js';
 import type { AgentElement } from '../src/dom.js';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const REPO_ROOT = resolve(__dirname, '..', '..', '..');
 
 function domFromHtml(html: string): AgentElement {
   const { document } = parseHTML(html);
@@ -11,7 +15,7 @@ function domFromHtml(html: string): AgentElement {
 }
 
 function domFromFile(relativePath: string): AgentElement {
-  const absPath = resolve('/Users/martintreiber/Documents/Development/CompassAI/agentic-microformats', relativePath);
+  const absPath = resolve(REPO_ROOT, relativePath);
   const html = readFileSync(absPath, 'utf-8');
   return domFromHtml(html);
 }
