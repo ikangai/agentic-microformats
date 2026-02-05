@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('partials/head') %>
+</head>
+<body>
+  <%- include('partials/header') %>
+
+  <main data-agent-trust="system">
+    <div class="confirmation-page"
+         data-agent="resource"
+         data-agent-type="order"
+         data-agent-id="<%= order.id %>">
+
+      <div class="confirmation-icon">&#10003;</div>
+      <h1>Order Confirmed!</h1>
+
+      <dl class="order-details">
+        <dt>Order Number</dt>
+        <dd data-agent-prop="order_number"><%= order.id %></dd>
+
+        <dt>Status</dt>
+        <dd data-agent-prop="status"><%= order.status %></dd>
+
+        <dt>Total</dt>
+        <dd data-agent-prop="total"
+            data-agent-typehint="currency"
+            data-agent-currency="<%= order.currency %>">&euro;<%= order.total %></dd>
+
+        <dt>Date</dt>
+        <dd data-agent-prop="created_at"
+            data-agent-typehint="datetime"><%= order.created_at %></dd>
+
+        <dt>Ship To</dt>
+        <dd data-agent-prop="shipping_name"><%= order.shipping.name %>, <%= order.shipping.city %></dd>
+
+        <dt>Payment</dt>
+        <dd data-agent-prop="payment_last_four">**** **** **** <%= order.payment.last_four %></dd>
+      </dl>
+
+      <h3>Items Ordered</h3>
+      <% order.items.forEach(item => { %>
+      <div class="order-item"
+           data-agent="resource"
+           data-agent-type="order-item"
+           data-agent-id="<%= item.id %>">
+        <span data-agent-prop="name"><%= item.name %></span>
+        <span> &times; </span>
+        <span data-agent-prop="quantity"
+              data-agent-typehint="integer"><%= item.quantity %></span>
+        <span> &mdash; </span>
+        <span data-agent-prop="line_total"
+              data-agent-typehint="currency"
+              data-agent-currency="EUR">&euro;<%= (item.price * item.quantity).toFixed(2) %></span>
+      </div>
+      <% }) %>
+
+      <a href="/" class="btn btn-primary" style="margin-top:24px">Continue Shopping</a>
+    </div>
+  </main>
+
+  <%- include('partials/footer') %>
+</body>
+</html>

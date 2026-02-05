@@ -1,0 +1,15 @@
+{
+  "name": "agentic-microformats-demo",
+  "version": "1.0.0",
+  "description": "AgentShop - Live demo of Agentic Microformats specification",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "ejs": "^3.1.10",
+    "express-session": "^1.18.0"
+  }
+}

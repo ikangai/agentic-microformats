@@ -1,0 +1,108 @@
+[
+  {
+    "id": "SKU-USB-C-2M",
+    "name": "USB-C Cable 2m",
+    "description": "High-quality braided USB-C to USB-C cable, 2 meters long. Supports fast charging up to 100W and data transfer speeds up to 10Gbps. Durable aluminum connectors with reinforced strain relief.",
+    "price": 14.99,
+    "currency": "EUR",
+    "category": "cables",
+    "availability": "in_stock",
+    "rating": 4.7,
+    "ratingCount": 246,
+    "reviews": [
+      {
+        "author": "TechEnthusiast42",
+        "rating": 5,
+        "text": "Excellent cable! Fast charging works perfectly with my laptop and phone. The braided design feels very premium."
+      },
+      {
+        "author": "CableCollector",
+        "rating": 4,
+        "text": "Good quality for the price. Slightly stiff at first but loosened up after a few days of use."
+      }
+    ]
+  },
+  {
+    "id": "SKU-HDMI-3M",
+    "name": "HDMI 2.1 Cable 3m",
+    "description": "Ultra high-speed HDMI 2.1 cable, 3 meters. Supports 8K@60Hz and 4K@120Hz with eARC and VRR. Gold-plated connectors for reliable signal transmission.",
+    "price": 24.99,
+    "currency": "EUR",
+    "category": "cables",
+    "availability": "in_stock",
+    "rating": 4.5,
+    "ratingCount": 182,
+    "reviews": [
+      {
+        "author": "HomeTheaterPro",
+        "rating": 5,
+        "text": "Finally a cable that actually supports full HDMI 2.1 bandwidth. 4K@120Hz works flawlessly with my PS5 and LG OLED."
+      }
+    ]
+  },
+  {
+    "id": "SKU-CHARGER-65W",
+    "name": "USB-C Charger 65W",
+    "description": "Compact GaN USB-C charger with 65W Power Delivery. Compatible with laptops, tablets, and smartphones. Foldable prongs for easy travel. Includes EU plug.",
+    "price": 39.99,
+    "currency": "EUR",
+    "category": "chargers",
+    "availability": "in_stock",
+    "rating": 4.8,
+    "ratingCount": 523,
+    "reviews": []
+  },
+  {
+    "id": "SKU-HUB-7PORT",
+    "name": "USB-C Hub 7-Port",
+    "description": "Versatile USB-C hub with 7 ports: 3x USB-A 3.0, 1x USB-C PD 100W passthrough, 1x HDMI 4K@60Hz, 1x SD card reader, 1x microSD card reader. Aluminum housing with thermal management.",
+    "price": 49.99,
+    "currency": "EUR",
+    "category": "hubs",
+    "availability": "in_stock",
+    "rating": 4.3,
+    "ratingCount": 89,
+    "reviews": [
+      {
+        "author": "DigitalNomad",
+        "rating": 4,
+        "text": "Great hub for the price. All ports work simultaneously without issues. The PD passthrough charges my MacBook at full speed."
+      },
+      {
+        "author": "OfficeWorker99",
+        "rating": 5,
+        "text": "Replaced my docking station with this. Perfect for hot-desking. Compact enough to carry in my laptop bag every day."
+      }
+    ]
+  },
+  {
+    "id": "SKU-STAND-LAPTOP",
+    "name": "Aluminum Laptop Stand",
+    "description": "Ergonomic aluminum laptop stand with adjustable height and angle. Fits laptops from 10\" to 17\". Improves airflow and reduces neck strain. Non-slip silicone pads protect your device.",
+    "price": 34.99,
+    "currency": "EUR",
+    "category": "accessories",
+    "availability": "low_stock",
+    "rating": 4.6,
+    "ratingCount": 312,
+    "reviews": []
+  },
+  {
+    "id": "SKU-MONITOR-27",
+    "name": "27\" 4K Monitor",
+    "description": "Professional 27-inch 4K UHD IPS monitor with 99% sRGB color accuracy. USB-C connectivity with 90W Power Delivery. Height-adjustable stand with pivot, swivel, and tilt. Built-in KVM switch.",
+    "price": 449.99,
+    "currency": "EUR",
+    "category": "monitors",
+    "availability": "in_stock",
+    "rating": 4.9,
+    "ratingCount": 67,
+    "reviews": [
+      {
+        "author": "DesignerDave",
+        "rating": 5,
+        "text": "Stunning color accuracy out of the box. The USB-C single-cable setup with my MacBook Pro is a dream. Best monitor in this price range."
+      }
+    ]
+  }
+]

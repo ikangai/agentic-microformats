@@ -1,0 +1,15 @@
+services:
+  tests:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: npx vitest run
+
+  demo:
+    build:
+      context: ./demo
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
