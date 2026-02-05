@@ -28,7 +28,7 @@ For changes to the specification:
 
 1. Open an issue first to discuss the change
 2. Fork the repository
-3. Make your changes to `SPECIFICATION.md`
+3. Make your changes to `spec/core.md`
 4. Submit a pull request with a clear description
 
 ### Add Examples

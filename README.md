@@ -107,9 +107,9 @@ The semantic annotations don't control agents or define automation rules. They h
 
 ## Specification
 
-📄 **[Read the full specification →](SPECIFICATION.md)**
+📄 **[Read the full specification →](spec/core.md)**
 
-Current version: **0.1.0** (Working Draft, January 2026)
+Current version: **0.2.0** (Working Draft, February 2026)
 
 ## Core Concepts
 
@@ -142,7 +142,7 @@ Agentic Microformats is designed for the emerging generation of browser-embedded
 - The browser LLM is the motor
 - Agentic Microformats is the clutch
 
-See [Appendix E](SPECIFICATION.md#appendix-e-browser-embedded-agents) in the specification.
+See [Appendix E](spec/core.md#appendix-e-browser-embedded-agents) in the specification.
 
 ## Relationship to Other Standards
 
@@ -158,9 +158,9 @@ These form a stack: AGENTS.md guides coding agents in your repo, llms.txt introd
 
 ## Examples
 
-- [E-commerce Product Page](examples/ecommerce.html)
-- [Project Dashboard](examples/dashboard.html)
-- [Form with Nested Parameters](examples/form.html)
+- [E-commerce Product Page](examples/ecommerce/product-page.html)
+- [Project Dashboard](examples/basic/project-dashboard.html)
+- [Form with Nested Parameters](examples/forms/nested-parameters.html)
 
 ## Contributing
 

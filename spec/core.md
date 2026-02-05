@@ -1,8 +1,8 @@
 # Agentic Microformats Specification
 
-**Version:** 0.1.0  
-**Status:** Working Draft  
-**Date:** January 2026  
+**Version:** 0.2.0
+**Status:** Working Draft
+**Date:** February 2026  
 **Authors:** Martin Treiber, [IKANGAI](https://www.ikangai.com)
 **License:** MIT
 
@@ -1588,6 +1588,14 @@ This is the tightest human-agent coupling this specification envisions, and brow
 ---
 
 ## Changelog
+
+### Version 0.2.0 (February 2026)
+
+- New attributes: `data-agent-on-success`, `data-agent-response`, `data-agent-min`, `data-agent-max`
+- New sections: 6.7 Response Schema, 6.8 Success Outcome Hints, 7.4 Validation Constraints
+- Extended `data-agent-meta` with workflow graph, actions summary, responseSchemas, errorFormat, related links
+- Added AGENTS.md and llms.txt to related standards (Section 1.5, Appendix B)
+- Fixed broken internal links and outdated references
 
 ### Version 0.1.0 (January 2026)
 

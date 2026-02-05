@@ -8,7 +8,7 @@
 
 ## Overview
 
-This document proposes specific enhancements to address the critical gaps identified in CRITICAL_ANALYSIS.md. Each proposal includes:
+This document proposes specific enhancements to address the critical gaps identified in critical-analysis.md. Each proposal includes:
 - **Problem statement**
 - **Proposed solution** with concrete syntax
 - **Example implementation**
