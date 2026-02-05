@@ -148,12 +148,13 @@ See [Appendix E](SPECIFICATION.md#appendix-e-browser-embedded-agents) in the spe
 
 | Standard | Layer | Relationship |
 |----------|-------|--------------|
-| llms.txt | Site | Documentation for LLM context |
+| AGENTS.md | Repository | Instructions for coding agents in repos |
+| llms.txt | Site | Curated site overview for LLMs |
 | NLWeb | Site | Natural language query interface |
 | agents.json | Site | API contracts and policies |
 | **Agentic Microformats** | Page | UI semantics for shared operation |
 
-These are complementary. Agentic Microformats is unique in embedding semantics directly in the visible HTML.
+These form a stack: AGENTS.md guides coding agents in your repo, llms.txt introduces your site to LLMs, and Agentic Microformats lets agents interact with individual pages.
 
 ## Examples
 

@@ -1,0 +1,70 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title><%= title %> — AgentShop</title>
+<link rel="stylesheet" href="/style.css">
+<script type="application/json" data-agent-meta>
+{
+  "provider": {
+    "name": "AgentShop Demo",
+    "url": "https://github.com/ikangai/agentic-microformats",
+    "jurisdiction": "AT"
+  },
+  "defaults": {
+    "currency": "EUR",
+    "locale": "en-US"
+  },
+  "page": {
+    "type": "<%= typeof pageType !== 'undefined' ? pageType : 'general' %>"
+  },
+  "agent_policies": {
+    "rate_limit": { "requests_per_minute": 30 }
+  },
+  "workflow": {
+    "graph": {
+      "product-catalog": { "next": ["product-detail", "shopping-cart"] },
+      "product-detail": { "next": ["shopping-cart"] },
+      "shopping-cart": { "next": ["checkout", "product-catalog"] },
+      "checkout": { "next": ["order-confirmation"] },
+      "order-confirmation": { "next": ["product-catalog"] }
+    },
+    "entryPoint": "product-catalog"
+  },
+  "actions": {
+    "product-catalog": [
+      { "name": "add_to_cart", "method": "POST", "endpoint": "/api/cart/add" }
+    ],
+    "product-detail": [
+      { "name": "add_to_cart", "method": "POST", "endpoint": "/api/cart/add" }
+    ],
+    "shopping-cart": [
+      { "name": "update_quantity", "method": "PATCH", "endpoint": "/api/cart/:id" },
+      { "name": "remove_from_cart", "method": "DELETE", "endpoint": "/api/cart/:id" },
+      { "name": "proceed_to_checkout", "method": "GET", "endpoint": "/checkout" }
+    ],
+    "checkout": [
+      { "name": "place_order", "method": "POST", "endpoint": "/api/checkout" }
+    ]
+  },
+  "responseSchemas": {
+    "add_to_cart": {
+      "success": "boolean",
+      "message": "string",
+      "cartCount": "integer",
+      "cartTotal": "number"
+    },
+    "update_quantity": {
+      "success": "boolean",
+      "message": "string"
+    },
+    "remove_from_cart": {
+      "success": "boolean",
+      "message": "string"
+    },
+    "place_order": {
+      "success": "boolean",
+      "orderId": "string",
+      "redirect": "string"
+    }
+  }
+}
+</script>

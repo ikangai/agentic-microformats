@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('partials/head') %>
+</head>
+<body>
+  <%- include('partials/header') %>
+
+  <main data-agent-trust="system">
+    <h1>Checkout</h1>
+    <p>Complete your order. Total: &euro;<%= cartTotal %></p>
+
+    <form id="checkout-form"
+          data-agent="action"
+          data-agent-name="place_order"
+          data-agent-method="POST"
+          data-agent-endpoint="/api/checkout"
+          data-agent-headers='{"Content-Type":"application/json"}'
+          data-agent-role="primary"
+          data-agent-risk="high"
+          data-agent-cost="<%= cartTotal %>"
+          data-agent-cost-currency="EUR"
+          data-agent-reversible="false"
+          data-agent-human-preferred="true"
+          data-agent-description="Place order and charge payment method. This action is irreversible."
+          data-agent-on-success="Order placed. Response contains orderId and redirect URL to /confirmation/:orderId."
+          data-agent-response='{"success":"boolean","orderId":"string","redirect":"string"}'>
+
+      <fieldset>
+        <legend>Shipping Address</legend>
+
+        <label>
+          Full Name
+          <input data-agent-param="shipping.name"
+                 type="text"
+                 name="shipping_name"
+                 placeholder="John Doe"
+                 required>
+        </label>
+
+        <label>
+          Street Address
+          <input data-agent-param="shipping.address"
+                 type="text"
+                 name="shipping_address"
+                 placeholder="123 Main Street"
+                 required>
+        </label>
+
+        <div class="form-row">
+          <label class="flex-2">
+            City
+            <input data-agent-param="shipping.city"
+                   type="text"
+                   name="shipping_city"
+                   placeholder="Vienna"
+                   required>
+          </label>
+
+          <label class="flex-1">
+            Postal Code
+            <input data-agent-param="shipping.postal_code"
+                   data-agent-typehint="string"
+                   type="text"
+                   name="shipping_postal_code"
+                   placeholder="1010"
+                   required>
+          </label>
+        </div>
+
+        <label>
+          Country
+          <select data-agent-param="shipping.country"
+                  name="shipping_country"
+                  required>
+            <option value="">-- Select Country --</option>
+            <option value="AT" selected>Austria</option>
+            <option value="DE">Germany</option>
+            <option value="CH">Switzerland</option>
+            <option value="US">United States</option>
+          </select>
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Payment</legend>
+
+        <label>
+          Card Number
+          <input data-agent-param="payment.card_number"
+                 data-agent-typehint="string"
+                 type="text"
+                 name="payment_card_number"
+                 placeholder="4242424242424242"
+                 maxlength="16"
+                 required>
+        </label>
+
+        <div class="form-row">
+          <label class="flex-1">
+            Expiry (MM/YY)
+            <input data-agent-param="payment.expiry"
+                   type="text"
+                   name="payment_expiry"
+                   placeholder="12/27"
+                   maxlength="5"
+                   required>
+          </label>
+
+          <label class="flex-1">
+            CVV
+            <input data-agent-param="payment.cvv"
+                   data-agent-typehint="string"
+                   type="text"
+                   name="payment_cvv"
+                   placeholder="123"
+                   maxlength="4"
+                   required>
+          </label>
+        </div>
+
+        <label>
+          Cardholder Name
+          <input data-agent-param="payment.cardholder_name"
+                 type="text"
+                 name="payment_cardholder_name"
+                 placeholder="John Doe"
+                 required>
+        </label>
+      </fieldset>
+
+      <div class="order-summary"
+           data-agent="resource"
+           data-agent-type="order-summary"
+           data-agent-id="checkout-summary">
+        <h3>Order Summary</h3>
+        <% cart.forEach(item => { %>
+        <div class="summary-item">
+          <span><%= item.name %> &times; <%= item.quantity %></span>
+          <span>&euro;<%= (item.price * item.quantity).toFixed(2) %></span>
+        </div>
+        <% }) %>
+        <div class="summary-total">
+          <strong>Total</strong>
+          <strong data-agent-prop="total"
+                  data-agent-typehint="currency"
+                  data-agent-currency="EUR">&euro;<%= cartTotal %></strong>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-large btn-full-width">
+        Place Order &mdash; &euro;<%= cartTotal %>
+      </button>
+
+      <p class="checkout-notice">
+        This is a demo. No real payment will be processed.
+        Use card number <code>4242424242424242</code> with any future expiry and any 3-digit CVV.
+      </p>
+    </form>
+  </main>
+
+  <%- include('partials/footer') %>
+  <script src="/demo.js"></script>
+</body>
+</html>

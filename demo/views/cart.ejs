@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('partials/head') %>
+</head>
+<body>
+  <%- include('partials/header') %>
+
+  <main data-agent-trust="system">
+    <h1>Shopping Cart</h1>
+
+    <% if (cart.length === 0) { %>
+      <p class="empty-cart">Your cart is empty. <a href="/">Browse products</a></p>
+    <% } else { %>
+
+      <div class="cart-items">
+        <% cart.forEach(item => { %>
+        <div class="cart-item"
+             data-agent="resource"
+             data-agent-type="cart-item"
+             data-agent-id="<%= item.id %>">
+
+          <div class="item-details">
+            <h3 data-agent-prop="name"><%= item.name %></h3>
+            <span data-agent-prop="unit_price"
+                  data-agent-typehint="currency"
+                  data-agent-currency="EUR">&euro;<%= item.price.toFixed(2) %></span>
+            &times;
+            <span data-agent-prop="quantity"
+                  data-agent-typehint="integer"><%= item.quantity %></span>
+            =
+            <strong data-agent-prop="line_total"
+                    data-agent-typehint="currency"
+                    data-agent-currency="EUR">&euro;<%= (item.price * item.quantity).toFixed(2) %></strong>
+          </div>
+
+          <div class="item-actions">
+            <form data-agent="action"
+                  data-agent-name="update_quantity"
+                  data-agent-method="PATCH"
+                  data-agent-endpoint="/api/cart/<%= item.id %>"
+                  data-agent-headers='{"Content-Type":"application/json"}'
+                  data-agent-role="secondary"
+                  data-agent-risk="low"
+                  data-agent-reversible="true"
+                  data-agent-on-success="Quantity updated. Reload /cart to see updated totals."
+                  data-agent-response='{"success":"boolean","message":"string"}'
+                  class="inline-form">
+
+              <input data-agent-param="quantity"
+                     data-agent-typehint="integer"
+                     data-agent-min="1"
+                     data-agent-max="10"
+                     type="number"
+                     name="quantity"
+                     min="1" max="10"
+                     value="<%= item.quantity %>"
+                     required
+                     class="qty-input">
+
+              <button type="submit" class="btn btn-secondary btn-small">Update</button>
+            </form>
+
+            <button data-agent="action"
+                    data-agent-name="remove_from_cart"
+                    data-agent-method="DELETE"
+                    data-agent-endpoint="/api/cart/<%= item.id %>"
+                    data-agent-role="danger"
+                    data-agent-risk="low"
+                    data-agent-reversible="true"
+                    data-agent-description="Remove <%= item.name %> from cart"
+                    data-agent-on-success="Item removed from cart. Reload /cart to see updated cart."
+                    data-agent-response='{"success":"boolean","message":"string"}'
+                    class="btn btn-danger btn-small"
+                    onclick="removeFromCart('<%= item.id %>')">
+              Remove
+            </button>
+          </div>
+        </div>
+        <% }) %>
+      </div>
+
+      <div class="cart-summary"
+           data-agent="resource"
+           data-agent-type="cart-summary"
+           data-agent-id="cart-total">
+        <div class="summary-row">
+          <span>Total</span>
+          <span class="total-price"
+                data-agent-prop="total"
+                data-agent-typehint="currency"
+                data-agent-currency="EUR">&euro;<%= cartTotal %></span>
+        </div>
+
+        <a href="/checkout"
+           data-agent="action"
+           data-agent-name="proceed_to_checkout"
+           data-agent-method="GET"
+           data-agent-endpoint="/checkout"
+           data-agent-role="primary"
+           data-agent-description="Proceed to checkout to place your order"
+           data-agent-on-success="Navigates to /checkout page where order can be placed."
+           class="btn btn-primary btn-large btn-full-width">
+          Proceed to Checkout
+        </a>
+      </div>
+
+    <% } %>
+  </main>
+
+  <%- include('partials/footer') %>
+  <script src="/demo.js"></script>
+</body>
+</html>

@@ -120,7 +120,8 @@ This specification does NOT define:
 | JSON-LD | Agentic Microformats annotates visible elements; JSON-LD provides hidden metadata |
 | MCP | Actions can be exposed as MCP tools; see Appendix A |
 | HATEOAS | Makes REST's hypermedia principle explicit for shared human-agent operation |
-| llms.txt | Complementary; llms.txt provides documentation; Agentic Microformats provides UI semantics |
+| llms.txt | Complementary; llms.txt provides site-level discovery; Agentic Microformats provides page-level UI semantics |
+| AGENTS.md | Complementary; AGENTS.md guides coding agents in repositories; Agentic Microformats guides browsing agents on pages |
 | NLWeb | Complementary; NLWeb provides query interface; Agentic Microformats provides action discovery |
 
 ---
@@ -246,6 +247,10 @@ A conforming agent:
 | `data-agent-human-preferred` | Hint | Suggests human confirmation |
 | `data-agent-reversible` | Hint | Whether the action can be undone |
 | `data-agent-cost` | Hint | Monetary cost indicator |
+| `data-agent-on-success` | Action | Expected outcome after successful execution |
+| `data-agent-response` | Action | JSON describing the response schema |
+| `data-agent-min` | Parameter | Minimum allowed value |
+| `data-agent-max` | Parameter | Maximum allowed value |
 | `data-agent-description` | Meta | Human-readable description for agents |
 | `data-agent-trust` | Scope | Trust level for a content region |
 | `data-agent-ignore` | Scope | Excludes a subtree from agent parsing |
@@ -397,6 +402,8 @@ An **action** is an operation that can be performed, typically corresponding to 
 | `data-agent-endpoint` | RECOMMENDED | The URL to call |
 | `data-agent-params` | OPTIONAL | Comma-separated parameter names |
 | `data-agent-headers` | OPTIONAL | JSON object of HTTP headers |
+| `data-agent-on-success` | OPTIONAL | Description of expected outcome |
+| `data-agent-response` | OPTIONAL | JSON describing the response schema |
 | `data-agent-description` | OPTIONAL | Human-readable description |
 
 ### 6.2 Actions Within Resources
@@ -470,7 +477,31 @@ Agents SHOULD interpret HTTP status codes conventionally:
 - 4xx = client error
 - 5xx = server error
 
-Specific response formats are not defined by this specification.
+### 6.7 Response Schema
+
+Actions MAY declare their expected response shape using `data-agent-response`:
+
+```html
+<form data-agent="action"
+      data-agent-name="add_to_cart"
+      data-agent-method="POST"
+      data-agent-endpoint="/api/cart/add"
+      data-agent-response='{"success":"boolean","message":"string","cartCount":"integer","cartTotal":"number"}'>
+```
+
+The value is a JSON object where keys are field names and values are type hints (matching the vocabulary from Section 5.3). This lets agents plan multi-step workflows without trial-and-error—they know what data will be available after an action succeeds.
+
+### 6.8 Success Outcome Hints
+
+Actions MAY describe the expected outcome after successful execution using `data-agent-on-success`:
+
+```html
+<form data-agent="action"
+      data-agent-name="add_to_cart"
+      data-agent-on-success="Item added to cart. Cart count and total updated in response. Navigate to /cart to view cart.">
+```
+
+The value is natural-language text describing what happens next—whether the page updates in place, a redirect occurs, or the agent should navigate elsewhere. This helps agents chain actions into multi-step workflows.
 
 ---
 
@@ -520,7 +551,30 @@ Agents construct:
 }
 ```
 
-### 7.4 DOM State
+### 7.4 Validation Constraints
+
+Parameters MAY declare value constraints using `data-agent-min` and `data-agent-max`:
+
+```html
+<input data-agent-param="quantity"
+       data-agent-typehint="integer"
+       data-agent-min="1"
+       data-agent-max="10"
+       type="number" min="1" max="10" required>
+```
+
+| Attribute | Description |
+|-----------|-------------|
+| `data-agent-min` | Minimum allowed value (numeric) or minimum length (string) |
+| `data-agent-max` | Maximum allowed value (numeric) or maximum length (string) |
+
+The interpretation depends on `data-agent-typehint`:
+- For `integer` and `number`: numeric range (e.g., quantity 1–10)
+- For `string`: character length (e.g., max 16 characters for a card number)
+
+These attributes mirror server-side validation rules, helping agents construct valid requests without trial-and-error. Where HTML `min`/`max` attributes are present, `data-agent-min`/`data-agent-max` provide explicit confirmation for agents that may not inspect native HTML validation attributes.
+
+### 7.5 DOM State
 
 Agents MUST respect HTML DOM state:
 
@@ -627,7 +681,72 @@ The **meta layer** provides page-level context.
 </script>
 ```
 
-### 9.2 Discovery Through Navigation
+### 9.2 Extended Metadata
+
+The meta layer MAY include additional sections to help agents plan multi-step workflows before navigating:
+
+#### 9.2.1 Workflow Graph
+
+A `workflow` object describes the navigation flow between page types:
+
+```html
+<script type="application/json" data-agent-meta>
+{
+  "workflow": {
+    "graph": {
+      "product-catalog": { "next": ["product-detail", "shopping-cart"] },
+      "product-detail": { "next": ["shopping-cart"] },
+      "shopping-cart": { "next": ["checkout", "product-catalog"] },
+      "checkout": { "next": ["order-confirmation"] }
+    },
+    "entryPoint": "product-catalog"
+  }
+}
+</script>
+```
+
+Keys in `graph` correspond to `page.type` values. Each entry lists the page types reachable from that page. The `entryPoint` identifies the starting page for a typical user journey.
+
+#### 9.2.2 Actions Summary
+
+An `actions` object lists available actions per page type:
+
+```json
+{
+  "actions": {
+    "product-catalog": [
+      { "name": "add_to_cart", "method": "POST", "endpoint": "/api/cart/add" }
+    ],
+    "shopping-cart": [
+      { "name": "update_quantity", "method": "PATCH", "endpoint": "/api/cart/:id" },
+      { "name": "remove_from_cart", "method": "DELETE", "endpoint": "/api/cart/:id" }
+    ]
+  }
+}
+```
+
+This lets agents know what capabilities a page offers before navigating to it.
+
+#### 9.2.3 Response Schemas
+
+A `responseSchemas` object describes the expected JSON response for each action:
+
+```json
+{
+  "responseSchemas": {
+    "add_to_cart": {
+      "success": "boolean",
+      "message": "string",
+      "cartCount": "integer",
+      "cartTotal": "number"
+    }
+  }
+}
+```
+
+Type values match the vocabulary from Section 5.3. This complements per-action `data-agent-response` attributes (Section 6.7) by providing a centralized reference.
+
+### 9.4 Discovery Through Navigation
 
 Agents discover site capabilities through navigation, not centralized manifests. As agents traverse pages, they encounter resources, actions, and patterns, building understanding incrementally.
 
@@ -643,7 +762,7 @@ Sites MAY provide navigation hints:
 
 There is no required central manifest. The sum of all page-level annotations *is* the site's agent interface.
 
-### 9.3 Linking Related Resources
+### 9.5 Linking Related Resources
 
 Sites with complementary documentation MAY reference it:
 
@@ -941,7 +1060,7 @@ Reserved for future versions:
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Project Dashboard - CompassAI</title>
+  <title>Project Dashboard - IKANGAI</title>
 </head>
 <body>
   <script type="application/json" data-agent-meta>
@@ -1040,10 +1159,14 @@ action-method     = 'data-agent-method="' method-value '"'
 action-endpoint   = 'data-agent-endpoint="' url-value '"'
 action-params     = 'data-agent-params="' params-list '"'
 action-headers    = 'data-agent-headers="' json-value '"'
+action-on-success = 'data-agent-on-success="' text-value '"'
+action-response   = 'data-agent-response="' json-value '"'
 
 ; Parameter
 param-decl        = 'data-agent-param="' param-path '"'
 param-required    = 'data-agent-required="' bool-value '"'
+param-min         = 'data-agent-min="' number-value '"'
+param-max         = 'data-agent-max="' number-value '"'
 
 ; Hints
 hint-role         = 'data-agent-role="' role-value '"'
@@ -1111,6 +1234,7 @@ params-list       = param-path *( "," param-path )
 - **[MCP]** Model Context Protocol, https://modelcontextprotocol.io/
 - **[ARIA]** WAI-ARIA 1.2
 - **[llms.txt]** https://llmstxt.org/
+- **[AGENTS.md]** https://agents.md/
 - **[NLWeb]** https://github.com/microsoft/NLWeb
 
 ---
@@ -1156,15 +1280,17 @@ const mcpTool = {
 
 | Standard | Layer | Purpose |
 |----------|-------|---------|
-| llms.txt | Site | Documentation for LLM context |
+| AGENTS.md | Repository | Instructions for coding agents working on source code |
+| llms.txt | Site | Curated site overview and navigation for LLMs |
 | NLWeb | Site | Natural language query interface |
 | agents.json | Site | API contracts and policies |
 | **Agentic Microformats** | Page | UI semantics for shared operation |
 
-These are complementary. A site might use:
-- llms.txt for documentation
+These are complementary. A project might use:
+- AGENTS.md for coding agents working in the repository
+- llms.txt for LLMs approaching the deployed site
 - NLWeb for conversational queries
-- Agentic Microformats for understanding and interacting with pages
+- Agentic Microformats for understanding and interacting with individual pages
 
 The key difference: Agentic Microformats embeds semantics in the visible UI, enabling human-agent shared operation on the same interface.
 
