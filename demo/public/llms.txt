@@ -11,11 +11,11 @@ Every page is fully annotated with structured metadata. Agents can read resource
 
 ## Pages
 
-- [Product Catalog](http://localhost:3000/): Browse all products. Each product is a `data-agent="resource"` with properties (name, price, availability, rating) and an `add_to_cart` action.
-- [Product Detail](http://localhost:3000/product/SKU-USB-C-2M): Individual product view with full specs, add-to-cart action, and customer reviews (marked `data-agent-trust="untrusted"`).
-- [Shopping Cart](http://localhost:3000/cart): View cart items with `update_quantity` (PATCH) and `remove_from_cart` (DELETE) actions, plus `proceed_to_checkout`.
-- [Checkout](http://localhost:3000/checkout): Place order form with shipping and payment fields. Action is `data-agent-risk="high"` and `data-agent-human-preferred="true"`.
-- [Order Confirmation](http://localhost:3000/confirmation/:orderId): Displays order details after successful checkout.
+- [Product Catalog](/): Browse all products. Each product is a `data-agent="resource"` with properties (name, price, availability, rating) and an `add_to_cart` action.
+- [Product Detail](/product/SKU-USB-C-2M): Individual product view with full specs, add-to-cart action, and customer reviews (marked `data-agent-trust="untrusted"`).
+- [Shopping Cart](/cart): View cart items with `update_quantity` (PATCH) and `remove_from_cart` (DELETE) actions, plus `proceed_to_checkout`.
+- [Checkout](/checkout): Place order form with shipping and payment fields. Action is `data-agent-risk="high"` and `data-agent-human-preferred="true"`.
+- [Order Confirmation](/confirmation/:orderId): Displays order details after successful checkout.
 
 ## Workflow
 
@@ -27,10 +27,11 @@ product-catalog → product-detail → shopping-cart → checkout → order-conf
 
 ## API Endpoints
 
-- [POST /api/cart/add](http://localhost:3000/api/cart/add): Add item to cart. Params: `product_id`, `quantity` (1-10). Returns: `{ success, message, cartCount, cartTotal }`.
-- [PATCH /api/cart/:id](http://localhost:3000/api/cart/:id): Update cart item quantity. Params: `quantity` (1-10). Returns: `{ success, message }`.
-- [DELETE /api/cart/:id](http://localhost:3000/api/cart/:id): Remove item from cart. Returns: `{ success, message }`.
-- [POST /api/checkout](http://localhost:3000/api/checkout): Place order. Params: `shipping.*`, `payment.*`. Returns: `{ success, orderId, redirect }`.
+- POST /api/cart/add: Add item to cart. Params: `product_id`, `quantity` (1-10). Returns: `{ success, message, cartItemId, cartCount, cartTotal }`.
+- PATCH /api/cart/:id: Update cart item quantity. Params: `quantity` (1-10). Returns: `{ success, message }`.
+- DELETE /api/cart/:id: Remove item from cart. Returns: `{ success, message }`.
+- POST /api/checkout: Place order. Params: `shipping.*`, `payment.*`. Returns: `{ success, orderId, redirect }`.
+- All errors return: `{ success: false, message }`.
 
 ## How Agents Use This Site
 

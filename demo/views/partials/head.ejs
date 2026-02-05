@@ -17,7 +17,11 @@
     "type": "<%= typeof pageType !== 'undefined' ? pageType : 'general' %>"
   },
   "agent_policies": {
-    "rate_limit": { "requests_per_minute": 30 }
+    "rate_limit": { "requests_per_minute": 30 },
+    "errorFormat": { "success": "boolean", "message": "string" }
+  },
+  "related": {
+    "documentation": "/llms.txt"
   },
   "workflow": {
     "graph": {
@@ -49,6 +53,7 @@
     "add_to_cart": {
       "success": "boolean",
       "message": "string",
+      "cartItemId": "string",
       "cartCount": "integer",
       "cartTotal": "number"
     },
