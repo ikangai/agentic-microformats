@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Program – Synthesis Conf 2026, Vienna</title>
+  <meta name="description" content="Three days on agentic systems, evaluation and the human-machine interface. September 12–14, 2026, MuseumsQuartier Vienna + virtual track.">
+  <link rel="stylesheet" href="/static/conf.css">
+</head>
+<body>
+
+<header class="conf-header">
+  <a class="conf-logo" href="/">Synthesis<span>Conf</span> 2026</a>
+  <nav aria-label="Main">
+    <a href="/program" class="active">Program</a>
+    <a href="/speakers">Speakers</a>
+    <a href="/venue">Venue</a>
+    <a href="/tickets">Tickets</a>
+    <a href="/sponsors">Sponsors</a>
+    <a href="/code-of-conduct">Code of Conduct</a>
+  </nav>
+  <a class="btn btn-ticket" href="/tickets">Get tickets</a>
+</header>
+
+<section class="conf-hero">
+  <h1>Program</h1>
+  <p>September 12–14, 2026 · MuseumsQuartier, Vienna · All times are shown in local Vienna time (CEST, UTC+2) unless noted otherwise.</p>
+  <p class="hero-note">🎟 Conference pass covers all talks and panels. Workshops and add-ons are booked separately per session below. Club members of our partner communities get the member rate — bring your membership ID.</p>
+  <div class="tz-picker">
+    <label for="tz">Show times in:</label>
+    <select id="tz">
+      <option selected>Vienna (CEST)</option>
+      <option>UTC</option>
+      <option>San Francisco (PT)</option>
+      <option>New York (ET)</option>
+    </select>
+    <noscript><p>Timezone conversion requires JavaScript. All times below are CEST.</p></noscript>
+  </div>
+</section>
+
+<main class="schedule">
+
+  <section class="day" id="day-1">
+    <h2>Day 1 — Friday, September 12</h2>
+
+    <article class="session session-keynote" id="s-101">
+      <div class="session-time"><span class="time">09:30</span><span class="tz">CEST</span> · 60 min</div>
+      <div class="session-body">
+        <h3>Keynote: Machines that Listen</h3>
+        <p class="speakers">Dr. Amara Okafor — Institute for Interactive Systems</p>
+        <p class="abstract">Why the next generation of assistants will be judged not by what they say, but by what they choose not to do. Opening keynote with live demos.</p>
+        <p class="session-meta">📍 Main Hall · Included in conference pass</p>
+        <p class="availability avail-open">Seats available (214 left)</p>
+        <button class="btn btn-book" onclick="reserveSeat('s-101')">Reserve seat</button>
+      </div>
+    </article>
+
+    <article class="session" id="s-102">
+      <div class="session-time"><span class="time">11:00</span><span class="tz">CEST</span> · 45 min</div>
+      <div class="session-body">
+        <h3>Nested Feedback Loops in Multi-Agent Systems</h3>
+        <p class="speakers">Jonas Leitner — Fjord Analytics</p>
+        <p class="abstract">Coupling between agent loops at different tempos is where multi-agent systems actually fail. A tour of production incidents and the patterns that prevented them.</p>
+        <p class="session-meta">📍 Aula 1 · Included in conference pass</p>
+        <p class="availability avail-soldout">Sold out</p>
+        <button class="btn btn-waitlist" onclick="joinWaitlist('s-102')">Join waitlist</button>
+      </div>
+    </article>
+
+    <article class="session session-workshop" id="s-103">
+      <div class="session-time"><span class="time">13:30</span><span class="tz">CEST</span> · 3 h</div>
+      <div class="session-body">
+        <h3>Prompt Systems Workshop</h3>
+        <p class="speakers">Mei-Ling Zhou — Cascade Labs</p>
+        <p class="abstract">Hands-on: from ad-hoc prompting to versioned, tested prompt systems. Bring a laptop; API credits are provided.</p>
+        <p class="session-meta">📍 Studio A · Workshop ticket required: <strong>149 €</strong> standard / 119 € member</p>
+        <p class="availability avail-open">Seats available (12 left)</p>
+        <button class="btn btn-book" onclick="reserveSeat('s-103')">Book workshop</button>
+      </div>
+    </article>
+
+    <article class="session" id="s-104">
+      <div class="session-time"><span class="time">15:00</span><span class="tz">CEST</span> · 45 min</div>
+      <div class="session-body">
+        <h3>Grounding LLMs with Structured HTML</h3>
+        <p class="speakers">Priya Raghavan — Independent</p>
+        <p class="abstract">What happens when pages carry their own machine-readable semantics? Field results from annotating production storefronts.</p>
+        <p class="session-meta">📍 Aula 2 · Included in conference pass</p>
+        <p class="availability avail-waitlist">Waitlist only</p>
+        <button class="btn btn-waitlist" onclick="joinWaitlist('s-104')">Join waitlist</button>
+      </div>
+    </article>
+
+    <article class="session session-panel" id="s-105">
+      <div class="session-time"><span class="time">16:30</span><span class="tz">CEST</span> · 60 min</div>
+      <div class="session-body">
+        <h3>Agent Safety Panel</h3>
+        <p class="speakers">Okafor · Leitner · Raghavan · Moderation: Felix Brandt</p>
+        <p class="abstract">Confirmation fatigue, risk annotations, and who is liable when an agent clicks the wrong button. Audience Q&amp;A.</p>
+        <p class="session-meta">📍 Main Hall · Included in conference pass</p>
+        <p class="availability avail-open">Seats available (58 left)</p>
+        <button class="btn btn-book" onclick="reserveSeat('s-105')">Reserve seat</button>
+      </div>
+    </article>
+
+    <article class="session session-workshop" id="s-106">
+      <div class="session-time"><span class="time">18:00</span><span class="tz">CEST</span> · 90 min</div>
+      <div class="session-body">
+        <h3>Evaluation Deep Dive <span class="tag">add-on</span></h3>
+        <p class="speakers">Tomás Herrera — Verdict AI</p>
+        <p class="abstract">Beyond accuracy: building eval harnesses that survive contact with reality. Includes the infamous gallery of benchmark failures.</p>
+        <p class="session-meta">📍 Studio B · Add-on ticket required: <strong>79 €</strong> standard / 59 € member</p>
+        <p class="availability avail-open">Seats available (31 left)</p>
+        <button class="btn btn-book" onclick="reserveSeat('s-106')">Book add-on</button>
+      </div>
+    </article>
+
+    <article class="session session-social" id="s-107">
+      <div class="session-time"><span class="time">19:30</span><span class="tz">CEST</span> · 90 min</div>
+      <div class="session-body">
+        <h3>Speed Networking</h3>
+        <p class="speakers">Hosted by the program committee</p>
+        <p class="abstract">Structured 1:1 rotations. Drinks included. Limited to 80 participants.</p>
+        <p class="session-meta">📍 Foyer · Included in conference pass</p>
+        <p class="availability avail-soldout">Sold out</p>
+        <button class="btn btn-waitlist" onclick="joinWaitlist('s-107')">Join waitlist</button>
+      </div>
+    </article>
+  </section>
+
+  <section class="day" id="day-2">
+    <h2>Day 2 — Saturday, September 13</h2>
+
+    <article class="session" id="s-201">
+      <div class="session-time"><span class="time">10:00</span><span class="tz">CEST</span> · 45 min</div>
+      <div class="session-body">
+        <h3>Nested Feedback Loops in Multi-Agent Systems <span class="tag">repeat</span></h3>
+        <p class="speakers">Jonas Leitner — Fjord Analytics</p>
+        <p class="abstract">Encore of Friday's sold-out session. Same content, smaller room, more time for questions.</p>
+        <p class="session-meta">📍 Studio B · Included in conference pass</p>
+        <p class="availability avail-open">Seats available (26 left)</p>
+        <button class="btn btn-book" onclick="reserveSeat('s-201')">Reserve seat</button>
+      </div>
+    </article>
+
+    <article class="session" id="s-202">
+      <div class="session-time"><span class="time">11:30</span><span class="tz">CEST</span> · 45 min</div>
+      <div class="session-body">
+        <h3>The Economics of Agent Traffic</h3>
+        <p class="speakers">Sofia Marchetti — Meridian Research</p>
+        <p class="abstract">Ad-funded web meets agents that don't see ads. Who pays for content when the reader is a machine?</p>
+        <p class="session-meta">📍 Aula 1 · Included in conference pass</p>
+        <p class="availability avail-waitlist">Waitlist only</p>
+        <button class="btn btn-waitlist" onclick="joinWaitlist('s-202')">Join waitlist</button>
+      </div>
+    </article>
+
+    <article class="session session-workshop" id="s-203">
+      <div class="session-time"><span class="time">13:00</span><span class="tz">CEST</span> · 2 h</div>
+      <div class="session-body">
+        <h3>Hands-on: Annotating for Agents</h3>
+        <p class="speakers">Priya Raghavan — Independent</p>
+        <p class="abstract">Take a real page, annotate it, watch an agent operate it. Bring your own site if you dare.</p>
+        <p class="session-meta">📍 Studio A · Workshop ticket required: <strong>99 €</strong> standard / 79 € member</p>
+        <p class="availability avail-soldout">Sold out</p>
+        <button class="btn btn-waitlist" onclick="joinWaitlist('s-203')">Join waitlist</button>
+      </div>
+    </article>
+
+    <article class="session" id="s-204">
+      <div class="session-time"><span class="time">14:30</span><span class="tz">CEST</span> · 45 min</div>
+      <div class="session-body">
+        <h3>Browser Agents in Production</h3>
+        <p class="speakers">Daniel Kovač — Northline</p>
+        <p class="abstract">Twelve months of a browser agent handling real customer workflows: what broke, what surprised us, what we rolled back.</p>
+        <p class="session-meta">📍 Main Hall · Included in conference pass</p>
+        <p class="availability avail-open">Seats available (112 left)</p>
+        <button class="btn btn-book" onclick="reserveSeat('s-204')">Reserve seat</button>
+      </div>
+    </article>
+
+    <article class="session session-keynote" id="s-205">
+      <div class="session-time"><span class="time">16:00</span><span class="tz">CEST</span> · 60 min</div>
+      <div class="session-body">
+        <h3>Closing Keynote: The Shared Wheel</h3>
+        <p class="speakers">Prof. Henrike Dalgaard — TU Wien</p>
+        <p class="abstract">Humans and machines operating the same interface — a history of shared control from aviation to the web, and what it teaches us about the next decade.</p>
+        <p class="session-meta">📍 Main Hall · Included in conference pass</p>
+        <p class="availability avail-open">Seats available (301 left)</p>
+        <button class="btn btn-book" onclick="reserveSeat('s-205')">Reserve seat</button>
+      </div>
+    </article>
+
+    <article class="session session-social" id="s-206">
+      <div class="session-time"><span class="time">17:30</span><span class="tz">CEST</span> · 2 h</div>
+      <div class="session-body">
+        <h3>Community Unconference</h3>
+        <p class="speakers">You</p>
+        <p class="abstract">Open grid, sticky notes, no slides. Topics pitched on the spot.</p>
+        <p class="session-meta">📍 Foyer · Included in conference pass</p>
+        <p class="availability avail-waitlist">Waitlist only</p>
+        <button class="btn btn-waitlist" onclick="joinWaitlist('s-206')">Join waitlist</button>
+      </div>
+    </article>
+
+    <article class="session session-virtual" id="s-207">
+      <div class="session-time"><span class="time">20:00</span><span class="tz">CEST</span> <span class="tz-alt">(11:00 PT)</span> · 60 min</div>
+      <div class="session-body">
+        <h3>Virtual Track: Live from San Francisco</h3>
+        <p class="speakers">Panel with West-Coast community hosts</p>
+        <p class="abstract">Streamed session bridging both communities. Free for all ticket holders; recording available afterwards.</p>
+        <p class="session-meta">🖥 Online (stream link via email) · Included in conference pass</p>
+        <p class="availability avail-open">Unlimited virtual seats</p>
+        <button class="btn btn-book" onclick="reserveSeat('s-207')">Add to my agenda</button>
+      </div>
+    </article>
+  </section>
+
+  <section class="day" id="day-3">
+    <h2>Day 3 — Sunday, September 14</h2>
+
+    <article class="session session-workshop" id="s-301">
+      <div class="session-time"><span class="time">09:00</span><span class="tz">CEST</span> · 2 h</div>
+      <div class="session-body">
+        <h3>Workshop: Building Eval Harnesses</h3>
+        <p class="speakers">Tomás Herrera — Verdict AI</p>
+        <p class="abstract">From metric design to contamination control: build a working eval harness for your own agent during the session. Runs 09:00–11:00.</p>
+        <p class="session-meta">📍 Studio A · Workshop ticket required: <strong>89 €</strong> standard / 69 € member</p>
+        <p class="availability avail-open">Seats available (9 left)</p>
+        <button class="btn btn-book" onclick="reserveSeat('s-301')">Book workshop</button>
+      </div>
+    </article>
+
+    <article class="session" id="s-302">
+      <div class="session-time"><span class="time">10:30</span><span class="tz">CEST</span> · 45 min</div>
+      <div class="session-body">
+        <h3>Retrieval Isn't Dead</h3>
+        <p class="speakers">Lena Vogt — Archive Systems</p>
+        <p class="abstract">Long contexts didn't kill retrieval — they changed what it's for. Fresh benchmarks and three production war stories.</p>
+        <p class="session-meta">📍 Aula 1 · Included in conference pass</p>
+        <p class="availability avail-open">Seats available (44 left)</p>
+        <button class="btn btn-book" onclick="reserveSeat('s-302')">Reserve seat</button>
+      </div>
+    </article>
+
+    <article class="session" id="s-303">
+      <div class="session-time"><span class="time">11:45</span><span class="tz">CEST</span> · 45 min</div>
+      <div class="session-body">
+        <h3>Agents and Accessibility</h3>
+        <p class="speakers">Samuel Adeyemi — Inclusive Web Collective</p>
+        <p class="abstract">The same semantics that help agents help assistive technology — and where the two diverge.</p>
+        <p class="session-meta">📍 Aula 2 · Included in conference pass</p>
+        <p class="availability avail-waitlist">Waitlist only</p>
+        <button class="btn btn-waitlist" onclick="joinWaitlist('s-303')">Join waitlist</button>
+      </div>
+    </article>
+
+    <article class="session" id="s-304">
+      <div class="session-time"><span class="time">13:15</span><span class="tz">CEST</span> · 60 min</div>
+      <div class="session-body">
+        <h3>Live Incident Review</h3>
+        <p class="speakers">Northline SRE guild</p>
+        <p class="abstract">A real agent incident, replayed end to end with the original logs. What the postmortem missed.</p>
+        <p class="session-meta">📍 Main Hall · Included in conference pass</p>
+        <p class="availability avail-soldout">Sold out</p>
+        <button class="btn btn-waitlist" onclick="joinWaitlist('s-304')">Join waitlist</button>
+      </div>
+    </article>
+
+    <article class="session session-panel" id="s-305">
+      <div class="session-time"><span class="time">14:45</span><span class="tz">CEST</span> · 60 min</div>
+      <div class="session-body">
+        <h3>The Annotation Economy Panel</h3>
+        <p class="speakers">Marchetti · Vogt · Adeyemi · Moderation: Felix Brandt</p>
+        <p class="abstract">Who pays for machine-readable semantics — and who profits? Publishers, agent vendors and standards folks argue it out.</p>
+        <p class="session-meta">📍 Main Hall · Included in conference pass</p>
+        <p class="availability avail-open">Seats available (77 left)</p>
+        <button class="btn btn-book" onclick="reserveSeat('s-305')">Reserve seat</button>
+      </div>
+    </article>
+
+    <article class="session session-social" id="s-306">
+      <div class="session-time"><span class="time">16:00</span><span class="tz">CEST</span> · 90 min</div>
+      <div class="session-body">
+        <h3>Hallway Track: Demos</h3>
+        <p class="speakers">Community</p>
+        <p class="abstract">Bring a laptop, show your thing. Tables assigned on site.</p>
+        <p class="session-meta">📍 Foyer · Included in conference pass</p>
+        <p class="availability avail-open">Seats available (open floor)</p>
+        <button class="btn btn-book" onclick="reserveSeat('s-306')">Add to my agenda</button>
+      </div>
+    </article>
+
+    <article class="session" id="s-307">
+      <div class="session-time"><span class="time">17:45</span><span class="tz">CEST</span> · 45 min</div>
+      <div class="session-body">
+        <h3>Farewell &amp; Awards</h3>
+        <p class="speakers">Program committee</p>
+        <p class="abstract">Community awards, thank-yous and the announcement of next year's venue.</p>
+        <p class="session-meta">📍 Main Hall · Included in conference pass</p>
+        <p class="availability avail-open">Seats available (188 left)</p>
+        <button class="btn btn-book" onclick="reserveSeat('s-307')">Reserve seat</button>
+      </div>
+    </article>
+  </section>
+
+</main>
+
+<section class="conf-faq">
+  <h2>Practical notes</h2>
+  <ul>
+    <li>Doors open 08:30 both days. Registration desk is in the main courtyard.</li>
+    <li>Workshops (Studio A) and add-ons (Studio B) have separate tickets and limited capacity — book early.</li>
+    <li>Waitlist spots are released 24 h before each session, first come first served.</li>
+    <li>All sessions in Main Hall are recorded; workshop sessions are not.</li>
+    <li>Download the full schedule: <a href="/api/schedule.ics">calendar file (.ics)</a>.</li>
+  </ul>
+</section>
+
+<footer class="conf-footer">
+  <div class="footer-cols">
+    <div><h3>Synthesis Conf</h3><p>An independent community conference on agentic systems and the human-machine interface.</p></div>
+    <div><h3>Contact</h3><p><a href="mailto:hello@synthesisconf.example">hello@synthesisconf.example</a><br>MuseumsQuartier, Museumsplatz 1, 1070 Wien</p></div>
+    <div><h3>Stay updated</h3>
+      <form id="conf-newsletter">
+        <input type="email" name="email" placeholder="you@example.com" aria-label="Email address" required>
+        <button type="submit">Subscribe</button>
+      </form>
+    </div>
+  </div>
+  <p class="fineprint">© 2026 Synthesis Conf. Ticket sales handled by our own booking system; no external ticketing fees.</p>
+</footer>
+
+<script>
+  // Booking flow. Reservation requires a ticket-holder session.
+  function reserveSeat(sessionId) {
+    fetch('/api/bookings/reserve', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ session: sessionId })
+    }).then(function (r) { return r.json(); }).then(function (data) {
+      if (data.ok) {
+        showBanner('Seat reserved for ' + data.sessionTitle + '. Check your email for the confirmation.');
+      } else if (data.reason === 'no_ticket') {
+        window.location.href = '/tickets?return=/program%23' + sessionId;
+      } else {
+        showBanner(data.message || 'Reservation failed.', 'error');
+      }
+    });
+  }
+
+  function joinWaitlist(sessionId) {
+    fetch('/api/bookings/waitlist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ session: sessionId })
+    }).then(function (r) { return r.json(); }).then(function (data) {
+      if (data.ok) { showBanner('You are #' + data.position + ' on the waitlist.'); }
+    });
+  }
+
+  document.getElementById('conf-newsletter').addEventListener('submit', function (e) {
+    e.preventDefault();
+    fetch('/api/newsletter/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: e.target.elements.email.value })
+    }).then(function () { showBanner('Almost there — confirm via the email we just sent.'); });
+  });
+
+  function showBanner(msg, kind) {
+    var el = document.createElement('div');
+    el.className = 'banner banner-' + (kind || 'ok');
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(function () { el.remove(); }, 4000);
+  }
+</script>
+
+</body>
+</html>

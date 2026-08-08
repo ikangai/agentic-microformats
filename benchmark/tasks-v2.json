@@ -1,0 +1,137 @@
+[
+  {
+    "id": "V01",
+    "page": "07-ecommerce-category.html",
+    "page_type": "ecommerce",
+    "task": "What is the current selling price of the product 'Trekkingstock Carbon Pro Duo'? Return only the number as a decimal with a dot separator (e.g. 12.34).",
+    "expected": "44.90",
+    "match_type": "contains",
+    "category": "property_extraction"
+  },
+  {
+    "id": "V02",
+    "page": "07-ecommerce-category.html",
+    "page_type": "ecommerce",
+    "task": "How many products on this page are sold out (ausverkauft)? Pre-order items do not count as sold out. Return a number.",
+    "expected": "10",
+    "match_type": "contains",
+    "category": "resource_enumeration"
+  },
+  {
+    "id": "V03",
+    "page": "07-ecommerce-category.html",
+    "page_type": "ecommerce",
+    "task": "When a customer adds a product to the shopping cart, which URL path does the page send the request to? Return the path only.",
+    "expected": "/api/v2/basket/items",
+    "match_type": "contains",
+    "category": "action_discovery"
+  },
+  {
+    "id": "V04",
+    "page": "07-ecommerce-category.html",
+    "page_type": "ecommerce",
+    "task": "What is the article number (Art.-Nr.) of the cheapest product that can be bought right now (exclude sold-out and pre-order items)?",
+    "expected": "ALP-9002",
+    "match_type": "contains",
+    "category": "computation"
+  },
+  {
+    "id": "V05",
+    "page": "07-ecommerce-category.html",
+    "page_type": "ecommerce",
+    "task": "How many products on this page cost less than 15 EUR and can be bought right now (in stock or low stock; exclude sold-out and pre-order items)? Return a number.",
+    "expected": "13",
+    "match_type": "contains",
+    "category": "computation"
+  },
+  {
+    "id": "V06",
+    "page": "08-api-changelog.html",
+    "page_type": "changelog",
+    "task": "What is the latest stable (non-beta) version of the API? Return the version number only.",
+    "expected": "2.9.1",
+    "match_type": "contains",
+    "category": "property_extraction"
+  },
+  {
+    "id": "V07",
+    "page": "08-api-changelog.html",
+    "page_type": "changelog",
+    "task": "On what date was version 2.8.0 released? Return the date in ISO format YYYY-MM-DD.",
+    "expected": "2026-01-14",
+    "match_type": "contains",
+    "category": "property_extraction"
+  },
+  {
+    "id": "V08",
+    "page": "08-api-changelog.html",
+    "page_type": "changelog",
+    "task": "The synchronous /v1/render endpoint is deprecated. Which endpoint should be used instead? Return the path only.",
+    "expected": "/v2/render/jobs",
+    "match_type": "contains",
+    "category": "property_extraction"
+  },
+  {
+    "id": "V09",
+    "page": "08-api-changelog.html",
+    "page_type": "changelog",
+    "task": "What is the minimum SDK version required to use streaming exports? Return the version number only.",
+    "expected": "4.2.0",
+    "match_type": "contains",
+    "category": "property_extraction"
+  },
+  {
+    "id": "V10",
+    "page": "08-api-changelog.html",
+    "page_type": "changelog",
+    "task": "How many breaking changes are listed for version 2.7.0? Return a number.",
+    "expected": "3",
+    "match_type": "contains",
+    "category": "resource_enumeration"
+  },
+  {
+    "id": "V11",
+    "page": "09-event-schedule.html",
+    "page_type": "events",
+    "task": "How many sessions across all three days currently have seats available (i.e. are neither sold out nor waitlist-only)? Return a number.",
+    "expected": "13",
+    "match_type": "contains",
+    "category": "resource_enumeration"
+  },
+  {
+    "id": "V12",
+    "page": "09-event-schedule.html",
+    "page_type": "events",
+    "task": "The keynote 'Machines that Listen' starts at 09:30 local Vienna time. What is the start time in UTC? Return it in 24-hour HH:MM format with a leading zero (e.g. 06:15).",
+    "expected": "07:30",
+    "match_type": "contains",
+    "category": "property_extraction"
+  },
+  {
+    "id": "V13",
+    "page": "09-event-schedule.html",
+    "page_type": "events",
+    "task": "A non-member wants to attend the 'Prompt Systems Workshop' and the 'Evaluation Deep Dive' add-on. What is the total ticket cost in EUR for both sessions at the standard rate? Return a number.",
+    "expected": "228",
+    "match_type": "contains",
+    "category": "computation"
+  },
+  {
+    "id": "V14",
+    "page": "09-event-schedule.html",
+    "page_type": "events",
+    "task": "Which HTTP method and URL path does the page use to reserve a seat for a session? Return both.",
+    "expected": ["POST", "/api/bookings/reserve"],
+    "match_type": "all_contained",
+    "category": "action_discovery"
+  },
+  {
+    "id": "V15",
+    "page": "09-event-schedule.html",
+    "page_type": "events",
+    "task": "On Day 3 (September 14), the session 'Retrieval Isn't Dead' starts at 10:30. Which other Day-3 session is still in progress at that moment? Return its title.",
+    "expected": "Building Eval Harnesses",
+    "match_type": "contains",
+    "category": "computation"
+  }
+]

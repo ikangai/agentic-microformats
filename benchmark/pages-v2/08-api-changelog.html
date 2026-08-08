@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Changelog – Nimbus Render API</title>
+  <meta name="description" content="Release notes and migration guides for the Nimbus Render API, SDKs and CLI.">
+  <link rel="stylesheet" href="/docs/assets/docs.css">
+</head>
+<body>
+
+<header class="docs-header">
+  <a class="logo" href="/">Nimbus<span>Render</span></a>
+  <nav aria-label="Primary">
+    <a href="/docs">Documentation</a>
+    <a href="/docs/api">API Reference</a>
+    <a href="/docs/sdks">SDKs</a>
+    <a href="/docs/changelog" class="active">Changelog</a>
+    <a href="/status">Status</a>
+    <a href="/pricing">Pricing</a>
+  </nav>
+  <div class="header-actions">
+    <input type="search" placeholder="Search docs… (⌘K)" aria-label="Search documentation">
+    <a class="btn" href="/console">Open Console</a>
+  </div>
+</header>
+
+<div class="docs-layout">
+
+<aside class="docs-sidebar" aria-label="Versions">
+  <h2>Releases</h2>
+  <ul>
+    <li><a href="#v3-0-0-beta-2">v3.0.0-beta.2 <span class="tag tag-beta">beta</span></a></li>
+    <li><a href="#v3-0-0-beta-1">v3.0.0-beta.1 <span class="tag tag-beta">beta</span></a></li>
+    <li><a href="#v2-9-1">v2.9.1 <span class="tag tag-stable">stable</span></a></li>
+    <li><a href="#v2-9-0">v2.9.0</a></li>
+    <li><a href="#v2-8-1">v2.8.1</a></li>
+    <li><a href="#v2-8-0">v2.8.0</a></li>
+    <li><a href="#v2-7-0">v2.7.0</a></li>
+    <li><a href="#v2-6-0">v2.6.0</a></li>
+    <li><a href="#older">Older releases…</a></li>
+  </ul>
+  <h2>Guides</h2>
+  <ul>
+    <li><a href="/docs/migration/v2-to-v3">v2 → v3 migration guide</a></li>
+    <li><a href="/docs/guides/webhooks">Webhook signatures</a></li>
+    <li><a href="/docs/guides/rate-limits">Rate limits</a></li>
+    <li><a href="/docs/guides/idempotency">Idempotency keys</a></li>
+  </ul>
+  <div class="sidebar-note">
+    <p><strong>Deprecation policy:</strong> deprecated endpoints are removed two minor versions after the deprecation notice, with a minimum of 6 months.</p>
+  </div>
+</aside>
+
+<main class="docs-content">
+  <h1>Changelog</h1>
+  <p class="lead">All notable changes to the Nimbus Render API, the official SDKs and the <code>nimbus</code> CLI. We follow semantic versioning. Prerelease builds are published on the <code>beta</code> channel and are <strong>not recommended for production</strong>.</p>
+
+  <div class="subscribe-strip">
+    <p>Get release notes by mail:</p>
+    <form action="/api/notify/releases" method="POST">
+      <input type="email" name="email" placeholder="you@company.com" aria-label="Email">
+      <button type="submit">Subscribe</button>
+    </form>
+    <a href="/docs/changelog.rss">RSS feed</a>
+  </div>
+
+  <article class="release" id="v3-0-0-beta-2">
+    <header>
+      <h2>v3.0.0-beta.2 <span class="tag tag-beta">beta</span></h2>
+      <p class="release-date">Released April 2, 2026 · beta channel</p>
+    </header>
+    <div class="callout callout-warn">
+      <p>⚠️ Prerelease build. APIs may change without notice before the stable 3.0.0 release. Do not use in production.</p>
+    </div>
+    <h3>Added</h3>
+    <ul>
+      <li>New <code>/v3/scenes</code> resource for multi-layer scene composition (experimental).</li>
+      <li>Server-driven pagination on all collection endpoints via <code>page_token</code>.</li>
+    </ul>
+    <h3>Changed</h3>
+    <ul>
+      <li>All timestamps are now RFC 3339 with mandatory timezone offset.</li>
+      <li>Error envelope switches from <code>{"error": …}</code> to a problem-details object (<code>application/problem+json</code>).</li>
+    </ul>
+    <h3>Known issues</h3>
+    <ul>
+      <li>Scene renders above 4K resolution intermittently return 502.</li>
+    </ul>
+  </article>
+
+  <article class="release" id="v3-0-0-beta-1">
+    <header>
+      <h2>v3.0.0-beta.1 <span class="tag tag-beta">beta</span></h2>
+      <p class="release-date">Released March 18, 2026 · beta channel</p>
+    </header>
+    <h3>Added</h3>
+    <ul>
+      <li>First public preview of the v3 API surface. See the <a href="/docs/migration/v2-to-v3">migration guide</a>.</li>
+    </ul>
+  </article>
+
+  <article class="release" id="v2-9-1">
+    <header>
+      <h2>v2.9.1 <span class="tag tag-stable">latest stable</span></h2>
+      <p class="release-date">Released March 3, 2026</p>
+    </header>
+    <h3>Fixed</h3>
+    <ul>
+      <li>Webhook retries no longer skip the exponential backoff window after a 429 response.</li>
+      <li><code>GET /v2/render/jobs/{id}</code> returned a stale <code>progress</code> value for jobs in the <code>queued</code> state.</li>
+      <li>CLI: <code>nimbus login</code> now honors <code>NO_COLOR</code>.</li>
+    </ul>
+    <h3>Security</h3>
+    <ul>
+      <li>Webhook signature timestamps outside a ±5 minute window are now rejected.</li>
+    </ul>
+  </article>
+
+  <article class="release" id="v2-9-0">
+    <header>
+      <h2>v2.9.0</h2>
+      <p class="release-date">Released 2026-02-14</p>
+    </header>
+    <h3>Added</h3>
+    <ul>
+      <li><strong>Streaming exports.</strong> Long-running exports can now stream partial results over SSE. Streaming exports require SDK version 4.2.0 or newer; older SDKs fall back to polling.</li>
+      <li><code>quality</code> parameter on <code>POST /v2/render/jobs</code> (draft | standard | archival).</li>
+    </ul>
+    <h3>Breaking changes</h3>
+    <ul>
+      <li><code>GET /v2/render/jobs</code> collection now defaults to <code>status=active</code> instead of returning all jobs.</li>
+      <li>The <code>metadata</code> field on job objects is now limited to 16 KB; larger payloads are rejected with 413.</li>
+    </ul>
+    <h3>Notes</h3>
+    <ul>
+      <li>SDK 4.2.0 also drops support for Node 16 (EOL). The last SDK line supporting Node 16 is 4.1.x.</li>
+      <li>CLI 1.8 ships with this release and adds <code>nimbus export --stream</code>.</li>
+    </ul>
+  </article>
+
+  <article class="release" id="v2-8-1">
+    <header>
+      <h2>v2.8.1</h2>
+      <p class="release-date">Released 01.02.2026 (hotfix)</p>
+    </header>
+    <h3>Fixed</h3>
+    <ul>
+      <li>Regression from 2.8.0: presigned upload URLs expired after 5 minutes instead of the documented 60 minutes.</li>
+    </ul>
+  </article>
+
+  <article class="release" id="v2-8-0">
+    <header>
+      <h2>v2.8.0</h2>
+      <p class="release-date">Released 14.01.2026</p>
+    </header>
+    <h3>Added</h3>
+    <ul>
+      <li>Idempotency keys on all mutating endpoints via the <code>Idempotency-Key</code> header.</li>
+      <li>Per-project usage endpoint: <code>GET /v2/projects/{id}/usage</code>.</li>
+    </ul>
+    <h3>Breaking changes</h3>
+    <ul>
+      <li>Renders with unsupported color profiles now fail fast with 422 instead of silently converting to sRGB.</li>
+    </ul>
+    <h3>Deprecated</h3>
+    <ul>
+      <li>The legacy <code>/v1/assets</code> endpoint is deprecated. Use <code>/v2/assets/files</code> instead. Removal is planned for 3.0.0.</li>
+    </ul>
+  </article>
+
+  <article class="release" id="v2-7-0">
+    <header>
+      <h2>v2.7.0</h2>
+      <p class="release-date">Released December 9, 2025</p>
+    </header>
+    <h3>Added</h3>
+    <ul>
+      <li>Webhook event <code>render.job.progressed</code> (fires at 25/50/75 %).</li>
+      <li>Batch asset tagging: <code>PATCH /v2/assets/tags</code>.</li>
+    </ul>
+    <h3>Breaking changes</h3>
+    <ul>
+      <li>API keys created before 2024 are no longer accepted; rotate via the console.</li>
+      <li><code>webhook_url</code> must now be HTTPS; plain HTTP endpoints are rejected at configuration time.</li>
+      <li>The undocumented <code>?format=xml</code> query parameter has been removed from all endpoints.</li>
+    </ul>
+    <h3>Changed</h3>
+    <ul>
+      <li>Default rate limit raised from 60 to 120 requests/minute for paid plans.</li>
+    </ul>
+  </article>
+
+  <article class="release" id="v2-6-0">
+    <header>
+      <h2>v2.6.0</h2>
+      <p class="release-date">Released October 21, 2025</p>
+    </header>
+    <h3>Added</h3>
+    <ul>
+      <li>Asynchronous render jobs: <code>POST /v2/render/jobs</code> plus job polling and webhooks. This is now the recommended way to render.</li>
+    </ul>
+    <h3>Deprecated</h3>
+    <ul>
+      <li>The synchronous <code>/v1/render</code> endpoint is deprecated as of this release. Use <code>/v2/render/jobs</code> instead. <code>/v1/render</code> continues to work until its removal in 3.0.0, but new features ship only for render jobs.</li>
+      <li>SDK: the blocking <code>renderSync()</code> helper is deprecated in favor of <code>renderAsync()</code>. <code>renderSync()</code> will be removed in SDK 5.0.</li>
+    </ul>
+  </article>
+
+  <section class="older" id="older">
+    <h2>Older releases</h2>
+    <p>Release notes for 2.5.x and earlier have moved to the <a href="/docs/changelog/archive">changelog archive</a>. Highlights: 2.5.0 introduced project-scoped API keys (August 30, 2025); 2.4.0 introduced webhooks (June 12, 2025); 2.3.0 introduced the asset library (April 3, 2025).</p>
+  </section>
+
+  <section class="upcoming">
+    <h2>Upcoming</h2>
+    <p>On the roadmap for the stable 3.0.0 release (targeted for Q3 2026): scene composition GA, problem-details errors everywhere, and removal of all endpoints deprecated on the 2.x line (<code>/v1/render</code>, <code>/v1/assets</code>). Track progress on the <a href="/roadmap">public roadmap</a>.</p>
+  </section>
+</main>
+
+</div>
+
+<footer class="docs-footer">
+  <p>© 2026 Nimbus Render, Inc. · <a href="/legal/terms">Terms</a> · <a href="/legal/privacy">Privacy</a> · <a href="/security">Security</a> · <a href="https://github.com/nimbusrender">GitHub</a></p>
+  <p>Questions? Reach us at <a href="mailto:support@nimbusrender.dev">support@nimbusrender.dev</a> or in the <a href="/community">community forum</a>.</p>
+</footer>
+
+<script>
+  (function () {
+    var links = document.querySelectorAll('.docs-sidebar a[href^="#"]');
+    for (var i = 0; i < links.length; i++) {
+      links[i].addEventListener('click', function () {
+        try { navigator.sendBeacon('/api/telemetry/docs', JSON.stringify({ page: 'changelog', anchor: this.getAttribute('href') })); } catch (e) {}
+      });
+    }
+  })();
+</script>
+
+</body>
+</html>

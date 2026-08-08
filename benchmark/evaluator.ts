@@ -81,9 +81,21 @@ interface Task {
   category: string;
 }
 
+interface CallStats {
+  duration_ms?: number;
+  duration_api_ms?: number;
+  input_tokens?: number;
+  cache_creation_input_tokens?: number;
+  cache_read_input_tokens?: number;
+  output_tokens?: number;
+  cost_usd?: number;
+}
+
 interface SideResult {
   llm_response: string;
   passed: boolean;
+  page_bytes?: number;
+  stats?: CallStats;
   error?: string;
 }
 
@@ -98,6 +110,15 @@ interface TaskResult {
   baseline?: SideResult;
 }
 
+interface SideCostSummary {
+  calls: number;
+  mean_duration_ms: number;
+  mean_page_bytes: number;
+  total_prompt_tokens: number; // input + cache_creation (page-driven)
+  total_output_tokens: number;
+  total_cost_usd: number;
+}
+
 interface RunResult {
   timestamp: string;
   harness_version: string;
@@ -110,7 +131,25 @@ interface RunResult {
   baseline_passed: number | null;
   delta: number | null; // tasks_passed − baseline_passed
   score: number;
+  cost_summary?: { annotated: SideCostSummary; baseline?: SideCostSummary };
   results: TaskResult[];
+}
+
+function summarizeCosts(sides: (SideResult | undefined)[]): SideCostSummary {
+  const withStats = sides.filter((s): s is SideResult => !!s && !!s.stats);
+  const n = withStats.length;
+  const sum = (f: (s: SideResult) => number) =>
+    withStats.reduce((acc, s) => acc + f(s), 0);
+  return {
+    calls: n,
+    mean_duration_ms: n ? Math.round(sum((s) => s.stats!.duration_ms ?? 0) / n) : 0,
+    mean_page_bytes: n ? Math.round(sum((s) => s.page_bytes ?? 0) / n) : 0,
+    total_prompt_tokens: sum(
+      (s) => (s.stats!.input_tokens ?? 0) + (s.stats!.cache_creation_input_tokens ?? 0)
+    ),
+    total_output_tokens: sum((s) => s.stats!.output_tokens ?? 0),
+    total_cost_usd: Number(sum((s) => s.stats!.cost_usd ?? 0).toFixed(4)),
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -122,6 +161,11 @@ function containsToken(response: string, expected: string): boolean {
   // does not pass on a response of "15".
   if (/^\d+$/.test(expected)) {
     return new RegExp(`(^|\\D)${expected}(\\D|$)`).test(response);
+  }
+  // Decimal expectations ("4.99") must not match inside "14.99" or "0.4.99".
+  if (/^\d+\.\d+$/.test(expected)) {
+    const esc = expected.replace(".", "\\.");
+    return new RegExp(`(^|[^\\d.])${esc}(\\D|$)`).test(response);
   }
   return response.includes(expected);
 }
@@ -166,13 +210,14 @@ function getScratchDir(): string {
   return SCRATCH_DIR;
 }
 
-function runClaudeP(prompt: string, model: string): { response: string; error?: string } {
+function runClaudeP(prompt: string, model: string): { response: string; stats?: CallStats; error?: string } {
   const scratch = getScratchDir();
   const argv = [
     "-p",
     "--model", model,
     "--disallowedTools", DISALLOWED_TOOLS,
     "--no-session-persistence",
+    "--output-format", "json",
   ];
 
   let lastError = "";
@@ -184,8 +229,24 @@ function runClaudeP(prompt: string, model: string): { response: string; error?: 
         timeout: CLAUDE_TIMEOUT_MS,
         encoding: "utf-8",
         cwd: scratch, // empty dir: no CLAUDE.md, no repo files in reach
+        maxBuffer: 32 * 1024 * 1024,
       });
-      return { response: output.trim() };
+      try {
+        const parsed = JSON.parse(output);
+        const stats: CallStats = {
+          duration_ms: parsed.duration_ms,
+          duration_api_ms: parsed.duration_api_ms,
+          input_tokens: parsed.usage?.input_tokens,
+          cache_creation_input_tokens: parsed.usage?.cache_creation_input_tokens,
+          cache_read_input_tokens: parsed.usage?.cache_read_input_tokens,
+          output_tokens: parsed.usage?.output_tokens,
+          cost_usd: parsed.total_cost_usd,
+        };
+        return { response: String(parsed.result ?? "").trim(), stats };
+      } catch {
+        // JSON parse failed — fall back to treating output as plain text
+        return { response: output.trim() };
+      }
     } catch (e: any) {
       lastError = e?.stderr?.toString()?.trim() || String(e);
     }
@@ -225,7 +286,7 @@ function evaluateSide(
   }
 
   const html = fs.readFileSync(pageFile, "utf-8");
-  const { response, error } = runClaudeP(buildEvalPrompt(html, task), model);
+  const { response, stats, error } = runClaudeP(buildEvalPrompt(html, task), model);
 
   if (error) {
     return { llm_response: "", passed: false, error };
@@ -234,6 +295,8 @@ function evaluateSide(
   return {
     llm_response: response.trim(),
     passed: checkMatch(response, task.expected, task.match_type),
+    page_bytes: Buffer.byteLength(html, "utf-8"),
+    stats,
   };
 }
 
@@ -319,6 +382,11 @@ async function main() {
   const score = annotatedPassed / tasks.length;
   const delta = baselineDir ? annotatedPassed - baselinePassed : null;
 
+  const annotatedCosts = summarizeCosts(results.map((r) => r.annotated));
+  const baselineCosts = baselineDir
+    ? summarizeCosts(results.map((r) => r.baseline))
+    : undefined;
+
   const runResult: RunResult = {
     timestamp,
     harness_version: HARNESS_VERSION,
@@ -331,6 +399,7 @@ async function main() {
     baseline_passed: baselineDir ? baselinePassed : null,
     delta,
     score,
+    cost_summary: { annotated: annotatedCosts, baseline: baselineCosts },
     results,
   };
 
@@ -358,6 +427,25 @@ async function main() {
       (baselineDir ? `  /  ${b}/${catResults.length}` : "")
     );
   }
+  const fmtSide = (label: string, c: SideCostSummary) =>
+    console.log(
+      `  ${label.padEnd(10)} page ~${(c.mean_page_bytes / 1024).toFixed(1)}KB | ` +
+      `latency ~${(c.mean_duration_ms / 1000).toFixed(1)}s/task | ` +
+      `prompt ${c.total_prompt_tokens} tok | output ${c.total_output_tokens} tok | ` +
+      `$${c.total_cost_usd.toFixed(2)}`
+    );
+  console.log(`\nCost / latency (means per task, totals per run):`);
+  fmtSide("annotated", annotatedCosts);
+  if (baselineCosts) {
+    fmtSide("baseline", baselineCosts);
+    if (baselineCosts.mean_page_bytes > 0) {
+      const overhead =
+        ((annotatedCosts.mean_page_bytes - baselineCosts.mean_page_bytes) /
+          baselineCosts.mean_page_bytes) * 100;
+      console.log(`  annotation page-weight overhead: ${overhead >= 0 ? "+" : ""}${overhead.toFixed(1)}%`);
+    }
+  }
+
   console.log(`\nResults written to: ${outFile}`);
   console.log(`${"=".repeat(60)}\n`);
 

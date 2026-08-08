@@ -35,8 +35,9 @@ const DEFAULT_MODEL = "claude-sonnet-5";
 const DISALLOWED_TOOLS =
   "Read,Glob,Grep,Bash,Write,Edit,NotebookEdit,WebFetch,WebSearch,Task,TodoWrite";
 
-// Generous timeout — annotating a full page can take a moment
-const CLAUDE_TIMEOUT_MS = 120_000;
+// Generous timeout — annotating a full page (v2 pages are up to ~40KB and the
+// model must return the complete annotated HTML) can take several minutes.
+const CLAUDE_TIMEOUT_MS = 480_000;
 
 let SCRATCH_DIR: string | null = null;
 
@@ -107,9 +108,12 @@ function inferPageType(filename: string): string {
   if (filename.includes("corporate")) return "corporate";
   if (filename.includes("blog")) return "blog";
   if (filename.includes("api-docs")) return "api_docs";
+  if (filename.includes("changelog")) return "changelog";
   if (filename.includes("spec")) return "spec";
   if (filename.includes("support")) return "support";
   if (filename.includes("news")) return "news";
+  if (filename.includes("ecommerce") || filename.includes("category")) return "ecommerce";
+  if (filename.includes("event")) return "events";
   return "unknown";
 }
 

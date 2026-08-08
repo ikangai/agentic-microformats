@@ -3,12 +3,18 @@
 Read this entire file before doing anything else. Then execute the experiment
 loop described below. Do not ask for permission at any step — just run.
 
-**STOP CONDITION (read first):** the original 15-task suite is **saturated** —
-the unannotated baseline scores 15/15 (recorded 2026-03, reconfirmed under
-harness v2). On a saturated suite the loop cannot demonstrate annotation value.
-If `benchmark/results/latest.json` shows `baseline_passed == total_tasks`, do
-NOT iterate on the strategy — report the saturation and stop. The loop below
-only applies once the suite contains tasks the baseline fails.
+**STOP CONDITION (read first):** BOTH task suites (`tasks.json` and
+`tasks-v2.json`) are **saturated for accuracy** — the unannotated baseline
+scores 14–15/15 at both the sonnet and haiku tiers (see the 2026-08-08 entries
+in `benchmark/experiment-log.md`). On a saturated suite the loop cannot
+demonstrate annotation accuracy value; remaining single-task failures are
+run-to-run noise. Do NOT iterate on the strategy to chase accuracy — report the
+saturation and stop. Meaningful next work is a different task format
+(deterministic extraction via `packages/agentic-microformats` + small-model
+answering, action execution against the demo, multi-page workflows), which is a
+maintainer decision, not a loop action. The evaluator's cost table
+(latency/tokens per side) is the one metric still worth watching on these
+suites.
 
 ---
 

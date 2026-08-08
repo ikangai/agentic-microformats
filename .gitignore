@@ -4,3 +4,4 @@ dist/
 .DS_Store
 benchmark/pages-annotated/
 benchmark/results/
+benchmark/pages-v2-annotated/

@@ -37,14 +37,26 @@ Both `annotator.ts` and `evaluator.ts` call `claude -p` with:
 ```
 benchmark/
 ├── annotation-strategy.md          # THE editable file — agent improves this
-├── tasks.json                      # 15 benchmark tasks with expected answers
+├── tasks.json                      # Suite v1: 15 tasks on small pages (3–5 KB)
+├── tasks-v2.json                   # Suite v2: 15 harder tasks on large pages (10–41 KB)
 ├── experiment-log.md               # Running record of all experiments
 ├── annotator.ts                    # Applies strategy to pages
-├── evaluator.ts                    # Scores annotated AND baseline pages per run
-├── pages/                          # 6 unannotated benchmark pages (never modified)
-├── pages-annotated/                # Annotated pages (generated, gitignored)
+├── evaluator.ts                    # Scores annotated AND baseline pages per run,
+│                                   #   records latency/tokens/cost per call
+├── pages/                          # Suite v1 unannotated pages (never modified)
+├── pages-v2/                       # Suite v2 unannotated pages (never modified)
+├── pages-annotated/                # Generated (gitignored)
+├── pages-v2-annotated/             # Generated (gitignored)
 └── results/                        # Evaluation results (generated, gitignored)
 ```
+
+**Suite v2** targets aggregation over many items, stale-data disambiguation,
+endpoints buried in inline JS, locale/timezone normalization, and temporal
+reasoning. Headline result (2026-08-08): both suites are **accuracy-saturated
+at both model tiers** (sonnet and haiku answer from raw HTML at 14–15/15 by
+spending output tokens); the measurable annotation effect at the frontier tier
+is **effort** — −17 % latency and −14 % output tokens, against +54 % page
+weight. Full numbers in `experiment-log.md`.
 
 ## Setup
 

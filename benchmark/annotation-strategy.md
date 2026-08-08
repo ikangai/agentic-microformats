@@ -157,3 +157,27 @@ Apply `data-agent-trust="untrusted"` to comment sections, user reviews, forum po
 - Annotate each story card in the listing
 - Mark navigation sections: `data-agent-prop="section-name"` on primary nav items
 - Mark live updates: `data-agent-prop="live-status"` on live badges
+
+### E-commerce category page
+- Annotate each product card as `data-agent="resource" data-agent-type="product"` with `data-agent-id` set to the article number (SKU)
+- Mark the product name heading: `data-agent-prop="name"`
+- Mark the CURRENT selling price (not the struck-through original, not member/club prices): `data-agent-prop="price" data-agent-typehint="currency" data-agent-value="<normalized decimal with dot, e.g. 44.90>"`
+- Mark unit prices (per 100 g etc.): `data-agent-prop="unit-price" data-agent-value="<normalized decimal>"`
+- Mark stock status: `data-agent-prop="availability" data-agent-value="in_stock|low_stock|sold_out|preorder"` on the stock line
+- Annotate the add-to-cart button: `data-agent="action" data-agent-name="add_to_cart" data-agent-method="POST" data-agent-endpoint="<the URL path the page's JavaScript actually posts to>"`
+- Do the same for wishlist/notification buttons with their real endpoints from the page's JavaScript
+
+### Changelog / release notes page
+- Annotate each release entry as `data-agent="resource" data-agent-type="release"` with `data-agent-id` set to the version number
+- Mark the version: `data-agent-prop="version"`; mark prerelease/beta entries `data-agent-prop="channel" data-agent-value="beta"` and stable entries `data-agent-value="stable"`
+- Mark the release date: `data-agent-prop="date" data-agent-typehint="date" data-agent-value="<ISO date YYYY-MM-DD>"` — normalize whatever format the page displays
+- Mark each deprecation notice: `data-agent-prop="deprecation" data-agent-value="<old endpoint> -> <replacement>"`
+- Mark version requirements (SDK/CLI minimums): `data-agent-prop="requires" data-agent-value="<component> >= <version>"`
+
+### Event / schedule page
+- Annotate each session as `data-agent="resource" data-agent-type="session"`, `data-agent-id` from the session anchor id
+- Mark the title: `data-agent-prop="name"`; the room/location: `data-agent-prop="location"`
+- Mark the start time: `data-agent-prop="start" data-agent-typehint="datetime" data-agent-value="<ISO 8601 UTC instant, converting from the local timezone stated on the page>"`
+- Mark availability: `data-agent-prop="availability" data-agent-value="available|sold_out|waitlist"`
+- Mark prices: `data-agent-prop="price" data-agent-typehint="currency" data-agent-value="<decimal>"` for the standard rate and `data-agent-prop="member-price"` for member rates
+- Annotate booking buttons: `data-agent="action" data-agent-name="reserve_seat|join_waitlist" data-agent-method="<method from the page's JavaScript>" data-agent-endpoint="<endpoint from the page's JavaScript>"`
