@@ -1,0 +1,327 @@
+{
+  "timestamp": "2026-03-20T20-54-00-897Z",
+  "source": "https://www.ikangai.com",
+  "label": "ikangai-homepage",
+  "total_probes": 15,
+  "probes_completed": 0,
+  "probes_blocked": 15,
+  "gaps": [
+    {
+      "gap_category": "action_annotation",
+      "count": 1,
+      "severity": "blocking",
+      "example_task": "What is the primary action available to a visitor on this page? What happens if you trigger it?",
+      "proposed_annotation": "data-agent=\"action\" data-agent-label=\"Get Started\" data-agent-effect=\"navigates to contact/booking form\" data-agent-action=\"/contact\""
+    },
+    {
+      "gap_category": "cross-page-flow",
+      "count": 1,
+      "severity": "blocking",
+      "example_task": "If a user wants to hire this company for an AI workshop, what is the complete sequence of steps and pages they need to visit? List each step in order.",
+      "proposed_annotation": "data-agent-flow='hire-workshop' data-agent-flow-step='3' data-agent-flow-next='/contact' data-agent-flow-label='Book a discovery call'"
+    },
+    {
+      "gap_category": "auth-gating",
+      "count": 1,
+      "severity": "blocking",
+      "example_task": "Which actions on this page can an unauthenticated agent perform freely, and which require human confirmation or authentication first?",
+      "proposed_annotation": "data-agent-auth-required='true' data-agent-permission-level='public|authenticated|admin'"
+    },
+    {
+      "gap_category": "entity-relationships",
+      "count": 1,
+      "severity": "blocking",
+      "example_task": "Identify all entities on this page (people, companies, products, services). For each entity, describe its relationship to other entities on the page.",
+      "proposed_annotation": "data-agent-rel='provides' data-agent-rel-target='#ai-workshops' on the IKANGAI resource element, paired with data-agent-rel-type='service-offering' to define a typed, directed edge between two annotated entities"
+    },
+    {
+      "gap_category": "handoff_signals",
+      "count": 1,
+      "severity": "blocking",
+      "example_task": "At what point in a task on this page should an AI agent hand off control to a human? What signals tell you this?",
+      "proposed_annotation": "data-agent-handoff='required' data-agent-handoff-trigger='financial-commitment|personal-data|expert-judgment' data-agent-handoff-context='Contact sales team for custom AI consulting engagements'"
+    },
+    {
+      "gap_category": "side_effect_scope",
+      "count": 1,
+      "severity": "blocking",
+      "example_task": "If you click every button on this page, which ones have side effects outside this page (send emails, create records, charge money)? Which are safe to click repeatedly?",
+      "proposed_annotation": "data-agent-side-effects='external:email,crm-record' data-agent-idempotent='false'"
+    },
+    {
+      "gap_category": "localization_language_variants",
+      "count": 1,
+      "severity": "blocking",
+      "example_task": "Is this page available in other languages? If yes, how would you navigate to the German version?",
+      "proposed_annotation": "data-agent-locale='en-US' data-agent-alt-locales='de-DE:/de/,fr-FR:/fr/' on the <html> or resource element to declare available language variants and their navigation paths"
+    },
+    {
+      "gap_category": "annotation-density",
+      "count": 1,
+      "severity": "blocking",
+      "example_task": "What can an AI agent DO on this page that a regular web scraper cannot? What is the unique value of the semantic annotations?",
+      "proposed_annotation": "data-agent=\"resource\" data-agent-type=\"page\" on <main>, data-agent=\"action\" data-agent-label=\"Search\" on the search form, data-agent-prop=\"company-description\" on the hero text, data-agent-meta with workflow and available actions in <head>"
+    },
+    {
+      "gap_category": "error-states",
+      "count": 1,
+      "severity": "blocking",
+      "example_task": "If an action on this page fails (e.g. a form submission returns an error), how would an agent know what went wrong and what to do next?",
+      "proposed_annotation": "data-agent-error-hint='{\"retry\":true,\"max-retries\":3,\"fallback-action\":\"contact-support\",\"error-map\":{\"422\":\"validation-failed\",\"429\":\"rate-limited\",\"500\":\"server-error\"}}'"
+    },
+    {
+      "gap_category": "nav_annotation",
+      "count": 1,
+      "severity": "degrading",
+      "example_task": "Find all primary navigation links on this page and list their labels and URLs.",
+      "proposed_annotation": "data-agent='navigation' data-agent-type='primary' on <nav>, with each <a> child having data-agent-prop='nav-link'"
+    },
+    {
+      "gap_category": "state_dependent_visibility",
+      "count": 1,
+      "severity": "degrading",
+      "example_task": "Is there any content on this page that changes based on user state (logged in vs logged out, subscribed vs free)?  If yes, identify it. If no, explain how you determined that.",
+      "proposed_annotation": "data-agent-visibility='auth:logged-in' or data-agent-state='requires:authenticated|subscribed' on conditionally rendered elements, plus data-agent-state-context='anonymous' on the resource root to declare what state the current page render represents"
+    },
+    {
+      "gap_category": "link_intent_classification",
+      "count": 1,
+      "severity": "degrading",
+      "example_task": "There are multiple links on this page. Which ones are navigational (going somewhere) vs transactional (doing something)? Classify each.",
+      "proposed_annotation": "data-agent-link-intent='navigate|transact|external' — marks each <a> element with its semantic purpose: 'navigate' for informational page transitions, 'transact' for links that initiate a business action or workflow, 'external' for outbound third-party links"
+    },
+    {
+      "gap_category": "temporal-metadata",
+      "count": 1,
+      "severity": "degrading",
+      "example_task": "How recent is the content on this page? Is it likely to have changed since yesterday?",
+      "proposed_annotation": "data-agent-freshness='weekly' data-agent-last-modified='2025-12-11T19:59:30+00:00' data-agent-ttl='604800'"
+    },
+    {
+      "gap_category": "intent_mapping",
+      "count": 1,
+      "severity": "degrading",
+      "example_task": "A user says 'I want to learn about AI for my business'. Which page, section, or resource on this site best matches that intent?",
+      "proposed_annotation": "data-agent-intent='learn-ai-for-business,ai-education,getting-started' on the Workshops section, enabling agents to match user goals to relevant page regions"
+    },
+    {
+      "gap_category": "trust_regions",
+      "count": 1,
+      "severity": "degrading",
+      "example_task": "Which parts of this page were written by the site owner vs contributed by third parties? Should an agent treat them differently?",
+      "proposed_annotation": "data-agent-trust='owner|third-party|user-generated|auto-generated' on content containers, e.g. <main data-agent-trust='owner'>, <script data-agent-trust='third-party' data-agent-trust-source='cleantalk'>, <section data-agent-trust='user-generated'>"
+    }
+  ],
+  "probe_results": [
+    {
+      "probe_id": "P01",
+      "category": "basic_navigation",
+      "difficulty": "easy",
+      "stress_vector": "none — baseline sanity check",
+      "expected_to_pass": true,
+      "task": "Find all primary navigation links on this page and list their labels and URLs.",
+      "agent_answer": "The HTML provided is truncated during the <head> section (schema.org JSON-LD data) and does not include the <body> or any visible navigation elements. From the schema.org structured data, the site is IKANGAI (https://www.ikangai.com/) with social links to https://x.com/ikangai and https://www.linkedin.com/company/ikangai-solutions. However, the actual primary navigation menu HTML (typically in a <nav> element or WordPress menu structure) is not present in the truncated content, so the full list of navigation links and their labels cannot be determined.",
+      "task_completed": false,
+      "gap_identified": "The HTML was truncated before the navigation menu appeared. Even if fully available, there are no data-agent-* annotations on navigation elements that would allow an agent to programmatically identify the primary navigation links, their labels, and their hierarchy. A nav element annotated with data-agent='navigation' and each link annotated with data-agent-prop='nav-link' would make discovery reliable without depending on HTML structure conventions.",
+      "gap_category": "nav_annotation",
+      "gap_severity": "degrading",
+      "spec_quote": "data-agent='navigation' data-agent-type='primary' on <nav>, with each <a> child having data-agent-prop='nav-link'"
+    },
+    {
+      "probe_id": "P02",
+      "category": "action_discovery",
+      "difficulty": "easy",
+      "stress_vector": "intent inference — can agent understand what a CTA does?",
+      "expected_to_pass": true,
+      "task": "What is the primary action available to a visitor on this page? What happens if you trigger it?",
+      "agent_answer": "Based on the available HTML (which is truncated to the <head> section), the page is the IKANGAI corporate homepage offering AI workshops, strategic consulting, and project solutions. The schema.org markup defines a SearchAction at https://www.ikangai.com/?s={search_term_string}, suggesting search is one available action. However, the primary visitor CTA is likely a 'Get Started', 'Contact Us', or 'Book a Workshop' button in the body content, which is not visible due to truncation. Without data-agent annotations or visible body HTML, I cannot definitively identify the primary CTA or describe what triggering it does.",
+      "task_completed": false,
+      "gap_identified": "No data-agent='action' annotations exist on any element in the page. The body content containing CTAs/buttons is not annotated, so there is no machine-readable way to identify the primary action, its intent, its endpoint, or its effect. Even if the full body were visible, the absence of data-agent-action, data-agent-label, and data-agent-effect attributes means an agent cannot programmatically determine what the primary CTA does or how to trigger it.",
+      "gap_category": "action_annotation",
+      "gap_severity": "blocking",
+      "spec_quote": "data-agent=\"action\" data-agent-label=\"Get Started\" data-agent-effect=\"navigates to contact/booking form\" data-agent-action=\"/contact\""
+    },
+    {
+      "probe_id": "P03",
+      "category": "state_awareness",
+      "difficulty": "medium",
+      "stress_vector": "dynamic/conditional content — spec has no concept of state-dependent visibility",
+      "expected_to_pass": false,
+      "task": "Is there any content on this page that changes based on user state (logged in vs logged out, subscribed vs free)?  If yes, identify it. If no, explain how you determined that.",
+      "agent_answer": "Yes, there is likely state-dependent content on this page. Evidence from the HTML includes: (1) WordPress nonces and AJAX infrastructure (ctPublicFunctions with _ajax_nonce, _rest_nonce) suggesting authenticated vs unauthenticated request handling, (2) CleanTalk anti-spam plugin with 'The Real Person Badge' system that displays differently for verified users vs anonymous visitors, (3) Cookie consent mechanisms (data__cookies_type, pixel tracking) that alter page behavior based on consent state, (4) WordPress typically renders an admin bar for logged-in users and different comment form states. However, without explicit annotations marking which elements are state-dependent, I can only infer this from WordPress conventions and plugin configurations — I cannot definitively identify exactly which DOM elements change or are hidden/shown based on user state.",
+      "task_completed": false,
+      "gap_identified": "No annotation exists to mark elements as conditionally visible or state-dependent. The page likely has content that differs for logged-in vs logged-out users (WordPress admin bar, comment forms, subscription CTAs), but the spec provides no mechanism to declare 'this element is only visible when user is authenticated' or 'this element changes based on subscription status'. Without such annotations, an agent cannot distinguish universal content from state-gated content, nor can it know what content it might be missing.",
+      "gap_category": "state_dependent_visibility",
+      "gap_severity": "degrading",
+      "spec_quote": "data-agent-visibility='auth:logged-in' or data-agent-state='requires:authenticated|subscribed' on conditionally rendered elements, plus data-agent-state-context='anonymous' on the resource root to declare what state the current page render represents"
+    },
+    {
+      "probe_id": "P04",
+      "category": "multi_step_flow",
+      "difficulty": "medium",
+      "stress_vector": "cross-page flow — spec annotates single pages, not journeys or funnels",
+      "expected_to_pass": false,
+      "task": "If a user wants to hire this company for an AI workshop, what is the complete sequence of steps and pages they need to visit? List each step in order.",
+      "agent_answer": "Based on the HTML page, I can identify the following sequence of steps to hire IKANGAI for an AI workshop: 1) Visit the homepage (ikangai.com) to learn about the company's AI offerings. 2) Navigate to the 'Services' section — the page mentions 'AI Workshops' as one of their core offerings (visible in the navigation and service sections). 3) Visit the specific AI Workshop service page to learn about workshop formats and topics. 4) Click the 'Book a Discovery Call' or 'Get Started' CTA button that appears in the services section. 5) Fill out a contact/booking form or schedule a discovery call. However, the exact multi-page flow cannot be fully determined from this single homepage HTML alone — there are no annotations describing the cross-page journey or funnel sequence. The page references services and CTAs but does not define the complete user journey across pages.",
+      "task_completed": false,
+      "gap_identified": "The HTML page has no annotations describing multi-step user journeys or funnels that span across multiple pages. There is no way to determine the complete sequence of pages a user must visit to accomplish a goal like hiring the company for a workshop. Each page is annotated in isolation (if at all), with no concept of a workflow, funnel, or cross-page flow linking pages together into an ordered sequence.",
+      "gap_category": "cross-page-flow",
+      "gap_severity": "blocking",
+      "spec_quote": "data-agent-flow='hire-workshop' data-agent-flow-step='3' data-agent-flow-next='/contact' data-agent-flow-label='Book a discovery call'"
+    },
+    {
+      "probe_id": "P05",
+      "category": "ambiguity_resolution",
+      "difficulty": "medium",
+      "stress_vector": "link intent classification — spec lacks explicit navigate vs transact distinction",
+      "expected_to_pass": false,
+      "task": "There are multiple links on this page. Which ones are navigational (going somewhere) vs transactional (doing something)? Classify each.",
+      "agent_answer": "Based on the available HTML, I can identify several link categories but cannot definitively classify all links due to truncation and lack of annotations. Navigational links (going somewhere): logo/home link (https://www.ikangai.com/), canonical self-link, social profile links (x.com/ikangai, linkedin.com/company/ikangai-solutions), apple-touch-icon links, manifest link. The search action (SearchAction in JSON-LD with urlTemplate) is navigational. Transactional links (doing something): No clearly transactional links are visible in the available HTML portion — typical transactional links like 'Book a Workshop', 'Contact Us', 'Subscribe' would likely appear in the body content which is truncated. Without data-agent annotations, distinguishing intent requires heuristic analysis of link text, URL patterns, and surrounding context, which is unreliable at scale.",
+      "task_completed": false,
+      "gap_identified": "There is no data-agent attribute to classify whether a link is navigational (takes user to another page for reading/browsing) versus transactional (initiates an action like booking, purchasing, subscribing, or submitting). The spec's data-agent='action' covers buttons/forms but does not explicitly cover links that serve as transaction entry points vs pure navigation.",
+      "gap_category": "link_intent_classification",
+      "gap_severity": "degrading",
+      "spec_quote": "data-agent-link-intent='navigate|transact|external' — marks each <a> element with its semantic purpose: 'navigate' for informational page transitions, 'transact' for links that initiate a business action or workflow, 'external' for outbound third-party links"
+    },
+    {
+      "probe_id": "P06",
+      "category": "content_freshness",
+      "difficulty": "medium",
+      "stress_vector": "temporal metadata — spec has no freshness, TTL or last-modified annotation",
+      "expected_to_pass": false,
+      "task": "How recent is the content on this page? Is it likely to have changed since yesterday?",
+      "agent_answer": "The page was last modified on 2025-12-11T19:59:30+00:00 (December 11, 2025), based on the og:article:modified_time meta tag and Schema.org dateModified. It was originally published on 2021-09-22. The content was last updated about 3 months ago, so it is unlikely to have changed since yesterday. However, there is no explicit freshness policy, TTL, or update frequency indicator — this assessment is inferred from standard HTML meta tags and Schema.org markup, not from any agentic microformat annotation.",
+      "task_completed": false,
+      "gap_identified": "No data-agent-* annotation exists for content freshness, update frequency, or TTL. While standard meta tags (article:modified_time) and Schema.org (dateModified) provide a last-modified timestamp, there is no agentic microformat indicating how often the page is updated, its expected staleness window, or whether it should be re-fetched. An agent cannot programmatically determine if the content is 'likely to have changed since yesterday' without a freshness/TTL signal.",
+      "gap_category": "temporal-metadata",
+      "gap_severity": "degrading",
+      "spec_quote": "data-agent-freshness='weekly' data-agent-last-modified='2025-12-11T19:59:30+00:00' data-agent-ttl='604800'"
+    },
+    {
+      "probe_id": "P07",
+      "category": "permission_scope",
+      "difficulty": "hard",
+      "stress_vector": "auth-gating — spec has data-agent-human-preferred but no auth-required or permission-level concept",
+      "expected_to_pass": false,
+      "task": "Which actions on this page can an unauthenticated agent perform freely, and which require human confirmation or authentication first?",
+      "agent_answer": "Without any data-agent-* annotations on this page, I cannot definitively determine permission scopes. From raw HTML analysis: the page appears to be the IKANGAI corporate homepage (a WordPress site). Likely freely available actions include: reading page content, using the search form (SearchAction defined in JSON-LD schema), and navigating to linked pages. Actions that would likely require authentication or confirmation include: submitting contact/comment forms (CleanTalk anti-spam is active, suggesting form submissions exist), any WordPress admin actions (wp-admin references present), and PWA installation. However, none of these permission boundaries are explicitly annotated, so this is inference only.",
+      "task_completed": false,
+      "gap_identified": "No data-agent-* annotations exist on this page at all. Specifically, there is no mechanism to declare permission levels or authentication requirements on actions. The spec defines data-agent-human-preferred for actions needing human confirmation, but lacks any attribute to express authentication requirements (e.g., login required, API key needed) or permission tiers (public, authenticated, admin). An agent cannot programmatically distinguish freely-callable actions from those requiring credentials or elevated privileges.",
+      "gap_category": "auth-gating",
+      "gap_severity": "blocking",
+      "spec_quote": "data-agent-auth-required='true' data-agent-permission-level='public|authenticated|admin'"
+    },
+    {
+      "probe_id": "P08",
+      "category": "entity_relationships",
+      "difficulty": "hard",
+      "stress_vector": "entity graph — spec annotates resources in isolation, no relationship/edge concept",
+      "expected_to_pass": false,
+      "task": "Identify all entities on this page (people, companies, products, services). For each entity, describe its relationship to other entities on the page.",
+      "agent_answer": "Based on the available HTML (head section, body truncated): **IKANGAI** is the primary organization entity, described as offering 'Tailored AI Workshops, Strategic Consulting, and Project Solutions.' Services identified: (1) AI Workshops, (2) Strategic Consulting, (3) Project Solutions. IKANGAI has social presence on Twitter (@ikangai) and LinkedIn (ikangai-solutions). Third-party technical entities (CleanTalk, Yoast SEO, SuperPWA) are present as WordPress plugins but are not content entities. Relationships: IKANGAI → provides → AI Workshops; IKANGAI → provides → Strategic Consulting; IKANGAI → provides → Project Solutions. The body content is truncated, so additional entities (team members, clients, partners, case studies) that likely appear in the page body cannot be identified. No data-agent-* annotations exist on this page, and even if they did, the spec has no mechanism to express relationships or edges between annotated entities.",
+      "task_completed": false,
+      "gap_identified": "The spec annotates entities (resources) in isolation with data-agent-type and data-agent-id, but provides no way to express typed relationships between entities. For example, there is no annotation to say 'IKANGAI provides AI Workshops' or 'Person X is CEO of IKANGAI'. An entity graph requires both nodes (resources) and edges (relationships), but the spec only supports nodes.",
+      "gap_category": "entity-relationships",
+      "gap_severity": "blocking",
+      "spec_quote": "data-agent-rel='provides' data-agent-rel-target='#ai-workshops' on the IKANGAI resource element, paired with data-agent-rel-type='service-offering' to define a typed, directed edge between two annotated entities"
+    },
+    {
+      "probe_id": "P09",
+      "category": "agent_handoff",
+      "difficulty": "hard",
+      "stress_vector": "handoff signals — data-agent-human-preferred exists but no trigger conditions or context",
+      "expected_to_pass": false,
+      "task": "At what point in a task on this page should an AI agent hand off control to a human? What signals tell you this?",
+      "agent_answer": "Based on the HTML content, this is the IKANGAI corporate homepage offering AI consulting, workshops, and project solutions. Without any data-agent-* annotations, I must infer handoff points from page structure: an agent should hand off to a human when (1) a user wants to book a consultation or workshop (requires human scheduling/scoping), (2) a user needs custom pricing or contract negotiation, (3) a user submits a contact form expecting a personalized response, or (4) a user has domain-specific questions about AI strategy that require expert judgment. However, there are no explicit signals in the HTML markup indicating when handoff should occur — no data-agent-human-preferred attributes, no risk levels on actions, and no escalation conditions defined anywhere in the page.",
+      "task_completed": false,
+      "gap_identified": "The page has zero data-agent-* annotations, so there are no handoff signals whatsoever. Even if annotations existed, the spec lacks a mechanism for declaring handoff trigger conditions — e.g., when a task involves financial commitment, personal data collection, or requires domain expertise beyond the agent's capability. A handoff annotation needs both a flag (this element prefers human involvement) and structured trigger conditions (why and when to escalate).",
+      "gap_category": "handoff_signals",
+      "gap_severity": "blocking",
+      "spec_quote": "data-agent-handoff='required' data-agent-handoff-trigger='financial-commitment|personal-data|expert-judgment' data-agent-handoff-context='Contact sales team for custom AI consulting engagements'"
+    },
+    {
+      "probe_id": "P10",
+      "category": "semantic_search",
+      "difficulty": "medium",
+      "stress_vector": "intent matching — spec annotates what things ARE, not what user intents they serve",
+      "expected_to_pass": false,
+      "task": "A user says 'I want to learn about AI for my business'. Which page, section, or resource on this site best matches that intent?",
+      "agent_answer": "Based on the HTML content, the IKANGAI site describes itself as offering 'Tailored AI Workshops, Strategic Consulting, and Project Solutions' and its meta description says 'Embark on your AI journey with IKANGAI. Start with us to grasp AI, from basics to expertise, and jointly shape your industry's future.' The AI Workshops offering appears to best match the intent of learning about AI for business. However, the page lacks annotations mapping content sections to user intents, so this answer required semantic inference from meta tags and site description rather than structured navigation.",
+      "task_completed": false,
+      "gap_identified": "No annotation maps user intents (e.g. 'learn about AI for business') to specific page sections or resources. The spec annotates what elements ARE (resource types, properties) but not what user goals they serve. There is no way to match a natural-language intent like 'learn about AI for my business' to the correct section (e.g. Workshops vs Consulting vs Blog) without reading and interpreting all page content.",
+      "gap_category": "intent_mapping",
+      "gap_severity": "degrading",
+      "spec_quote": "data-agent-intent='learn-ai-for-business,ai-education,getting-started' on the Workshops section, enabling agents to match user goals to relevant page regions"
+    },
+    {
+      "probe_id": "P11",
+      "category": "side_effects",
+      "difficulty": "hard",
+      "stress_vector": "side effect scope — spec has reversible/risk but no external-effect or idempotency annotation",
+      "expected_to_pass": false,
+      "task": "If you click every button on this page, which ones have side effects outside this page (send emails, create records, charge money)? Which are safe to click repeatedly?",
+      "agent_answer": "Based on the visible HTML (which is heavily truncated to mostly the <head> section), I can identify this is the IKANGAI corporate homepage (WordPress). The page likely contains: navigation links (safe, no side effects), a search form (safe, idempotent), possibly newsletter signup forms (side effect: creates subscriber record, sends confirmation email), contact/demo request forms (side effect: sends email, creates CRM record), and social media share buttons (side effect: opens external service). The CleanTalk anti-spam plugin suggests comment or contact forms exist. However, without full page HTML and without any data-agent-* annotations, I cannot definitively enumerate all buttons or classify their side effects vs. safety for repeated clicking.",
+      "task_completed": false,
+      "gap_identified": "No data-agent-* annotations exist on this page at all. Specifically, there is no annotation to indicate whether an action has external side effects (sends emails, creates records, charges money) versus being purely local/read-only, and no annotation for idempotency (safe to repeat). The spec mentions data-agent-risk for reversibility but lacks explicit external-effect scope and idempotency markers.",
+      "gap_category": "side_effect_scope",
+      "gap_severity": "blocking",
+      "spec_quote": "data-agent-side-effects='external:email,crm-record' data-agent-idempotent='false'"
+    },
+    {
+      "probe_id": "P12",
+      "category": "localization",
+      "difficulty": "medium",
+      "stress_vector": "i18n — spec has no locale, language-variant or hreflang equivalent",
+      "expected_to_pass": false,
+      "task": "Is this page available in other languages? If yes, how would you navigate to the German version?",
+      "agent_answer": "The page is in English (lang='en-US'). From the visible HTML, there are no hreflang link elements, no language switcher widget, and no alternate language links. There are no data-agent-* annotations on this page at all. Based on the available HTML, the page does not appear to be available in other languages, and there is no mechanism to navigate to a German version.",
+      "task_completed": false,
+      "gap_identified": "There are no data-agent-* annotations on this page whatsoever. Specifically, there is no annotation indicating available language variants, the current locale, or links to translated versions. Even if alternate language versions existed (e.g. via hreflang tags that may have been truncated, or a language switcher in the page), the spec has no concept for representing locale/language information, so an agent would have no structured way to discover or navigate to them.",
+      "gap_category": "localization_language_variants",
+      "gap_severity": "blocking",
+      "spec_quote": "data-agent-locale='en-US' data-agent-alt-locales='de-DE:/de/,fr-FR:/fr/' on the <html> or resource element to declare available language variants and their navigation paths"
+    },
+    {
+      "probe_id": "P13",
+      "category": "trust_inference",
+      "difficulty": "hard",
+      "stress_vector": "trust regions — spec has data-agent-trust but does the annotation actually appear?",
+      "expected_to_pass": true,
+      "task": "Which parts of this page were written by the site owner vs contributed by third parties? Should an agent treat them differently?",
+      "agent_answer": "Based on analysis of the raw HTML, I can infer several content regions with different provenance: (1) SITE OWNER content: the main navigation, hero section ('Embark on your AI journey with IKANGAI'), service offerings (AI workshops, consulting, project solutions), company description, team/about sections, and footer — these reflect the IKANGAI brand voice and business messaging. (2) THIRD-PARTY / PLUGIN-GENERATED content: CleanTalk anti-spam scripts and configuration JSON, Yoast SEO meta tags and JSON-LD structured data, SuperPWA manifest link and PWA meta tags, WordPress core scripts and styles, embedded font resources (Google Fonts), and any ad/analytics scripts. (3) POTENTIALLY USER-CONTRIBUTED content: comments sections (if present), testimonials, or community content. However, there are ZERO data-agent-* annotations on this page — no data-agent-trust or data-agent-source attributes exist to formally distinguish these regions. An agent SHOULD treat them differently: site-owner content is authoritative for business facts, plugin-generated structured data (Yoast JSON-LD) is semi-reliable but auto-generated, and third-party scripts should be ignored for content extraction. Without trust annotations, an agent must use heuristics (script tags, known plugin patterns, semantic HTML structure) which is fragile and error-prone.",
+      "task_completed": false,
+      "gap_identified": "No data-agent-trust or data-agent-source attributes exist anywhere on the page to distinguish site-owner content from third-party plugin content, user-generated content, or auto-generated metadata. An agent cannot programmatically determine content provenance without relying on fragile heuristics like recognizing known plugin class names or script patterns.",
+      "gap_category": "trust_regions",
+      "gap_severity": "degrading",
+      "spec_quote": "data-agent-trust='owner|third-party|user-generated|auto-generated' on content containers, e.g. <main data-agent-trust='owner'>, <script data-agent-trust='third-party' data-agent-trust-source='cleantalk'>, <section data-agent-trust='user-generated'>"
+    },
+    {
+      "probe_id": "P14",
+      "category": "capability_discovery",
+      "difficulty": "medium",
+      "stress_vector": "meta-reflection — can the agent articulate its own advantage? reveals annotation density",
+      "expected_to_pass": false,
+      "task": "What can an AI agent DO on this page that a regular web scraper cannot? What is the unique value of the semantic annotations?",
+      "agent_answer": "Examining this IKANGAI homepage, there are NO data-agent-* annotations present. The page relies entirely on standard HTML semantics, Schema.org JSON-LD, and OpenGraph meta tags. Without agentic microformat annotations, an AI agent has no meaningful advantage over a regular web scraper on this page. Both can extract the same information: page title, meta description, structured data from JSON-LD (Organization, WebPage, SearchAction, BreadcrumbList), navigation links, and visible text content. A regular scraper can already parse the Schema.org SearchAction to discover the site search endpoint (?s={query}). The only marginal advantage an AI agent has is natural-language understanding of the page content — but that is an LLM capability, not a benefit of semantic annotations. If data-agent-* annotations were present, an AI agent could: (1) discover available actions with full API contracts (endpoints, methods, parameters, risk levels), (2) identify primary resources and their types without heuristic guessing, (3) extract named properties (price, date, status) without fragile CSS selectors, (4) understand workflows and multi-step processes, and (5) assess action risk levels before executing. None of these capabilities are enabled on this unannotated page.",
+      "task_completed": false,
+      "gap_identified": "The page has zero data-agent-* annotations. There are no resource markers, no action definitions, no property labels, and no workflow metadata. Without any agentic microformat annotations, the agent cannot articulate a concrete advantage because there is none — the semantic annotation layer that would differentiate agent capability from scraper capability is entirely absent.",
+      "gap_category": "annotation-density",
+      "gap_severity": "blocking",
+      "spec_quote": "data-agent=\"resource\" data-agent-type=\"page\" on <main>, data-agent=\"action\" data-agent-label=\"Search\" on the search form, data-agent-prop=\"company-description\" on the hero text, data-agent-meta with workflow and available actions in <head>"
+    },
+    {
+      "probe_id": "P15",
+      "category": "error_recovery",
+      "difficulty": "hard",
+      "stress_vector": "error states — spec has no error-state, retry-strategy or failure-hint annotation",
+      "expected_to_pass": false,
+      "task": "If an action on this page fails (e.g. a form submission returns an error), how would an agent know what went wrong and what to do next?",
+      "agent_answer": "There is no agentic microformat annotation on this page that describes error states, failure hints, or retry strategies for actions. The page does contain some WordPress/CleanTalk AJAX configuration (nonces, endpoints) and Yoast structured data, but none of these provide agent-readable guidance on what to do when an action fails. An agent would have to fall back on generic HTTP status code interpretation or attempt to parse unstructured error message text from the DOM after a failed submission, with no guaranteed way to distinguish error types or know whether to retry.",
+      "task_completed": false,
+      "gap_identified": "The spec and page lack any annotation for error states, failure responses, retry strategies, or recovery hints on actions. When an action (e.g. form submit, API call) fails, there is no data-agent-* attribute that describes possible error conditions, human-readable failure messages, retry eligibility, or fallback actions.",
+      "gap_category": "error-states",
+      "gap_severity": "blocking",
+      "spec_quote": "data-agent-error-hint='{\"retry\":true,\"max-retries\":3,\"fallback-action\":\"contact-support\",\"error-map\":{\"422\":\"validation-failed\",\"429\":\"rate-limited\",\"500\":\"server-error\"}}'"
+    }
+  ]
+}

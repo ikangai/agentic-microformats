@@ -1,0 +1,122 @@
+[
+  {
+    "id": "P01",
+    "category": "basic_navigation",
+    "difficulty": "easy",
+    "task": "Find all primary navigation links on this page and list their labels and URLs.",
+    "expected_to_pass": true,
+    "stress_vector": "none — baseline sanity check"
+  },
+  {
+    "id": "P02",
+    "category": "action_discovery",
+    "difficulty": "easy",
+    "task": "What is the primary action available to a visitor on this page? What happens if you trigger it?",
+    "expected_to_pass": true,
+    "stress_vector": "intent inference — can agent understand what a CTA does?"
+  },
+  {
+    "id": "P03",
+    "category": "state_awareness",
+    "difficulty": "medium",
+    "task": "Is there any content on this page that changes based on user state (logged in vs logged out, subscribed vs free)?  If yes, identify it. If no, explain how you determined that.",
+    "expected_to_pass": false,
+    "stress_vector": "dynamic/conditional content — spec has no concept of state-dependent visibility"
+  },
+  {
+    "id": "P04",
+    "category": "multi_step_flow",
+    "difficulty": "medium",
+    "task": "If a user wants to hire this company for an AI workshop, what is the complete sequence of steps and pages they need to visit? List each step in order.",
+    "expected_to_pass": false,
+    "stress_vector": "cross-page flow — spec annotates single pages, not journeys or funnels"
+  },
+  {
+    "id": "P05",
+    "category": "ambiguity_resolution",
+    "difficulty": "medium",
+    "task": "There are multiple links on this page. Which ones are navigational (going somewhere) vs transactional (doing something)? Classify each.",
+    "expected_to_pass": false,
+    "stress_vector": "link intent classification — spec lacks explicit navigate vs transact distinction"
+  },
+  {
+    "id": "P06",
+    "category": "content_freshness",
+    "difficulty": "medium",
+    "task": "How recent is the content on this page? Is it likely to have changed since yesterday?",
+    "expected_to_pass": false,
+    "stress_vector": "temporal metadata — spec has no freshness, TTL or last-modified annotation"
+  },
+  {
+    "id": "P07",
+    "category": "permission_scope",
+    "difficulty": "hard",
+    "task": "Which actions on this page can an unauthenticated agent perform freely, and which require human confirmation or authentication first?",
+    "expected_to_pass": false,
+    "stress_vector": "auth-gating — spec has data-agent-human-preferred but no auth-required or permission-level concept"
+  },
+  {
+    "id": "P08",
+    "category": "entity_relationships",
+    "difficulty": "hard",
+    "task": "Identify all entities on this page (people, companies, products, services). For each entity, describe its relationship to other entities on the page.",
+    "expected_to_pass": false,
+    "stress_vector": "entity graph — spec annotates resources in isolation, no relationship/edge concept"
+  },
+  {
+    "id": "P09",
+    "category": "agent_handoff",
+    "difficulty": "hard",
+    "task": "At what point in a task on this page should an AI agent hand off control to a human? What signals tell you this?",
+    "expected_to_pass": false,
+    "stress_vector": "handoff signals — data-agent-human-preferred exists but no trigger conditions or context"
+  },
+  {
+    "id": "P10",
+    "category": "semantic_search",
+    "difficulty": "medium",
+    "task": "A user says 'I want to learn about AI for my business'. Which page, section, or resource on this site best matches that intent?",
+    "expected_to_pass": false,
+    "stress_vector": "intent matching — spec annotates what things ARE, not what user intents they serve"
+  },
+  {
+    "id": "P11",
+    "category": "side_effects",
+    "difficulty": "hard",
+    "task": "If you click every button on this page, which ones have side effects outside this page (send emails, create records, charge money)? Which are safe to click repeatedly?",
+    "expected_to_pass": false,
+    "stress_vector": "side effect scope — spec has reversible/risk but no external-effect or idempotency annotation"
+  },
+  {
+    "id": "P12",
+    "category": "localization",
+    "difficulty": "medium",
+    "task": "Is this page available in other languages? If yes, how would you navigate to the German version?",
+    "expected_to_pass": false,
+    "stress_vector": "i18n — spec has no locale, language-variant or hreflang equivalent"
+  },
+  {
+    "id": "P13",
+    "category": "trust_inference",
+    "difficulty": "hard",
+    "task": "Which parts of this page were written by the site owner vs contributed by third parties? Should an agent treat them differently?",
+    "expected_to_pass": true,
+    "stress_vector": "trust regions — spec has data-agent-trust but does the annotation actually appear?"
+  },
+  {
+    "id": "P14",
+    "category": "capability_discovery",
+    "difficulty": "medium",
+    "task": "What can an AI agent DO on this page that a regular web scraper cannot? What is the unique value of the semantic annotations?",
+    "expected_to_pass": false,
+    "stress_vector": "meta-reflection — can the agent articulate its own advantage? reveals annotation density"
+  },
+  {
+    "id": "P15",
+    "category": "error_recovery",
+    "difficulty": "hard",
+    "task": "If an action on this page fails (e.g. a form submission returns an error), how would an agent know what went wrong and what to do next?",
+    "expected_to_pass": false,
+    "stress_vector": "error states — spec has no error-state, retry-strategy or failure-hint annotation"
+  }
+]
