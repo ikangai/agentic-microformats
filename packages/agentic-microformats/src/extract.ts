@@ -65,6 +65,21 @@ function extractAction(el: AgentElement, inheritedTargetId?: string, root?: Agen
   const paramsAttr = el.getAttribute('data-agent-params');
   const declaredParams = paramsAttr ? paramsAttr.split(',').map(s => s.trim()).filter(Boolean) : undefined;
 
+  const onSuccess = el.getAttribute('data-agent-on-success') ?? undefined;
+
+  let response: Record<string, string> | undefined;
+  const responseAttr = el.getAttribute('data-agent-response');
+  if (responseAttr) {
+    try {
+      const parsed = JSON.parse(responseAttr);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        response = parsed;
+      }
+    } catch {
+      // ignore invalid JSON
+    }
+  }
+
   return {
     name,
     target,
@@ -74,6 +89,8 @@ function extractAction(el: AgentElement, inheritedTargetId?: string, root?: Agen
     declaredParams,
     headers,
     description: resolveDescription(el, root),
+    onSuccess,
+    response,
     hints: extractHints(el),
     element: el,
   };
@@ -181,6 +198,9 @@ export function extractMeta(root: AgentElement): PageMeta {
     if (raw.defaults) meta.defaults = raw.defaults;
     if (raw.page) meta.page = raw.page;
     if (raw.related) meta.related = raw.related;
+    if (raw.workflow) meta.workflow = raw.workflow;
+    if (raw.actions) meta.actions = raw.actions;
+    if (raw.responseSchemas) meta.responseSchemas = raw.responseSchemas;
 
     if (raw.agent_policies) {
       meta.agentPolicies = {};
@@ -194,6 +214,9 @@ export function extractMeta(root: AgentElement): PageMeta {
       }
       if (raw.agent_policies.auth_method) {
         meta.agentPolicies.authMethod = raw.agent_policies.auth_method;
+      }
+      if (raw.agent_policies.errorFormat) {
+        meta.agentPolicies.errorFormat = raw.agent_policies.errorFormat;
       }
     }
 

@@ -40,6 +40,10 @@ export interface Parameter {
   required: boolean;
   value: string | null;
   disabled: boolean;
+  /** Minimum allowed value (numeric) or minimum length (string). Spec §7.4. */
+  min?: number;
+  /** Maximum allowed value (numeric) or maximum length (string). Spec §7.4. */
+  max?: number;
   element: import('./dom.js').AgentElement;
 }
 
@@ -52,6 +56,10 @@ export interface Action {
   declaredParams?: string[];  // from data-agent-params attribute
   headers?: Record<string, string>;
   description?: string;
+  /** Natural-language description of the expected outcome. Spec §6.8. */
+  onSuccess?: string;
+  /** Response schema: field name → typehint. Spec §6.7. */
+  response?: Record<string, string>;
   hints: InteractionHints;
   element: import('./dom.js').AgentElement;
 }
@@ -65,6 +73,17 @@ export interface Resource {
   element: import('./dom.js').AgentElement;
 }
 
+export interface WorkflowGraph {
+  graph?: Record<string, { next?: string[] }>;
+  entryPoint?: string;
+}
+
+export interface ActionSummary {
+  name?: string;
+  method?: string;
+  endpoint?: string;
+}
+
 export interface PageMeta {
   provider?: { name?: string; jurisdiction?: string; url?: string };
   defaults?: { currency?: string; locale?: string; timezone?: string };
@@ -73,8 +92,16 @@ export interface PageMeta {
     rateLimit?: { requestsPerMinute?: number };
     requireAuth?: boolean;
     authMethod?: string;
+    /** Common error response shape: field name → typehint. Spec §9.2 / changelog 0.2.0. */
+    errorFormat?: Record<string, string>;
   };
   related?: Record<string, string>;
+  /** Navigation flow between page types. Spec §9.2.1. */
+  workflow?: WorkflowGraph;
+  /** Available actions per page type. Spec §9.2.2. */
+  actions?: Record<string, ActionSummary[]>;
+  /** Expected JSON response per action name. Spec §9.2.3. */
+  responseSchemas?: Record<string, Record<string, string>>;
 }
 
 export interface ExtractionResult {

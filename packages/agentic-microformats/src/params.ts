@@ -46,12 +46,21 @@ export function extractParameters(actionEl: AgentElement): Parameter[] {
 
     const disabled = el.hasAttribute('disabled');
 
+    const parseBound = (attr: string): number | undefined => {
+      const v = el.getAttribute(attr);
+      if (v === null) return undefined;
+      const n = Number(v);
+      return Number.isFinite(n) ? n : undefined;
+    };
+
     params.push({
       name,
       typehint,
       required,
       value: getInputValue(el),
       disabled,
+      min: parseBound('data-agent-min'),
+      max: parseBound('data-agent-max'),
       element: el,
     });
   }
