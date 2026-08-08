@@ -1,0 +1,137 @@
+[
+  {
+    "id": "T01",
+    "page": "01-corporate-homepage.html",
+    "page_type": "corporate",
+    "task": "Find the primary contact CTA on this page. Return the URL it links to.",
+    "expected": "/contact/",
+    "match_type": "contains",
+    "category": "action_discovery"
+  },
+  {
+    "id": "T02",
+    "page": "01-corporate-homepage.html",
+    "page_type": "corporate",
+    "task": "List all AI product names available on this page.",
+    "expected": ["LEA", "HEY", "VIS", "KAI", "SUP", "FOP"],
+    "match_type": "all_contained",
+    "category": "resource_enumeration"
+  },
+  {
+    "id": "T03",
+    "page": "01-corporate-homepage.html",
+    "page_type": "corporate",
+    "task": "What services does this company offer? List the service names.",
+    "expected": ["AI Workshops", "Strategic AI Consultation", "AI Tool and Platform Selection", "AI Projects"],
+    "match_type": "all_contained",
+    "category": "resource_enumeration"
+  },
+  {
+    "id": "T04",
+    "page": "02-blog-overview.html",
+    "page_type": "blog",
+    "task": "What is the URL of the most recent article on this page?",
+    "expected": "/departments-are-albums-agentic-ai-and-the-coming-corporate-unbundling/",
+    "match_type": "contains",
+    "category": "navigation"
+  },
+  {
+    "id": "T05",
+    "page": "02-blog-overview.html",
+    "page_type": "blog",
+    "task": "How many articles are listed on this page?",
+    "expected": "5",
+    "match_type": "contains",
+    "category": "resource_enumeration"
+  },
+  {
+    "id": "T06",
+    "page": "02-blog-overview.html",
+    "page_type": "blog",
+    "task": "Which article has the most views? Return its title.",
+    "expected": "The Web Has No API for Agents",
+    "match_type": "contains",
+    "category": "property_extraction"
+  },
+  {
+    "id": "T07",
+    "page": "03-api-docs-quickstart.html",
+    "page_type": "api_docs",
+    "task": "What is the authentication method used for API requests?",
+    "expected": "API key",
+    "match_type": "contains_ci",
+    "category": "property_extraction"
+  },
+  {
+    "id": "T08",
+    "page": "03-api-docs-quickstart.html",
+    "page_type": "api_docs",
+    "task": "What is the endpoint path for generating a video?",
+    "expected": "/v2/video/generate",
+    "match_type": "contains",
+    "category": "action_discovery"
+  },
+  {
+    "id": "T09",
+    "page": "03-api-docs-quickstart.html",
+    "page_type": "api_docs",
+    "task": "Identify all executable code blocks on this page. For each one, return its programming language.",
+    "expected": ["curl", "python"],
+    "match_type": "all_contained_ci",
+    "category": "code_discovery"
+  },
+  {
+    "id": "T10",
+    "page": "04-spec-page.html",
+    "page_type": "spec",
+    "task": "What file format does the llms.txt specification use?",
+    "expected": "Markdown",
+    "match_type": "contains_ci",
+    "category": "property_extraction"
+  },
+  {
+    "id": "T11",
+    "page": "04-spec-page.html",
+    "page_type": "spec",
+    "task": "List the URLs of all documents linked in the 'Linked documents' section.",
+    "expected": ["/index.md", "/intro.html.md", "/ed-commonmark.md"],
+    "match_type": "all_contained",
+    "category": "resource_enumeration"
+  },
+  {
+    "id": "T12",
+    "page": "05-support-article.html",
+    "page_type": "support",
+    "task": "What is an LLMs.txt file, in one sentence?",
+    "expected": ["AI", "website", "text file"],
+    "match_type": "all_contained_ci",
+    "category": "property_extraction"
+  },
+  {
+    "id": "T13",
+    "page": "05-support-article.html",
+    "page_type": "support",
+    "task": "How many steps are required to customize the LLMs.txt file in the Wix dashboard?",
+    "expected": "4",
+    "match_type": "contains",
+    "category": "property_extraction"
+  },
+  {
+    "id": "T14",
+    "page": "06-news-homepage.html",
+    "page_type": "news",
+    "task": "What is the headline of the most recent/featured article? Return the full title.",
+    "expected": "New report finds AI automation affecting 40%",
+    "match_type": "contains",
+    "category": "navigation"
+  },
+  {
+    "id": "T15",
+    "page": "06-news-homepage.html",
+    "page_type": "news",
+    "task": "List all primary navigation section names on this page.",
+    "expected": ["World", "US", "Politics", "Business", "Health", "Tech"],
+    "match_type": "all_contained",
+    "category": "navigation"
+  }
+]

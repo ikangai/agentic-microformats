@@ -1,0 +1,22 @@
+{
+  "name": "agentic-microformats-benchmark",
+  "version": "0.1.0",
+  "description": "Autoresearch benchmark for agentic-microformats annotation strategy",
+  "scripts": {
+    "baseline": "ts-node --project tsconfig.json benchmark/evaluator.ts --pages-dir=benchmark/pages --tasks=benchmark/tasks.json",
+    "annotate": "ts-node --project tsconfig.json benchmark/annotator.ts",
+    "evaluate": "ts-node --project tsconfig.json benchmark/evaluator.ts",
+    "run-experiment": "npm run annotate && npm run evaluate",
+    "discover": "ts-node --project tsconfig.json discovery/discoverer.ts",
+    "discover:ikangai": "ts-node --project tsconfig.json discovery/discoverer.ts --url=https://www.ikangai.com --label=ikangai-homepage",
+    "discover:blog": "ts-node --project tsconfig.json discovery/discoverer.ts --url=https://www.ikangai.com/the-web-has-no-api-for-agents-agentic-microformats/ --label=ikangai-blog-post",
+    "discover:heygen": "ts-node --project tsconfig.json discovery/discoverer.ts --url=https://docs.heygen.com/docs/quick-start --label=heygen-api-docs",
+    "discover:llmstxt": "ts-node --project tsconfig.json discovery/discoverer.ts --url=https://llmstxt.org --label=llmstxt-spec",
+    "discover:all": "npm run discover:ikangai && npm run discover:blog && npm run discover:heygen && npm run discover:llmstxt"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "ts-node": "^10.9.0",
+    "@types/node": "^20.0.0"
+  }
+}

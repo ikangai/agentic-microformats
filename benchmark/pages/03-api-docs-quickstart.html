@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Quick Start – HeyGen API Documentation</title>
+</head>
+<body>
+
+<nav class="docs-nav">
+  <a href="/docs/">Developer Guide</a>
+  <a href="/reference/">API Reference</a>
+  <a href="/changelog/">Updates</a>
+</nav>
+
+<aside class="sidebar">
+  <section>
+    <h4>Getting Started</h4>
+    <ul>
+      <li><a href="/docs/quick-start" class="active">Quick Start</a></li>
+    </ul>
+  </section>
+  <section>
+    <h4>Auth</h4>
+    <ul>
+      <li><a href="/docs/authentication-methods">Authentication Methods</a></li>
+      <li><a href="/docs/api-key">API Key</a></li>
+      <li><a href="/docs/oauth">OAuth 2.0</a></li>
+    </ul>
+  </section>
+  <section>
+    <h4>Studio API</h4>
+    <ul>
+      <li><a href="/docs/create-video">Generate Studio Video</a></li>
+      <li><a href="/docs/generate-video-from-template-v2">Generate Studio Template</a></li>
+    </ul>
+  </section>
+  <section>
+    <h4>Avatars</h4>
+    <ul>
+      <li><a href="/docs/video-avatars-api">Digital Twin</a></li>
+      <li><a href="/docs/photo-avatars-api">Photo Avatar</a></li>
+    </ul>
+  </section>
+</aside>
+
+<main class="docs-content">
+  <h1>Quick Start</h1>
+  <p>Get from zero to a working integration in minutes. All requests use the same auth.</p>
+
+  <section id="step-1-get-api-key">
+    <h2>Step 1: Get your API key</h2>
+    <p>All API requests require an <code>X-Api-Key</code> header. Retrieve your key from the <a href="https://app.heygen.com/settings?nav=API">HeyGen dashboard</a>.</p>
+    <p>Authentication method: <strong>API key</strong> via HTTP header.</p>
+  </section>
+
+  <section id="step-2-list-avatars">
+    <h2>Step 2: List available avatars</h2>
+    <p>Before generating a video, fetch the list of avatars available to your account.</p>
+
+    <pre class="code-block" data-language="curl"><code>curl https://api.heygen.com/v2/avatars \
+  -H "X-Api-Key: YOUR_API_KEY"</code></pre>
+
+    <p>Response includes <code>avatar_id</code> values you'll use in the next step.</p>
+  </section>
+
+  <section id="step-3-generate-video">
+    <h2>Step 3: Generate a video</h2>
+    <p>Submit a video generation request to <code>POST /v2/video/generate</code>.</p>
+
+    <pre class="code-block" data-language="curl"><code>curl -X POST https://api.heygen.com/v2/video/generate \
+  -H "X-Api-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "video_inputs": [{
+      "character": {
+        "type": "avatar",
+        "avatar_id": "AVATAR_ID",
+        "avatar_style": "normal"
+      },
+      "voice": {
+        "type": "text",
+        "input_text": "Hello, welcome to my video.",
+        "voice_id": "VOICE_ID"
+      }
+    }],
+    "dimension": { "width": 1280, "height": 720 }
+  }'</code></pre>
+
+    <p>The response returns a <code>video_id</code>. Video generation is asynchronous.</p>
+  </section>
+
+  <section id="step-4-poll-status">
+    <h2>Step 4: Poll for completion</h2>
+    <p>Check video status at <code>GET /v1/video.status.get</code> until status is <code>completed</code>.</p>
+
+    <pre class="code-block" data-language="python"><code>import requests
+import time
+
+API_KEY = "YOUR_API_KEY"
+VIDEO_ID = "your_video_id"
+
+while True:
+    resp = requests.get(
+        f"https://api.heygen.com/v1/video.status.get?video_id={VIDEO_ID}",
+        headers={"X-Api-Key": API_KEY}
+    )
+    data = resp.json()["data"]
+    if data["status"] == "completed":
+        print("Video URL:", data["video_url"])
+        break
+    elif data["status"] == "failed":
+        print("Error:", data.get("error"))
+        break
+    time.sleep(5)</code></pre>
+  </section>
+
+  <section id="rate-limits">
+    <h2>Rate limits</h2>
+    <p>Free tier: 5 videos/day. Pro tier: 100 videos/day. Enterprise: unlimited.</p>
+    <p>API rate limit: 10 requests/second per API key.</p>
+  </section>
+
+  <section id="next-steps">
+    <h2>Next steps</h2>
+    <ul>
+      <li><a href="/docs/authentication-methods">Authentication Methods</a></li>
+      <li><a href="/docs/create-video">Full video generation reference</a></li>
+      <li><a href="/docs/streaming-api">Streaming API (real-time avatars)</a></li>
+    </ul>
+  </section>
+</main>
+
+</body>
+</html>

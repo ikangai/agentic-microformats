@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>llms.txt – A standard for LLM-friendly website content</title>
+</head>
+<body>
+
+<header>
+  <h1>llms.txt</h1>
+  <p>A proposal for making website content accessible to large language models.</p>
+</header>
+
+<nav>
+  <a href="/">Home</a>
+  <a href="/index.md">Proposal</a>
+  <a href="/intro.html">Python library docs</a>
+  <a href="/llms.txt">llms.txt file</a>
+</nav>
+
+<main>
+  <section id="overview">
+    <h2>Overview</h2>
+    <p>
+      The <code>llms.txt</code> proposal suggests that websites add a <code>/llms.txt</code> file
+      to their root directory. This file is written in Markdown and provides LLMs with
+      background information and links to further documentation.
+    </p>
+    <p>
+      The file format is <strong>Markdown</strong>. It should be placed at the root of a website
+      at the path <code>/llms.txt</code>.
+    </p>
+  </section>
+
+  <section id="motivation">
+    <h2>Motivation</h2>
+    <p>
+      LLMs are increasingly being used to interact with websites and APIs. However, most websites
+      are designed for human consumption and are not optimized for machine reading. The
+      <code>llms.txt</code> proposal aims to bridge this gap.
+    </p>
+    <p>
+      Similar to <code>robots.txt</code> for web crawlers and <code>sitemap.xml</code> for search
+      engines, <code>llms.txt</code> provides a standardized way for websites to communicate
+      with AI systems.
+    </p>
+  </section>
+
+  <section id="format">
+    <h2>File format</h2>
+    <p>An <code>llms.txt</code> file must:</p>
+    <ul>
+      <li>Be a Markdown file</li>
+      <li>Begin with an H1 title (the site/project name)</li>
+      <li>Optionally include a blockquote with a brief description</li>
+      <li>Include sections with H2 headings and bulleted link lists</li>
+    </ul>
+
+    <h3>Example</h3>
+    <pre><code># My Project
+
+> A brief description of what this project does.
+
+## Docs
+- [Getting started](https://example.com/start.md): How to get up and running
+- [API reference](https://example.com/api.md): Full API documentation
+
+## Optional
+- [Changelog](https://example.com/changelog.md): Recent changes
+</code></pre>
+  </section>
+
+  <section id="linked-documents">
+    <h2>Linked documents</h2>
+    <p>The llmstxt.org site itself provides the following documents:</p>
+    <ul>
+      <li><a href="/index.md">llms.txt proposal</a> – The full proposal document</li>
+      <li><a href="/intro.html.md">Python library docs</a> – Docs for the <code>llms-txt</code> Python library</li>
+      <li><a href="/ed-commonmark.md">ed demo</a> – Example of llms.txt usage in the <code>ed</code> editor</li>
+    </ul>
+  </section>
+
+  <section id="adoption">
+    <h2>Adoption</h2>
+    <p>The following sites have adopted <code>llms.txt</code>:</p>
+    <ul>
+      <li><a href="https://docs.anthropic.com/llms.txt">Anthropic</a></li>
+      <li><a href="https://docs.heygen.com/llms.txt">HeyGen</a></li>
+      <li><a href="https://platform.openai.com/llms.txt">OpenAI</a></li>
+    </ul>
+  </section>
+
+  <section id="python-library">
+    <h2>Python library</h2>
+    <p>A reference implementation is available as a Python library:</p>
+    <pre><code>pip install llms-txt</code></pre>
+    <p>See the <a href="/intro.html">full documentation</a> for usage examples.</p>
+  </section>
+</main>
+
+<footer>
+  <p>llms.txt proposal · <a href="https://github.com/answerfilter/llms-txt">GitHub</a></p>
+</footer>
+
+</body>
+</html>

@@ -2,3 +2,5 @@ node_modules/
 dist/
 .worktrees/
 .DS_Store
+benchmark/pages-annotated/
+benchmark/results/
