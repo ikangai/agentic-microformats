@@ -10,7 +10,7 @@ Repository: https://github.com/ikangai/agentic-microformats
 
 ```
 ├── spec/                    # Specification documents
-│   ├── core.md              # Main spec (v0.1.0) — all attribute definitions
+│   ├── core.md              # Main spec (v0.2.0) — all attribute definitions
 │   ├── advanced.md          # v0.2.0-dev patterns (async, batch, settlement)
 │   ├── agent-state-layer.md # Exploratory: agent-carried state across pages
 │   └── CHANGELOG.md

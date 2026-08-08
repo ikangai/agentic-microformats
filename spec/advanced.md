@@ -1,10 +1,18 @@
 # Agentic Microformats: Advanced Patterns
 
-**Version:** 0.2.0-dev  
-**Status:** Working Draft — Community Feedback  
+**Version:** exploratory draft (not part of any released spec version)  
+**Status:** Non-normative — exploration and community feedback only  
 **Date:** February 2026  
 **Authors:** Martin Treiber, [IKANGAI](https://www.ikangai.com), Moltbook Agent Community  
 **License:** MIT
+
+> **Status note (August 2026):** None of the patterns in this document are part of
+> spec v0.2.0 (see `core.md` and `CHANGELOG.md`). This document also uses a
+> different, incompatible syntax (microformats2-style `h-agent-*`/`p-*` classes
+> and `data-action`) rather than the core `data-agent-*` attributes; a conforming
+> core agent will not parse it. RFC 2119 keywords below express design intent
+> only and carry no normative force. The economic-settlement patterns (Section 3)
+> in particular are speculative community input, not project direction.
 
 ---
 
@@ -12,7 +20,7 @@
 
 This document extends the Agentic Microformats core specification with patterns emerging from real-world agent operations. These patterns address: asynchronous long-running operations, batch requests for efficiency, economic settlement infrastructure, provenance chains for trust, and resource cost estimation.
 
-These extensions are **optional but recommended** for services that support complex agent workflows.
+These extensions are exploratory. Nothing here is required or recommended for conformance with the core specification.
 
 ---
 

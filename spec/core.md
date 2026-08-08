@@ -247,11 +247,13 @@ A conforming agent:
 | `data-agent-human-preferred` | Hint | Suggests human confirmation |
 | `data-agent-reversible` | Hint | Whether the action can be undone |
 | `data-agent-cost` | Hint | Monetary cost indicator |
+| `data-agent-cost-currency` | Hint | ISO 4217 currency code for `data-agent-cost` |
 | `data-agent-on-success` | Action | Expected outcome after successful execution |
 | `data-agent-response` | Action | JSON describing the response schema |
 | `data-agent-min` | Parameter | Minimum allowed value |
 | `data-agent-max` | Parameter | Maximum allowed value |
 | `data-agent-description` | Meta | Human-readable description for agents |
+| `data-agent-meta` | Meta | Marks the page-level JSON metadata `<script>` block (Section 9) |
 | `data-agent-trust` | Scope | Trust level for a content region |
 | `data-agent-ignore` | Scope | Excludes a subtree from agent parsing |
 
@@ -1174,6 +1176,10 @@ hint-risk         = 'data-agent-risk="' risk-value '"'
 hint-human        = 'data-agent-human-preferred="' bool-value '"'
 hint-reversible   = 'data-agent-reversible="' bool-value '"'
 hint-cost         = 'data-agent-cost="' number-value '"'
+hint-cost-currency = 'data-agent-cost-currency="' currency-code '"'
+
+; Meta
+meta-block        = 'data-agent-meta'   ; boolean attribute on a JSON <script> element
 
 ; Trust
 trust-level       = 'data-agent-trust="' trust-value '"'

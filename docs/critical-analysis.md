@@ -4,6 +4,12 @@
 **Analyst:** Autonomous Agent Subagent  
 **Spec Version:** 0.1.0
 
+> **Staleness note (August 2026):** this analysis targets spec v0.1.0 and has not
+> been re-run against v0.2.0. Some findings are partially addressed in 0.2.0 —
+> parameter validation (§2.1) via `data-agent-min`/`max`, and error shape (§1.3)
+> via `errorFormat` — while the P0 items (async, batch, error taxonomy, state
+> notifications) remain open. Treat individual line references as historical.
+
 ---
 
 ## Executive Summary
