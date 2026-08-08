@@ -4,6 +4,15 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
+      // Spec §8: risk="high" MUST request explicit confirmation;
+      // human-preferred="true" suggests it.
+      const risk = form.getAttribute('data-agent-risk');
+      const humanPreferred = form.getAttribute('data-agent-human-preferred') === 'true';
+      if (risk === 'high' || humanPreferred) {
+        const actionName = form.getAttribute('data-agent-name') || 'this action';
+        if (!window.confirm('Confirm ' + actionName.replace(/_/g, ' ') + '?')) return;
+      }
+
       const endpoint = form.getAttribute('data-agent-endpoint');
       const method = form.getAttribute('data-agent-method') || 'POST';
       const headersAttr = form.getAttribute('data-agent-headers');
