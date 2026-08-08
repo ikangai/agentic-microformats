@@ -111,6 +111,17 @@ The semantic annotations don't control agents or define automation rules. They h
 
 Current version: **0.2.0** (Working Draft, February 2026)
 
+## What's in This Repo
+
+| Directory | Contents |
+|-----------|----------|
+| [`spec/`](spec/) | The specification: [core.md](spec/core.md) (normative, v0.2.0), [agent-state-layer.md](spec/agent-state-layer.md), [advanced.md](spec/advanced.md) (non-normative exploration) |
+| [`packages/agentic-microformats/`](packages/agentic-microformats/) | TypeScript reference implementation (extraction, coercion, trust regions, parameters, hints, mutation observation) — spec v0.2.0 |
+| [`demo/`](demo/) | AgentShop — a runnable Express store fully annotated at v0.2.0, with `/llms.txt` |
+| [`examples/`](examples/) | Standalone annotated HTML pages |
+| [`benchmark/`](benchmark/) | Autoresearch harness measuring the task-success **delta** annotations provide (see [benchmark/README.md](benchmark/README.md)) |
+| [`discovery/`](discovery/) | Probe tooling that surfaces candidate spec gaps on live pages |
+
 ## Core Concepts
 
 | Concept | Description |
@@ -161,6 +172,8 @@ These form a stack: AGENTS.md guides coding agents in your repo, llms.txt introd
 - [E-commerce Product Page](examples/ecommerce/product-page.html)
 - [Project Dashboard](examples/basic/project-dashboard.html)
 - [Form with Nested Parameters](examples/forms/nested-parameters.html)
+- [Multi-Step Checkout](examples/workflows/multi-step-checkout.html) *(proposed vocabulary — not in spec v0.2.0)*
+- [Async File Upload](examples/autonomous/async-file-upload.html) *(proposed vocabulary — not in spec v0.2.0)*
 
 ## Contributing
 
@@ -172,8 +185,7 @@ This specification is in active development. Contributions welcome:
 
 ## License
 
-- Specification: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
-- Examples and code: [MIT](LICENSE)
+[MIT](LICENSE) — specification, examples, and code.
 
 ## Author
 
