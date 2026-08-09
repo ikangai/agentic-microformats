@@ -47,7 +47,10 @@ benchmark/
 │                                   #   graph (0 tokens), model answers from JSON only
 ├── agent-bench.ts                  # Action-execution arm: model = policy in an episode
 │                                   #   loop against the live demo; judged by server state
-├── tasks-agent.json                # 8 action/multi-page episodes for agent-bench
+├── tasks-agent.json                # 13 episodes for agent-bench: 8 action/multi-page
+│                                   #   (G01–G08) + 5 error-recovery with fault injection
+│                                   #   (E01–E05: 503 retry, response-lost, 429, validation
+│                                   #   correction, garbled body)
 ├── pages/                          # Suite v1 unannotated pages (never modified)
 ├── pages-v2/                       # Suite v2 unannotated pages (never modified)
 ├── pages-annotated/                # Generated (gitignored)

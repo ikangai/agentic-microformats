@@ -268,4 +268,56 @@ annotation added to the demo.
 
 ---
 
+## Error-Recovery Episodes (E01–E05) — 2026-08-09
+
+**Goal:** episodes where the server misbehaves mid-flow. A fault-injection
+layer in `agent-bench.ts` intercepts agent-issued API calls (never setup or
+assertion reads, invisible to the model): `reject` (503/429 without
+forwarding), `drop_response` (the mutation LANDS but the agent sees only
+"502 Bad Gateway" — the classic did-my-write-land dilemma), and `garble_body`
+(mutation lands, response body replaced with garbage at status 200).
+Success is still judged by final server state, so a blind retry after
+`drop_response` that double-adds FAILS unless the agent notices and repairs.
+
+Episodes: E01 transient-503 retry · E02 response-lost/at-most-once ·
+E03 checkout behind 429×2 · E04 validation-driven correction (add 12 → API
+rejects → add the max 10) · E05 garbled 200 body (verify, don't re-fire).
+
+**Runs (isolated, pinned):**
+
+| Arm | Model | Score | Cost |
+|-----|-------|-------|------|
+| extraction | sonnet | 5/5 | $2.25 |
+| extraction | haiku | 5/5 | **$0.38** |
+| raw HTML | sonnet | 5/5 | $2.23 |
+
+**Findings:**
+1. **All five recovery patterns are handled at both tiers and both page
+   representations.** Error recovery on these patterns is not a
+   discriminator for current Claude tiers — the E-suite's ongoing value is as
+   a regression guard and a source of behavioral transcripts, and the cost
+   story persists (haiku recovers from everything for $0.38).
+2. **Identical scores hide different recovery strategies.** On E02
+   (response lost) sonnet VERIFIED before retrying: saw the 502, navigated
+   to /cart, found the write had landed, answered — no duplicate ever
+   existed. Haiku BLIND-RETRIED (cart briefly at quantity 2), then read the
+   cart page, noticed, and PATCHed back to 1 — repair, not caution. Both
+   pass on final state; the transcripts (`fault_injected` markers in
+   `results/agent-run-*.json`) preserve the difference.
+3. **Annotations are what make the repair loop possible.** Both strategies
+   depend on the cart being *inspectable*: the annotated /cart page exposes
+   item ids and quantities the agent can read back and act on (PATCH by id).
+   The `data-agent-on-success` hints ("Reload /cart to see updated cart")
+   visibly steered agents to the right verification page. A site without
+   machine-readable state would leave response-lost errors unrecoverable
+   except by guessing.
+4. E04 confirmed error messages + annotated `min`/`max` compose: agents read
+   the 400 ("between 1 and 10") and re-issued with quantity 10.
+
+**Kept:** yes — fault injector + 5 episodes committed. Suite is now 13
+episodes; G01–G05/G07/G08 and E01–E05 are regression-blocking, G06 is the
+trust-boundary marker.
+
+---
+
 <!-- Experiments appended below by the agent -->

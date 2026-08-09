@@ -90,5 +90,70 @@
     ],
     "expected_answer": "39.98",
     "match_type": "contains"
+  },
+  {
+    "id": "E01",
+    "start_url": "/",
+    "task": "Add the cheapest product in the catalog to the cart, quantity 1.",
+    "max_steps": 6,
+    "faults": [
+      { "method": "POST", "path_prefix": "/api/cart/add", "times": 1, "kind": "reject", "status": 503, "message": "Service temporarily unavailable. Please try again." }
+    ],
+    "assertions": [
+      { "type": "cart_item", "name_contains": "USB-C Cable 2m", "quantity": 1 },
+      { "type": "cart_count", "value": 1 }
+    ]
+  },
+  {
+    "id": "E02",
+    "start_url": "/",
+    "task": "Add exactly one USB-C Charger 65W to the cart. It must end up in the cart exactly once — no more, no less.",
+    "max_steps": 8,
+    "faults": [
+      { "method": "POST", "path_prefix": "/api/cart/add", "times": 1, "kind": "drop_response" }
+    ],
+    "assertions": [
+      { "type": "cart_item", "name_contains": "USB-C Charger 65W", "quantity": 1 },
+      { "type": "cart_count", "value": 1 }
+    ]
+  },
+  {
+    "id": "E03",
+    "start_url": "/",
+    "task": "Buy one USB-C Cable 2m: add it to the cart and complete the checkout. Shipping: name Jonas Weber, address Ringstrasse 5, city Wien, postal code 1010, country Austria. Payment: card number 4111111111111111, expiry 11/28, cvv 456. When the order is placed, report the order ID.",
+    "max_steps": 12,
+    "faults": [
+      { "method": "POST", "path_prefix": "/api/checkout", "times": 2, "kind": "reject", "status": 429, "message": "Too many requests. Please wait a moment and try again." }
+    ],
+    "assertions": [
+      { "type": "order_created" },
+      { "type": "answer_contains_order_id" },
+      { "type": "cart_count", "value": 0 }
+    ]
+  },
+  {
+    "id": "E04",
+    "start_url": "/",
+    "task": "Add 12 units of the HDMI 2.1 Cable 3m to the cart. If the API rejects that request, add the maximum allowed quantity instead. Report how many units ended up in the cart.",
+    "max_steps": 8,
+    "assertions": [
+      { "type": "cart_item", "name_contains": "HDMI 2.1 Cable", "quantity": 10 },
+      { "type": "attempted", "method": "POST", "path_prefix": "/api/cart/add" }
+    ],
+    "expected_answer": "10",
+    "match_type": "contains"
+  },
+  {
+    "id": "E05",
+    "start_url": "/",
+    "task": "Add one Aluminum Laptop Stand to the cart and make sure it is in the cart exactly once.",
+    "max_steps": 8,
+    "faults": [
+      { "method": "POST", "path_prefix": "/api/cart/add", "times": 1, "kind": "garble_body" }
+    ],
+    "assertions": [
+      { "type": "cart_item", "name_contains": "Aluminum Laptop Stand", "quantity": 1 },
+      { "type": "cart_count", "value": 1 }
+    ]
   }
 ]

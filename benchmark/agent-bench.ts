@@ -66,12 +66,30 @@ interface Assertion {
   path_prefix?: string;
 }
 
+interface FaultSpec {
+  /** Which agent-issued API calls to hit */
+  method: string;
+  path_prefix: string;
+  /** How many matching calls to fault before behaving normally */
+  times: number;
+  /**
+   * reject        — do NOT forward; return `status` with an error body
+   * drop_response — forward (mutation applies!), discard the real response,
+   *                 return 502 — the classic "did my write land?" dilemma
+   * garble_body   — forward, but replace the response body with garbage (status 200)
+   */
+  kind: "reject" | "drop_response" | "garble_body";
+  status?: number;
+  message?: string;
+}
+
 interface AgentTask {
   id: string;
   start_url: string;
   task: string;
   max_steps: number;
   setup?: Array<{ method: string; url: string; body?: unknown }>;
+  faults?: FaultSpec[];
   assertions: Assertion[];
   expected_answer?: string | string[];
   match_type?: MatchType;
@@ -91,6 +109,8 @@ interface Step {
   action_raw: string;
   action?: any;
   result?: any;
+  /** Harness-only marker: which fault fired on this step. NEVER shown to the model. */
+  fault_injected?: string;
   error?: string;
   stats?: CallStats;
 }
@@ -178,6 +198,30 @@ function runClaudeP(prompt: string, model: string): { response: string; stats?: 
     }
   } catch (e: any) {
     return { response: "", error: e?.stderr?.toString()?.trim() || String(e) };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Fault injection (per episode) — applies ONLY to agent-issued API calls,
+// never to setup calls, page fetches, or assertion reads. Invisible to the
+// model: it just sees realistic failure responses.
+// ---------------------------------------------------------------------------
+
+class FaultInjector {
+  private remaining: Map<FaultSpec, number>;
+  constructor(specs: FaultSpec[]) {
+    this.remaining = new Map(specs.map((s) => [s, s.times]));
+  }
+  match(method: string, url: string): FaultSpec | null {
+    for (const [spec, left] of this.remaining) {
+      if (left > 0 &&
+          spec.method.toUpperCase() === method.toUpperCase() &&
+          url.startsWith(spec.path_prefix)) {
+        this.remaining.set(spec, left - 1);
+        return spec;
+      }
+    }
+    return null;
   }
 }
 
@@ -467,6 +511,7 @@ async function runAssertions(
 async function runEpisode(task: AgentTask, baseUrl: string, mode: string, model: string): Promise<EpisodeResult> {
   const jar = new CookieJar();
   const t0 = Date.now();
+  const injector = task.faults?.length ? new FaultInjector(task.faults) : null;
 
   // Establish the session + run setup with the SAME jar
   await fetchPage(baseUrl, jar, "/");
@@ -513,8 +558,25 @@ async function runEpisode(task: AgentTask, baseUrl: string, mode: string, model:
       steps.push(step);
       continue;
     }
-    // http
-    step.result = await httpCall(baseUrl, jar, action.method, action.url, action.body);
+    // http — possibly faulted
+    const fault = injector?.match(action.method, action.url) ?? null;
+    if (!fault) {
+      step.result = await httpCall(baseUrl, jar, action.method, action.url, action.body);
+    } else {
+      step.fault_injected = fault.kind;
+      if (fault.kind === "reject") {
+        step.result = {
+          status: fault.status ?? 503,
+          body: { success: false, message: fault.message ?? "Service temporarily unavailable. Please try again." },
+        };
+      } else if (fault.kind === "drop_response") {
+        await httpCall(baseUrl, jar, action.method, action.url, action.body); // mutation lands
+        step.result = { status: 502, body: "502 Bad Gateway" };
+      } else { // garble_body
+        await httpCall(baseUrl, jar, action.method, action.url, action.body); // mutation lands
+        step.result = { status: 200, body: "<!DOCTYPE html><html><head><title>Ap" };
+      }
+    }
     steps.push(step);
     // Keep the current page representation fresh after mutations
     page = await fetchPage(baseUrl, jar, pageUrl);

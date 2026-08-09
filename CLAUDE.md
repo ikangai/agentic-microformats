@@ -27,11 +27,13 @@ keep only if neither tier regresses. Current best: 15/15 at both tiers — at
 ceiling. Do not weaken the isolation guards described below.
 
 A third arm exists: `benchmark/agent-bench.ts` (action execution + multi-page
-against the live demo, judged by server state; see benchmark/README.md).
-Current best there: 7/8 action tasks pass at both tiers; G06 is a deliberate
+against the live demo, judged by server state, including fault-injected
+error-recovery episodes E01–E05; see benchmark/README.md). Current best:
+G01–G05/G07/G08 and E01–E05 all pass at both tiers; G06 is a deliberate
 trust-boundary marker expected to fail in extraction mode. Changes to the
 demo's annotations or the strategy can be validated against it with
-`npm run agent-bench` — treat regressions on G01–G05/G07/G08 as blocking.
+`npm run agent-bench` — treat regressions on any G/E task except G06 as
+blocking.
 
 ---
 
