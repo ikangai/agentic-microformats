@@ -17,7 +17,10 @@
                data-agent-type="product"
                data-agent-id="<%= product.id %>">
 
-        <a href="/product/<%= product.id %>">
+        <a href="/product/<%= product.id %>"
+           data-agent-prop="url"
+           data-agent-typehint="url"
+           data-agent-value="/product/<%= product.id %>">
           <h2 data-agent-prop="name"><%= product.name %></h2>
         </a>
 

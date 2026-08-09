@@ -201,4 +201,71 @@ score 12→15 at both tiers, full-HTML scores unchanged).
 
 ---
 
+## Agent Benchmark: Action Execution + Multi-Page — 2026-08-09
+
+**Goal:** fresh headroom beyond reading/extraction QA — tasks where the agent
+must ACT: execute annotated API contracts against the live AgentShop demo,
+chain response data, and navigate across pages. Judged by **server state**
+(cart contents extracted from /cart via the reference library, order
+creation), not string matching.
+
+**Instrument:** `benchmark/agent-bench.ts` + `tasks-agent.json` (8 episodes).
+The model is a policy in an episode loop: per turn it sees the current page —
+extracted data-agent graph (`--mode=extraction`, default) or raw HTML
+(`--mode=html`) — plus action history, and emits one JSON action
+(navigate / http / answer). The harness executes it with a fresh session
+cookie jar per task against a spawned demo server, then runs typed state
+assertions. Episodes cover: direct add-to-cart, exact quantities, chaining
+`cartItemId` from the add response into PATCH, discovery + selective DELETE,
+full nested checkout (`shipping.*`/`payment.*` dotted params), constraint
+probing (max quantity), catalog-wide compute + multi-add, and one info task
+crossing the trust boundary (G06).
+
+**Runs (isolated, pinned):**
+
+| Arm | Model | Score | Steps | Total cost |
+|-----|-------|-------|-------|-----------|
+| raw HTML | sonnet | 7/8 | 22 | $2.62 |
+| extraction | sonnet | 7/8 | 23 | $2.49 |
+| extraction | haiku | 7/8 | 25 | **$0.47** |
+
+All seven ACTION episodes (G01–G05, G07, G08) passed in every arm — including
+the full checkout with nested params and the cartItemId chain. The only
+failure everywhere was G06 (info task), each arm differently — three findings
+from one task:
+
+1. **Navigability gap (spec/demo defect, fixed).** In extraction mode, sonnet
+   guessed `/products/SKU-MONITOR-27` (404) and looped: the catalog cards
+   never annotated their detail-page URLs, so plain `<a href>` links are
+   invisible to the graph. Fix: `data-agent-prop="url"` on catalog card links
+   (`demo/views/catalog.ejs`). After the fix the agent navigates correctly in
+   ONE step. Rule worth promoting to the spec: **resource cards MUST annotate
+   their canonical URL or the graph is not navigable.**
+2. **Trust boundary (by design, kept as a marker task).** Reviews live in a
+   `data-agent-trust="untrusted"` region, which extraction deliberately
+   skips. After the navigability fix, sonnet's extraction-arm answer was
+   *honest*: rating 4.9, "0 written review texts displayed" — true of the
+   trusted graph, false of the human-visible page. G06 permanently measures
+   this divergence; haiku instead burns all steps searching. Candidate spec
+   concept: site-authored aggregates about untrusted regions.
+3. **Task-wording ambiguity (fixed).** The original G06 didn't distinguish
+   review texts from the rating count (67); the html arm answered 67.
+   Amended wording → html+sonnet passes (2 steps).
+
+**Headline:** action execution over annotated contracts works at both tiers
+and both representations — and **extraction + haiku completes the suite at
+$0.47, ~5.6× cheaper than raw-HTML + sonnet ($2.62), at the same score.**
+The annotations' declared contracts (endpoint, method, params, min/max,
+response schemas) were sufficient for a small model to operate a shop
+end-to-end without ever reading HTML.
+
+**Harness notes:** `Connection: close` on all harness fetches (pooled sockets
+go stale across long model calls → spurious ECONNRESET); results persist
+incrementally per episode; per-task fresh session = state isolation.
+
+**Kept:** yes — agent-bench committed; G06 wording amended; catalog url
+annotation added to the demo.
+
+---
+
 <!-- Experiments appended below by the agent -->

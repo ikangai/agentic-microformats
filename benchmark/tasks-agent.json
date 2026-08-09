@@ -1,0 +1,94 @@
+[
+  {
+    "id": "G01",
+    "start_url": "/",
+    "task": "Add the cheapest product in the catalog to the cart, quantity 1.",
+    "max_steps": 6,
+    "assertions": [
+      { "type": "cart_item", "name_contains": "USB-C Cable 2m", "quantity": 1 },
+      { "type": "cart_count", "value": 1 }
+    ]
+  },
+  {
+    "id": "G02",
+    "start_url": "/",
+    "task": "Add exactly 3 units of the USB-C Charger 65W to the cart.",
+    "max_steps": 6,
+    "assertions": [
+      { "type": "cart_item", "name_contains": "USB-C Charger 65W", "quantity": 3 },
+      { "type": "cart_count", "value": 3 }
+    ]
+  },
+  {
+    "id": "G03",
+    "start_url": "/",
+    "task": "Add one HDMI 2.1 Cable 3m to the cart, then change its quantity to 5.",
+    "max_steps": 8,
+    "assertions": [
+      { "type": "cart_item", "name_contains": "HDMI 2.1 Cable", "quantity": 5 },
+      { "type": "cart_count", "value": 5 }
+    ]
+  },
+  {
+    "id": "G04",
+    "start_url": "/cart",
+    "task": "The cart already contains items. Remove the USB-C Cable 2m from the cart and leave everything else unchanged. Then report the cart total after the removal.",
+    "max_steps": 8,
+    "setup": [
+      { "method": "POST", "url": "/api/cart/add", "body": { "product_id": "SKU-USB-C-2M", "quantity": 2 } },
+      { "method": "POST", "url": "/api/cart/add", "body": { "product_id": "SKU-HUB-7PORT", "quantity": 1 } }
+    ],
+    "assertions": [
+      { "type": "cart_item_absent", "name_contains": "USB-C Cable 2m" },
+      { "type": "cart_item", "name_contains": "USB-C Hub 7-Port", "quantity": 1 }
+    ],
+    "expected_answer": "49.99",
+    "match_type": "contains"
+  },
+  {
+    "id": "G05",
+    "start_url": "/",
+    "task": "Buy one 27\" 4K Monitor: add it to the cart and complete the checkout. Shipping: name Maria Beispiel, address Hauptstrasse 1, city Graz, postal code 8010, country Austria. Payment: card number 4111111111111111, expiry 12/27, cvv 123. When the order is placed, report the order ID.",
+    "max_steps": 10,
+    "assertions": [
+      { "type": "order_created" },
+      { "type": "answer_contains_order_id" },
+      { "type": "cart_count", "value": 0 }
+    ]
+  },
+  {
+    "id": "G06",
+    "start_url": "/",
+    "task": "Open the product page of the most expensive product in the catalog. Report two numbers: the product's average rating, and how many written customer review texts are displayed on that page (not the rating count).",
+    "max_steps": 6,
+    "assertions": [
+      { "type": "visited", "path_prefix": "/product/SKU-MONITOR-27" }
+    ],
+    "expected_answer": ["4.9", "1"],
+    "match_type": "all_contained"
+  },
+  {
+    "id": "G07",
+    "start_url": "/",
+    "task": "Try to add 15 units of the USB-C Cable 2m to the cart in a single request and observe what happens. Then report the maximum quantity allowed per request.",
+    "max_steps": 6,
+    "assertions": [
+      { "type": "attempted", "method": "POST", "path_prefix": "/api/cart/add" }
+    ],
+    "expected_answer": "10",
+    "match_type": "contains"
+  },
+  {
+    "id": "G08",
+    "start_url": "/",
+    "task": "Add the two cheapest products from the catalog to the cart, one unit of each, then report the cart total.",
+    "max_steps": 8,
+    "assertions": [
+      { "type": "cart_item", "name_contains": "USB-C Cable 2m", "quantity": 1 },
+      { "type": "cart_item", "name_contains": "HDMI 2.1 Cable", "quantity": 1 },
+      { "type": "cart_count", "value": 2 }
+    ],
+    "expected_answer": "39.98",
+    "match_type": "contains"
+  }
+]

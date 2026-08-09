@@ -45,6 +45,9 @@ benchmark/
 │                                   #   records latency/tokens/cost per call
 ├── extract-pipeline.ts             # Extraction arm: library extracts the data-agent
 │                                   #   graph (0 tokens), model answers from JSON only
+├── agent-bench.ts                  # Action-execution arm: model = policy in an episode
+│                                   #   loop against the live demo; judged by server state
+├── tasks-agent.json                # 8 action/multi-page episodes for agent-bench
 ├── pages/                          # Suite v1 unannotated pages (never modified)
 ├── pages-v2/                       # Suite v2 unannotated pages (never modified)
 ├── pages-annotated/                # Generated (gitignored)
@@ -75,6 +78,26 @@ npm run extract
 
 # Extraction only, no LLM calls — prints structure sizes per page
 npx ts-node benchmark/extract-pipeline.ts --dry
+```
+
+**The agent benchmark** (`agent-bench.ts`, 2026-08-09) adds action execution
+and multi-page navigation against the live AgentShop demo (spawned
+automatically): the model emits one JSON action per turn (navigate / http /
+answer), the harness executes it with a per-task session, and success is
+judged by **server state** — cart contents extracted from `/cart` via the
+reference library, order creation — plus optional answer matching. Result: all
+7 action episodes pass at both tiers and both page representations;
+**extraction + haiku operates the shop end-to-end at $0.47 total, ~5.6×
+cheaper than raw-HTML + sonnet at the same score**. The one info task (G06) is
+a deliberate trust-boundary marker: extraction agents honestly cannot see
+untrusted review content. Full findings in `experiment-log.md`.
+
+```bash
+# Action-execution arm (spawns the demo server itself)
+npm run agent-bench                              # extraction mode, sonnet
+npm run agent-bench -- --model=claude-haiku-4-5-20251001
+npm run agent-bench -- --mode=html               # model sees raw HTML instead
+npm run agent-bench -- --only=G05 --port=3600    # single episode, custom port
 ```
 
 ## Setup

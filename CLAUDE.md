@@ -24,9 +24,14 @@ ts-node benchmark/extract-pipeline.ts        # default: haiku, tasks-v2
 Keep/revert on `tasks_passed` in `benchmark/results/latest-extract.json`; also
 run the sonnet arm (`--model=claude-sonnet-5`) before committing a change, and
 keep only if neither tier regresses. Current best: 15/15 at both tiers — at
-ceiling, further gains need NEW tasks/pages (maintainer decision) or new arms
-(action execution, multi-page workflows). Do not weaken the isolation guards
-described below.
+ceiling. Do not weaken the isolation guards described below.
+
+A third arm exists: `benchmark/agent-bench.ts` (action execution + multi-page
+against the live demo, judged by server state; see benchmark/README.md).
+Current best there: 7/8 action tasks pass at both tiers; G06 is a deliberate
+trust-boundary marker expected to fail in extraction mode. Changes to the
+demo's annotations or the strategy can be validated against it with
+`npm run agent-bench` — treat regressions on G01–G05/G07/G08 as blocking.
 
 ---
 
