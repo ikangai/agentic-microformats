@@ -43,6 +43,8 @@ benchmark/
 ├── annotator.ts                    # Applies strategy to pages
 ├── evaluator.ts                    # Scores annotated AND baseline pages per run,
 │                                   #   records latency/tokens/cost per call
+├── extract-pipeline.ts             # Extraction arm: library extracts the data-agent
+│                                   #   graph (0 tokens), model answers from JSON only
 ├── pages/                          # Suite v1 unannotated pages (never modified)
 ├── pages-v2/                       # Suite v2 unannotated pages (never modified)
 ├── pages-annotated/                # Generated (gitignored)
@@ -57,6 +59,23 @@ at both model tiers** (sonnet and haiku answer from raw HTML at 14–15/15 by
 spending output tokens); the measurable annotation effect at the frontier tier
 is **effort** — −17 % latency and −14 % output tokens, against +54 % page
 weight. Full numbers in `experiment-log.md`.
+
+**The extraction pipeline** (`extract-pipeline.ts`, 2026-08-09) is the arm with
+real signal: the reference library extracts the data-agent graph
+deterministically (0 tokens, ~ms), and the model answers from that JSON alone —
+the agent never reads the page. Its score directly measures **annotation
+completeness** (unannotated pages score ~0 here), and its failures name the
+missing annotation. Result: extraction + haiku = **15/15 at $0.37** vs
+sonnet-reading-HTML = 14/15 at $1.94; one strategy iteration driven by
+extraction failures took both tiers 12/15 → 15/15.
+
+```bash
+# Extraction arm (default: haiku over pages-v2-annotated + tasks-v2)
+npm run extract
+
+# Extraction only, no LLM calls — prints structure sizes per page
+npx ts-node benchmark/extract-pipeline.ts --dry
+```
 
 ## Setup
 

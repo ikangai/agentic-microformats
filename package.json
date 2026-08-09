@@ -7,6 +7,7 @@
     "annotate": "ts-node --project tsconfig.json benchmark/annotator.ts",
     "evaluate": "ts-node --project tsconfig.json benchmark/evaluator.ts",
     "run-experiment": "npm run annotate && npm run evaluate",
+    "extract": "ts-node --project tsconfig.json benchmark/extract-pipeline.ts",
     "discover": "ts-node --project tsconfig.json discovery/discoverer.ts",
     "discover:ikangai": "ts-node --project tsconfig.json discovery/discoverer.ts --url=https://www.ikangai.com --label=ikangai-homepage",
     "discover:blog": "ts-node --project tsconfig.json discovery/discoverer.ts --url=https://www.ikangai.com/the-web-has-no-api-for-agents-agentic-microformats/ --label=ikangai-blog-post",
@@ -15,8 +16,9 @@
     "discover:all": "npm run discover:ikangai && npm run discover:blog && npm run discover:heygen && npm run discover:llmstxt"
   },
   "devDependencies": {
-    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0",
+    "linkedom": "^0.18.13",
     "ts-node": "^10.9.0",
-    "@types/node": "^20.0.0"
+    "typescript": "^5.0.0"
   }
 }

@@ -171,8 +171,9 @@ Apply `data-agent-trust="untrusted"` to comment sections, user reviews, forum po
 - Annotate each release entry as `data-agent="resource" data-agent-type="release"` with `data-agent-id` set to the version number
 - Mark the version: `data-agent-prop="version"`; mark prerelease/beta entries `data-agent-prop="channel" data-agent-value="beta"` and stable entries `data-agent-value="stable"`
 - Mark the release date: `data-agent-prop="date" data-agent-typehint="date" data-agent-value="<ISO date YYYY-MM-DD>"` — normalize whatever format the page displays
-- Mark each deprecation notice: `data-agent-prop="deprecation" data-agent-value="<old endpoint> -> <replacement>"`
-- Mark version requirements (SDK/CLI minimums): `data-agent-prop="requires" data-agent-value="<component> >= <version>"`
+- Mark deprecations: ONE `data-agent-prop="deprecations"` per release whose `data-agent-value` lists ALL deprecations announced in that release, separated by "; " — e.g. `data-agent-value="/v1/render -> /v2/render/jobs; renderSync() -> renderAsync()"`. Never annotate two properties with the same name on one release (later ones overwrite earlier ones during extraction).
+- Mark breaking changes: `data-agent-prop="breaking-changes" data-agent-typehint="integer" data-agent-value="<number of breaking changes listed>"` on each release that has a breaking-changes section
+- Mark version requirements (SDK/CLI minimums): `data-agent-prop="requires" data-agent-value="<feature>: <component> >= <version>"` — always include the feature name so the requirement is understandable without the surrounding prose
 
 ### Event / schedule page
 - Annotate each session as `data-agent="resource" data-agent-type="session"`, `data-agent-id` from the session anchor id

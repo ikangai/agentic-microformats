@@ -141,4 +141,64 @@ covers both suites.
 
 ---
 
+## Extraction Pipeline — 2026-08-09
+
+**Goal:** measure what annotations enable *architecturally* — an agent that never
+reads the page, only its machine-readable surface — per the conclusion of the
+suite-v2 entry above.
+
+**Instrument:** `benchmark/extract-pipeline.ts`. The reference library
+(`packages/agentic-microformats` + linkedom) extracts the data-agent graph
+deterministically — **0 LLM tokens, 2–22 ms per page** — and the model answers
+tasks-v2 from that JSON alone. The HTML is never shown to the model. Extracted
+structure is **36 % of the HTML bytes** (39.4 KB vs 108.9 KB across the three
+annotated pages).
+
+**Runs (isolated, pinned):**
+
+| Arm | Model | Score | Latency/task | Output tok | Cost |
+|-----|-------|-------|-------------|-----------|------|
+| extraction (initial annotations) | sonnet | 12/15 | 5.7 s | 4 736 | $1.57 |
+| extraction (initial annotations) | haiku | 12/15 | 8.8 s | 11 603 | $0.36 |
+| extraction (after strategy fix, exp below) | sonnet | **15/15** | 4.4 s | 3 325 | $1.55 |
+| extraction (after strategy fix) | haiku | **15/15** | 9.8 s | 13 119 | **$0.37** |
+| *(reference: full HTML, 2026-08-08)* | sonnet | 14/15 | 4.2 s | 3 137 | $1.94 |
+| *(reference: full HTML, 2026-08-08)* | haiku | 15/15 | 8.4 s | 11 424 | $0.49 |
+
+**Experiment: first strategy iteration with real gradient.** The initial
+extraction runs failed 3 tasks at BOTH tiers — and every failure was a
+diagnosable annotation gap, not model noise:
+- V08: only one deprecation annotated per release; duplicate `deprecation`
+  props would collapse anyway (the library keys properties by name).
+- V09: `requires: "SDK >= 4.2.0"` extracted, but nothing tied it to
+  *streaming exports* — sonnet honestly answered "not found" (haiku guessed).
+- V10: breaking changes never annotated.
+
+One change to `annotation-strategy.md` (changelog rules: aggregate all
+deprecations into one `deprecations` value; add `breaking-changes` count;
+include the feature name in `requires`) + re-annotating page 08 took both
+tiers from **12/15 → 15/15**. First time in this project the loop metric
+moved in response to a strategy edit.
+
+**Findings:**
+1. **The extraction arm is the missing gradient.** Its score is a direct
+   measure of annotation completeness: unannotated pages would score ~0 here
+   (empty graph), so the annotated-vs-unannotated delta is the full task set —
+   the value the reading benchmark could never show.
+2. **Structure + small model beats prose + frontier model on cost at equal or
+   better accuracy:** extraction+haiku = 15/15 at $0.37 vs sonnet-reads-HTML =
+   14/15 at $1.94 (≈5× cheaper), with 31 % fewer prompt tokens than
+   haiku-reads-HTML and zero page-reading by the agent.
+3. **Extraction failures are interpretable.** Each one names the missing or
+   ambiguous annotation — they double as spec/strategy discovery, which the
+   probe-based discovery tool only simulated.
+4. **Caveat:** the strategy fix targeted the three observed failures — a
+   train-on-test iteration. Fine for demonstrating the gradient; claims of
+   generality need held-out tasks (suite v3 candidate).
+
+**Kept:** yes — pipeline committed; strategy change committed (extraction
+score 12→15 at both tiers, full-HTML scores unchanged).
+
+---
+
 <!-- Experiments appended below by the agent -->

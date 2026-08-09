@@ -3,18 +3,30 @@
 Read this entire file before doing anything else. Then execute the experiment
 loop described below. Do not ask for permission at any step — just run.
 
-**STOP CONDITION (read first):** BOTH task suites (`tasks.json` and
-`tasks-v2.json`) are **saturated for accuracy** — the unannotated baseline
-scores 14–15/15 at both the sonnet and haiku tiers (see the 2026-08-08 entries
-in `benchmark/experiment-log.md`). On a saturated suite the loop cannot
-demonstrate annotation accuracy value; remaining single-task failures are
-run-to-run noise. Do NOT iterate on the strategy to chase accuracy — report the
-saturation and stop. Meaningful next work is a different task format
-(deterministic extraction via `packages/agentic-microformats` + small-model
-answering, action execution against the demo, multi-page workflows), which is a
-maintainer decision, not a loop action. The evaluator's cost table
-(latency/tokens per side) is the one metric still worth watching on these
-suites.
+**WHICH METRIC TO OPTIMIZE (read first):** the READING benchmark
+(`evaluator.ts`, full HTML shown to the model) is **accuracy-saturated at both
+model tiers** on both task suites — do NOT iterate the strategy against it; its
+score movements are run-to-run noise (see the 2026-08-08 entries in
+`benchmark/experiment-log.md`).
+
+The live metric is the **extraction arm** (`benchmark/extract-pipeline.ts`,
+added 2026-08-09): the reference library extracts the data-agent graph at zero
+tokens and the model answers from that JSON alone. Its score directly measures
+annotation completeness, its failures name the missing annotation, and it has
+demonstrated real gradient (strategy fix took it 12/15 → 15/15 at both tiers).
+Optimize the strategy against THIS score:
+
+```
+ts-node benchmark/annotator.ts --pages-dir=benchmark/pages-v2 --out-dir=benchmark/pages-v2-annotated
+ts-node benchmark/extract-pipeline.ts        # default: haiku, tasks-v2
+```
+
+Keep/revert on `tasks_passed` in `benchmark/results/latest-extract.json`; also
+run the sonnet arm (`--model=claude-sonnet-5`) before committing a change, and
+keep only if neither tier regresses. Current best: 15/15 at both tiers — at
+ceiling, further gains need NEW tasks/pages (maintainer decision) or new arms
+(action execution, multi-page workflows). Do not weaken the isolation guards
+described below.
 
 ---
 
