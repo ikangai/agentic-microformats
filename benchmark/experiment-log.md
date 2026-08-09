@@ -320,4 +320,51 @@ trust-boundary marker.
 
 ---
 
+## Model Diversity: Non-Claude Agent — 2026-08-09
+
+**Goal:** close the monoculture caveat — every prior run used Claude models,
+so "annotations work" could have meant "annotations work for Claude."
+
+**Setup:** `agent-bench.ts` gains `--backend=openai --api-base=…` (any
+OpenAI-compatible server). Subject: **google/gemma-4-26b-a4b** (open-weights
+MoE, ~4B active params) served locally by LM Studio — zero API cost, fully
+offline. Claude-distilled local models were deliberately excluded (they would
+contaminate the diversity claim); qwen3.6-27b was unloadable (~45 GB memory
+guardrail). Down-tier prompt adaptation per the model-selection playbook: one
+worked action example + constraints restated at the end; `max_tokens` 4096
+(reasoning models starve the visible answer under small caps — observed:
+`content` empty, thinking ate a 10-token budget); parse falls back to
+`reasoning_content`.
+
+**Result: 12/13 — identical to both Claude tiers — at $0.00.**
+
+| Episode group | gemma-4-26b-a4b (local) | haiku | sonnet |
+|---|---|---|---|
+| G01–G05, G07, G08 (actions) | 7/7 | 7/7 | 7/7 |
+| G06 (trust-boundary marker) | FAIL (steps exhausted) | FAIL (same) | FAIL (honest "0 visible") |
+| E01–E05 (error recovery) | 5/5 | 5/5 | 5/5 |
+
+**Findings:**
+1. **The annotation contract is model-portable.** A locally-run open-weights
+   model completed the nested checkout, the cartItemId chain, and all five
+   fault-recovery patterns from the extraction graph alone — same score as
+   Claude, ~10–30 s/step, no API cost. This is the adoption claim in
+   miniature: annotate once, any agent vendor benefits.
+2. **Recovery strategies cluster by tier, not vendor.** Gemma's E02
+   transcript is step-for-step haiku's: blind retry (double-add), inspect
+   the annotated /cart, repair via PATCH. Verify-before-retry appeared only
+   at the frontier tier (sonnet). The small-tier pattern works *because* the
+   cart state is machine-readable.
+3. **G06 fails identically across vendors** (small tiers exhaust steps;
+   sonnet answers honestly) — confirming the trust boundary is architectural,
+   not a Claude quirk.
+4. Integration lesson recorded to the model-selection KB: local reasoning
+   models need a generous completion budget and a `reasoning_content`
+   fallback, or they emit no action at all.
+
+**Kept:** yes — openai backend committed; calibration recorded
+(`kb record --task-type agentic-tool-use`, gemma + haiku at 9.0).
+
+---
+
 <!-- Experiments appended below by the agent -->

@@ -23,6 +23,8 @@
  *   ts-node benchmark/agent-bench.ts [--tasks=./benchmark/tasks-agent.json]
  *                                    [--mode=extraction|html]
  *                                    [--model=claude-sonnet-5]
+ *                                    [--backend=claude|openai]           # openai = any OpenAI-compatible
+ *                                    [--api-base=http://localhost:1234/v1]  #   server, e.g. LM Studio
  *                                    [--base-url=http://localhost:3000]  # else spawns demo server
  *                                    [--only=G01,G05]
  *
@@ -201,6 +203,55 @@ function runClaudeP(prompt: string, model: string): { response: string; stats?: 
   }
 }
 
+// OpenAI-compatible backend (e.g. LM Studio). Cost is $0 for local servers.
+// First call may JIT-load the model — allow a generous timeout.
+async function runOpenAI(
+  prompt: string, model: string, apiBase: string
+): Promise<{ response: string; stats?: CallStats; error?: string }> {
+  const t0 = Date.now();
+  try {
+    const res = await fetch(`${apiBase.replace(/\/$/, "")}/chat/completions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model,
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0,
+        // Reasoning models spend completion budget on thinking before the
+        // visible answer — a small cap starves the action entirely.
+        max_tokens: 4096,
+      }),
+      signal: AbortSignal.timeout(300_000),
+    });
+    if (!res.ok) {
+      return { response: "", error: `${res.status}: ${(await res.text()).substring(0, 200)}` };
+    }
+    const data: any = await res.json();
+    const msg = data.choices?.[0]?.message ?? {};
+    // Prefer visible content; fall back to reasoning_content (some local
+    // reasoning models emit the final JSON only there when truncated).
+    const text = String(msg.content ?? "").trim() || String(msg.reasoning_content ?? "").trim();
+    return {
+      response: text,
+      stats: {
+        duration_ms: Date.now() - t0,
+        input_tokens: data.usage?.prompt_tokens,
+        output_tokens: data.usage?.completion_tokens,
+        cost_usd: 0,
+      },
+    };
+  } catch (e: any) {
+    return { response: "", error: String(e?.message ?? e).substring(0, 200) };
+  }
+}
+
+async function callModel(
+  prompt: string, backend: string, model: string, apiBase: string
+): Promise<{ response: string; stats?: CallStats; error?: string }> {
+  if (backend === "openai") return runOpenAI(prompt, model, apiBase);
+  return runClaudeP(prompt, model);
+}
+
 // ---------------------------------------------------------------------------
 // Fault injection (per episode) — applies ONLY to agent-issued API calls,
 // never to setup calls, page fetches, or assertion reads. Invisible to the
@@ -348,7 +399,7 @@ function representPage(html: string, mode: string): string {
 // Prompt + action parsing
 // ---------------------------------------------------------------------------
 
-function buildPrompt(task: AgentTask, mode: string, pageUrl: string, pageRepr: string, history: Step[], stepsLeft: number): string {
+function buildPrompt(task: AgentTask, mode: string, pageUrl: string, pageRepr: string, history: Step[], stepsLeft: number, strict = false): string {
   const historyText = history.length === 0 ? "(none yet)" : history.map((s) => {
     if (s.error) return `step ${s.n}: INVALID ACTION (${s.error}) — raw output was: ${s.action_raw.substring(0, 200)}`;
     if (s.action?.type === "navigate") return `step ${s.n}: navigate ${s.action.url} → now on that page`;
@@ -385,7 +436,12 @@ ${pageRepr}
 ACTION HISTORY:
 ${historyText}
 
-Your next action (one JSON object, nothing else):`;
+${strict ? `Example of a valid action (format only — use values from THIS page):
+{"type":"http","method":"POST","url":"/api/cart/add","body":{"product_id":"SKU-EXAMPLE","quantity":1}}
+
+Remember: output ONLY the single JSON action object. No explanation, no markdown fences, no text before or after it.
+
+` : ""}Your next action (one JSON object, nothing else):`;
 }
 
 function parseAction(raw: string): { action?: any; error?: string } {
@@ -508,10 +564,14 @@ async function runAssertions(
 // Episode loop
 // ---------------------------------------------------------------------------
 
-async function runEpisode(task: AgentTask, baseUrl: string, mode: string, model: string): Promise<EpisodeResult> {
+async function runEpisode(
+  task: AgentTask, baseUrl: string, mode: string, model: string,
+  backend = "claude", apiBase = "http://localhost:1234/v1"
+): Promise<EpisodeResult> {
   const jar = new CookieJar();
   const t0 = Date.now();
   const injector = task.faults?.length ? new FaultInjector(task.faults) : null;
+  const strictPrompt = backend === "openai"; // down-tier prompt adaptation for local models
 
   // Establish the session + run setup with the SAME jar
   await fetchPage(baseUrl, jar, "/");
@@ -528,8 +588,8 @@ async function runEpisode(task: AgentTask, baseUrl: string, mode: string, model:
   let parseErrors = 0;
 
   for (let n = 1; n <= task.max_steps; n++) {
-    const prompt = buildPrompt(task, mode, pageUrl, representPage(page.html, mode), steps, task.max_steps - n + 1);
-    const { response, stats, error } = runClaudeP(prompt, model);
+    const prompt = buildPrompt(task, mode, pageUrl, representPage(page.html, mode), steps, task.max_steps - n + 1, strictPrompt);
+    const { response, stats, error } = await callModel(prompt, backend, model, apiBase);
     const step: Step = { n, page_url: pageUrl, action_raw: response, stats };
 
     if (error) {
@@ -628,6 +688,8 @@ async function main() {
   const baseUrlArg = args.find((a) => a.startsWith("--base-url="))?.split("=")[1];
   const only = args.find((a) => a.startsWith("--only="))?.split("=")[1]?.split(",");
   const port = Number(args.find((a) => a.startsWith("--port="))?.split("=")[1] ?? SPAWN_PORT);
+  const backend = args.find((a) => a.startsWith("--backend="))?.split("=")[1] ?? "claude";
+  const apiBase = args.find((a) => a.startsWith("--api-base="))?.split("=")[1] ?? "http://localhost:1234/v1";
 
   let tasks: AgentTask[] = JSON.parse(fs.readFileSync(tasksFile, "utf-8"));
   if (only) tasks = tasks.filter((t) => only.includes(t.id));
@@ -647,7 +709,7 @@ async function main() {
   console.log(`\n${"=".repeat(60)}`);
   console.log(`Agent Benchmark — action execution + multi-page (harness v${HARNESS_VERSION})`);
   console.log(`Mode      : ${mode} ${mode === "extraction" ? "(model sees extracted data-agent graph only)" : "(model sees raw HTML)"}`);
-  console.log(`Model     : ${model}`);
+  console.log(`Model     : ${model} (backend: ${backend}${backend === "openai" ? ` @ ${apiBase}` : ""})`);
   console.log(`Server    : ${baseUrl}${server ? " (spawned)" : ""}`);
   console.log(`Tasks     : ${tasks.length}`);
   console.log(`${"=".repeat(60)}\n`);
@@ -675,7 +737,7 @@ async function main() {
     for (const task of tasks) {
       process.stdout.write(`[${task.id}] ${task.task.substring(0, 60)}... `);
       try {
-        const ep = await runEpisode(task, baseUrl, mode, model);
+        const ep = await runEpisode(task, baseUrl, mode, model, backend, apiBase);
         episodes.push(ep);
         console.log(`${ep.passed ? "PASS" : "FAIL"} (${ep.steps_used} steps, $${ep.cost_usd.toFixed(2)})`);
         if (!ep.passed) for (const f of ep.failed_assertions) console.log(`   ✗ ${f}`);
@@ -696,7 +758,7 @@ async function main() {
     const totalSteps = episodes.reduce((s, e) => s + e.steps_used, 0);
     const runResult = {
       timestamp, harness_version: HARNESS_VERSION, arm: "agent-bench",
-      mode, model, tasks_file: tasksFile,
+      mode, model, backend, tasks_file: tasksFile,
       total_tasks: tasks.length, tasks_passed: passed,
       score: passed / tasks.length,
       total_steps: totalSteps,

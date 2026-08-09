@@ -101,7 +101,16 @@ npm run agent-bench                              # extraction mode, sonnet
 npm run agent-bench -- --model=claude-haiku-4-5-20251001
 npm run agent-bench -- --mode=html               # model sees raw HTML instead
 npm run agent-bench -- --only=G05 --port=3600    # single episode, custom port
+
+# Non-Claude agent via any OpenAI-compatible server (e.g. LM Studio)
+npm run agent-bench -- --backend=openai --model=google/gemma-4-26b-a4b
 ```
+
+**Model portability** (2026-08-09): a locally-served open-weights model
+(gemma-4-26b-a4b via LM Studio) scores **12/13 — identical to both Claude
+tiers — at $0.00**, completing the nested checkout and all five
+error-recovery episodes from the extraction graph alone. Only the deliberate
+trust-boundary marker (G06) fails, in the same way across vendors.
 
 ## Setup
 
