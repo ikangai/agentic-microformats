@@ -67,6 +67,11 @@ function extractAction(el: AgentElement, inheritedTargetId?: string, root?: Agen
 
   const onSuccess = el.getAttribute('data-agent-on-success') ?? undefined;
 
+  const idempotentAttr = el.getAttribute('data-agent-idempotent');
+  const idempotent =
+    idempotentAttr === 'true' ? true :
+    idempotentAttr === 'false' ? false : undefined;
+
   let response: Record<string, string> | undefined;
   const responseAttr = el.getAttribute('data-agent-response');
   if (responseAttr) {
@@ -91,6 +96,7 @@ function extractAction(el: AgentElement, inheritedTargetId?: string, root?: Agen
     description: resolveDescription(el, root),
     onSuccess,
     response,
+    idempotent,
     hints: extractHints(el),
     element: el,
   };
@@ -118,12 +124,26 @@ function extractProperties(resourceEl: AgentElement): Record<string, Property> {
     const valueOverride = el.getAttribute('data-agent-value');
     const rawValue = valueOverride ?? el.textContent?.trim() ?? '';
     const currency = el.getAttribute('data-agent-currency') ?? undefined;
+    const value = coerceValue(rawValue, typehint);
+
+    const existing = props[name];
+    if (existing) {
+      // Repeated property name (spec §5, 0.3.0): keep the first occurrence
+      // as value/rawValue and collect ALL occurrences in document order.
+      if (!existing.values) {
+        existing.values = [existing.value];
+        existing.rawValues = [existing.rawValue];
+      }
+      existing.values.push(value);
+      existing.rawValues!.push(rawValue);
+      continue;
+    }
 
     props[name] = {
       name,
       rawValue,
       typehint,
-      value: coerceValue(rawValue, typehint),
+      value,
       currency,
       element: el,
     };

@@ -30,6 +30,13 @@ export interface Property {
   rawValue: string;
   typehint: TypeHint;
   value: unknown;
+  /**
+   * Present when the same property name appears more than once within one
+   * resource (spec §5, 0.3.0): all coerced values in document order.
+   * `value`/`rawValue` hold the FIRST occurrence.
+   */
+  values?: unknown[];
+  rawValues?: string[];
   currency?: string;
   element: import('./dom.js').AgentElement;
 }
@@ -60,6 +67,12 @@ export interface Action {
   onSuccess?: string;
   /** Response schema: field name → typehint. Spec §6.7. */
   response?: Record<string, string>;
+  /**
+   * Whether repeating this request produces the same server state (spec
+   * 0.3.0). Distinct from hints.reversible: reversible answers "can I undo
+   * it?", idempotent answers "is it safe to retry blindly?".
+   */
+  idempotent?: boolean;
   hints: InteractionHints;
   element: import('./dom.js').AgentElement;
 }

@@ -22,6 +22,9 @@ export { isUntrusted, isIgnored, getTrustLevel, shouldSkip } from './trust.js';
 export { extractHints, requiresConfirmation } from './hints.js';
 export { extractParameters, buildNestedParams } from './params.js';
 export { extractMeta, extractResources, extractActions, extractAll } from './extract.js';
+export { toGraph, toGraphJSON, GRAPH_FORMAT_VERSION } from './serialize.js';
+export { validate } from './validate.js';
+export type { ValidationIssue } from './validate.js';
 export { observe } from './observe.js';
 export type { AgentMutation, MutationCallback } from './observe.js';
 
