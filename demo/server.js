@@ -2,6 +2,8 @@ const express = require('express');
 const session = require('express-session');
 const crypto = require('crypto');
 const path = require('path');
+const { parseHTML } = require('linkedom');
+const am = require('agentic-microformats');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -51,6 +53,54 @@ app.use((req, res, next) => {
   ).toFixed(2);
 
   next();
+});
+
+// ──────────────────────────────────────────────
+// Agentic Microformats delivery (spec 0.3.0)
+// ──────────────────────────────────────────────
+
+// Announce annotation support + graph endpoint on every response (spec §9.6)
+app.use((req, res, next) => {
+  res.set('X-Agent-Annotations', '0.3; graph=/.well-known/agent-graph');
+
+  // Content negotiation (graph-serialization.md §3.1): agents that send
+  // Accept: application/agent+json get the canonical graph of the page —
+  // rendered server-side, extracted with the reference library.
+  if (req.accepts(['html', 'application/agent+json']) === 'application/agent+json') {
+    const originalRender = res.render.bind(res);
+    res.render = (view, locals) => {
+      originalRender(view, locals, (err, html) => {
+        if (err) return next(err);
+        const { document } = parseHTML(html);
+        res.type('application/agent+json');
+        res.send(am.toGraphJSON(am.extractAll(document.documentElement)));
+      });
+    };
+  }
+  next();
+});
+
+// Well-known graph endpoint (graph-serialization.md §3.2). Session cookies
+// forward, so stateful pages (cart) serialize the caller's own state.
+app.get('/.well-known/agent-graph', async (req, res) => {
+  const page = String(req.query.page || '/');
+  if (!page.startsWith('/') || page.startsWith('//')) {
+    return res.status(400).json({ success: false, message: 'page must be a site-relative path' });
+  }
+  try {
+    const r = await fetch(`http://localhost:${PORT}${page}`, {
+      headers: { 'Accept': 'application/agent+json', 'Cookie': req.headers.cookie || '' },
+      redirect: 'manual',
+    });
+    if (r.status >= 300) {
+      return res.status(r.status === 404 ? 404 : 502)
+        .json({ success: false, message: `page returned ${r.status}` });
+    }
+    res.type('application/agent+json');
+    res.send(await r.text());
+  } catch (e) {
+    res.status(502).json({ success: false, message: 'graph rendering failed' });
+  }
 });
 
 // ──────────────────────────────────────────────

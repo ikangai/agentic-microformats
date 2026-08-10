@@ -38,6 +38,7 @@
             <form data-agent="action"
                   data-agent-name="update_quantity"
                   data-agent-method="PATCH"
+                  data-agent-idempotent="true"
                   data-agent-endpoint="/api/cart/<%= item.id %>"
                   data-agent-headers='{"Content-Type":"application/json"}'
                   data-agent-role="secondary"
@@ -64,6 +65,7 @@
             <button data-agent="action"
                     data-agent-name="remove_from_cart"
                     data-agent-method="DELETE"
+                    data-agent-idempotent="true"
                     data-agent-endpoint="/api/cart/<%= item.id %>"
                     data-agent-role="danger"
                     data-agent-risk="low"

@@ -5,6 +5,8 @@
 Every page is fully annotated with structured metadata. Agents can read resources, discover actions, and call APIs directly — no scraping or vision required.
 
 - Spec: [Agentic Microformats](https://github.com/ikangai/agentic-microformats)
+- Annotations: agent-annotations 0.3 (announced via meta tag and X-Agent-Annotations header)
+- Canonical graph: send `Accept: application/agent+json` to any page, or GET `/.well-known/agent-graph?page=<path>` — no HTML parsing needed
 - Currency: EUR
 - Locale: en-US
 - Rate limit: 30 requests/minute
