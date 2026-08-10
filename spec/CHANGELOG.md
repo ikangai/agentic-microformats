@@ -16,6 +16,9 @@ All notable changes to the Agentic Microformats specification.
 - `verified` trust semantics defined (reserved, parse-as-system); aggregates-over-untrusted-regions pattern (§10.1)
 - Reference implementation 0.3.0: canonical serializer, structural validator, repeated properties, idempotency
 
+- Annotations as Consent (§3.3): publishing annotations is a machine-readable permission grant for conforming agents, bounded by the declared constraints — the robots.txt of actions
+- Prior-art positioning (§B.1): honest comparison with schema.org `potentialAction`, incl. one-way export path (data-agent → JSON-LD)
+
 ### Fixed
 - `data-agent-cost-currency` and `data-agent-meta` registered in §4.1 and the ABNF (previously used but unregistered)
 

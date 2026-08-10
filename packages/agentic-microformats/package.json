@@ -1,6 +1,6 @@
 {
   "name": "agentic-microformats",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Reference implementation of the Agentic Microformats specification",
   "type": "module",
   "exports": {
@@ -10,7 +10,11 @@
       "default": "./dist/index.js"
     }
   },
-  "files": ["dist", "LICENSE"],
+  "files": [
+    "dist",
+    "bin",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc",
     "test": "vitest run",
@@ -22,11 +26,23 @@
     "url": "git+https://github.com/ikangai/agentic-microformats.git",
     "directory": "packages/agentic-microformats"
   },
-  "keywords": ["agents", "microformats", "html", "semantic-web", "ai-agents", "data-agent"],
+  "keywords": [
+    "agents",
+    "microformats",
+    "html",
+    "semantic-web",
+    "ai-agents",
+    "data-agent"
+  ],
   "devDependencies": {
     "typescript": "^5.7.0",
-    "vitest": "^3.0.0",
-    "linkedom": "^0.18.0"
+    "vitest": "^3.0.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "bin": {
+    "agentic-microformats": "./bin/cli.js"
+  },
+  "dependencies": {
+    "linkedom": "^0.18.0"
+  }
 }

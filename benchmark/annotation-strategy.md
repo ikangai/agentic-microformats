@@ -99,14 +99,14 @@ Risk assessment for code blocks:
 
 ## Navigation annotation
 
-For primary navigation elements:
+Primary navigation is annotated with REGISTERED vocabulary only (the values
+`data-agent="navigation"` and `data-agent-section` are NOT part of the spec
+and fail validation):
 
-```
-data-agent="navigation"
-data-agent-role="primary|secondary|breadcrumb|pagination"
-```
-
-Individual nav items: annotate each `<a>` with `data-agent-prop="nav-item"` and `data-agent-section="<section-name>"`.
+- Mark the nav container as a resource: `data-agent="resource" data-agent-type="navigation"`
+- Annotate each nav link with `data-agent-prop="section-name"` and
+  `data-agent-prop="url"`-style link annotation where the section has its own page
+- For extensions beyond the registry, use the `data-agent-x-*` prefix (always legal)
 
 ---
 

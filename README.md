@@ -61,6 +61,10 @@ The semantic annotations don't control agents or define automation rules. They h
 
 ## Quick Start
 
+**Site owner?** The 30-minute path — annotate, validate with
+`npx agentic-microformats <url>`, watch an agent use it:
+**[docs/adopt-in-30-minutes.md](docs/adopt-in-30-minutes.md)**
+
 ### 1. Annotate a Resource
 
 ```html

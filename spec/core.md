@@ -231,6 +231,31 @@ A conforming agent:
 
 ---
 
+### 3.3 Annotations as Consent
+
+Publishing conforming annotations is a machine-readable statement of
+permission: it declares that conforming agents are **welcome to perform the
+declared actions, within the declared constraints** — the endpoints, methods,
+and parameters as annotated; the risk, confirmation, and rate-limit hints as
+declared; nothing more.
+
+Consequences, in both directions:
+
+- A site that annotates an action MUST NOT treat a conforming agent's use of
+  that action, within its declared constraints, as abuse.
+- The permission is exactly as wide as the annotations: it does not extend to
+  unannotated endpoints, to circumventing `data-agent-human-preferred` or
+  risk hints, to exceeding declared rate limits, or to content inside
+  untrusted or ignored regions.
+- Absence of annotations grants nothing. This section makes annotated sites
+  *more* predictable to operate, not unannotated sites fair game.
+
+This gives annotation a function that no amount of agent capability can
+replace: it is the `robots.txt` of *actions* — an explicit, per-action,
+per-constraint invitation, legible to machines and to humans reading the
+source. (This specification defines protocol semantics, not legal advice;
+sites remain free to state additional terms out of band.)
+
 ## 4. Core Vocabulary
 
 ### 4.1 Attribute Overview
@@ -1396,6 +1421,36 @@ These are complementary. A project might use:
 
 The key difference: Agentic Microformats embeds semantics in the visible UI, enabling human-agent shared operation on the same interface.
 
+### B.1 Why not schema.org `potentialAction`?
+
+Schema.org has declared actions since 2014: `potentialAction`, `EntryPoint`,
+`target`, `httpMethod`, `urlTemplate` — typically embedded as JSON-LD. It is
+the closest prior art to this specification's action layer, it has
+search-engine-scale deployment, and any serious reviewer should ask why this
+document does not simply extend it. The honest comparison:
+
+| Concern | schema.org Actions (JSON-LD) | Agentic Microformats |
+|---------|------------------------------|----------------------|
+| Where semantics live | A hidden metadata block, separate from the UI | On the visible elements humans use — one source of truth |
+| Drift risk | JSON-LD famously rots apart from the page it describes | Annotation and UI are the same node; drift is visible |
+| Shared human–agent operation | Not modeled | The core design goal (§2.1) |
+| Trust boundaries | None — injected JSON-LD is indistinguishable from site-authored | `data-agent-trust` regions; untrusted content never reaches the graph (§10) |
+| Interaction safety | None | risk / reversible / idempotent / human-preferred / cost hints (§6.9, §8) |
+| Parameters | `*-input` URL template properties | Bound to the real form inputs, with live values, min/max, required (§7) |
+| Live state | Static description | The graph serializes current page state — carts, availability — enabling error recovery (§2.11) |
+| Vocabulary breadth | Vast, mature, multi-domain | Deliberately small; types MAY reuse schema.org names (Appendix A.2) |
+| Deployment | Search engines already consume it | Emerging |
+
+The two are complementary rather than competing: schema.org describes *what
+things are* for crawlers; Agentic Microformats describes *how to operate
+them* for agents sharing the interface with a human. Sites already invested
+in schema.org lose nothing — `data-agent-type` values SHOULD reuse
+schema.org type names where they exist, and because the canonical graph
+serialization is deterministic, tooling can mechanically *export* a
+`potentialAction` JSON-LD block from Agentic Microformats annotations (the
+reverse is not possible: JSON-LD lacks the element binding, trust scope, and
+live state to generate meaningful `data-agent-*` markup).
+
 ---
 
 ## Appendix C: Implementation Notes
@@ -1706,6 +1761,8 @@ Driven by measured findings from the benchmark suite (see
 - `verified` trust semantics defined as reserved; aggregates-over-untrusted pattern (10.1)
 - Endpoint origin policy: same-origin MUST with explicit opt-out (12.5)
 - Registered `data-agent-cost-currency` and `data-agent-meta` in 4.1 and the ABNF
+- Annotations as Consent: publishing annotations grants conforming agents permission within declared constraints (3.3)
+- Prior-art positioning: comparison with schema.org `potentialAction` (B.1)
 
 ### Version 0.2.0 (February 2026)
 
