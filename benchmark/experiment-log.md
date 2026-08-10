@@ -403,10 +403,10 @@ prompts at equal scores, one interchange shape across TS, Python, the demo's
 HTTP delivery, and both benchmark arms. The V01 episode is a reminder that
 string matchers rot when representations improve; prefer semantic matchers.
 
-**Left deliberately unpublished:** `npm publish` (public, irreversible) —
-tarball verified, one command away. Remaining functional gaps (async, error
-taxonomy, notifications, signed graphs, wild-web evidence) are scoped in
-`docs/plans/2026-08-10-v0.4-roadmap.md`.
+**Published 2026-08-10:** `agentic-microformats@0.3.0` is live on npm
+(operator-executed; prepublish guard ran all 102 tests). Remaining
+functional gaps (async, error taxonomy, notifications, signed graphs,
+wild-web evidence) are scoped in `docs/plans/2026-08-10-v0.4-roadmap.md`.
 
 ---
 

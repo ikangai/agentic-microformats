@@ -51,6 +51,13 @@ guard is in place), then a small Python `extract()` with the same canonical
 output. Nothing else on this list matters if integration starts with
 copy-paste.
 
+> **Resolved 2026-08-10:** `agentic-microformats@0.3.0` is live on npm;
+> the stdlib-only Python port ships in `packages/agentic-microformats-py`
+> with exact golden-parity against the TS reference (PyPI upload pending).
+> Items 2–9 shipped in spec 0.3.0 the same day; item 10's validator exists,
+> its signing mechanism and item 11 are scoped in
+> `docs/plans/2026-08-10-v0.4-roadmap.md`.
+
 ### 2. The graph has no standard serialization — and no server-side delivery
 `extract-pipeline.ts` had to invent a JSON shape for the graph. If two
 consumers invent two shapes, the ecosystem forks at birth. And since
