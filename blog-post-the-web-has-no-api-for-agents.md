@@ -80,11 +80,27 @@ The order completed. The response included a redirect URL, exactly as the `respo
 
 The entire journey: five page visits, eight API calls, and every single one was informed by metadata that the page provided explicitly.
 
+## We Tried to Prove It — and First Proved Ourselves Wrong
+
+A demo is a story. We wanted numbers. So we built a benchmark harness — isolated model calls, pinned models, annotated and unannotated pages scored side by side — and the first result was humbling: **on reading tasks, annotations don't help.**
+
+We wrote fifteen tasks over deliberately hostile pages — a 48-product German store with locale-formatted prices and API endpoints buried in inline JavaScript, a changelog mixing three date formats, a three-day conference program requiring timezone math. Frontier and small models alike answered 14–15 out of 15 from the raw, unannotated HTML. Modern LLMs read web pages just fine. They pay for it in effort — the small model spent roughly 750 output tokens per task visibly enumerating product cards — but they get there. If your agent only needs to *read* a page, it doesn't need your annotations.
+
+The value shows up when the agent stops reading and starts operating.
+
+**Extraction is free.** Our reference library parses the complete annotation graph out of a page in milliseconds — deterministically, zero model tokens — at roughly a third of the HTML's size. Feed that structure to a small model instead of feeding HTML to a frontier model, and the same QA suite goes from 14/15 at $1.94 to 15/15 at $0.37. Better score, about five times cheaper, and the agent never saw a page.
+
+**Operation is model-portable.** We ran thirteen live episodes against AgentShop — add to cart, chain the returned `cartItemId` into a quantity update, remove the right item, complete a checkout with nested shipping and payment fields — judged not by what the model *said*, but by what the server's state actually was afterward. Three very different agents ran the same episodes: a frontier model ($2.62), a small model ($0.47), and an open-weights model running locally on a laptop ($0.00). All three scored 12 of 13. Annotate once, and anyone's model can operate your site.
+
+**Recovery needs machine-readable state.** We injected faults mid-episode: responses dropped *after* the mutation landed (did my write go through?), rate limits on checkout, garbled response bodies. Every agent recovered every time — but only because the cart page itself is annotated. The small models blindly retried, spotted the duplicate on the machine-readable cart, and repaired it with a PATCH. The frontier model checked the cart *before* retrying. Different strategies, same enabler: without a machine-readable state surface, a lost response is unrecoverable except by guessing.
+
+The benchmark also bit us twice, usefully. An agent given only the extraction graph couldn't find a product's detail page — because our own catalog never annotated its links, and a plain `<a href>` is invisible to the graph. The rule we learned: if a resource has a canonical URL, annotate it, or your site isn't navigable. And an agent asked about customer reviews truthfully reported that it couldn't see any — reviews live in a `data-agent-trust="untrusted"` region that graph-readers skip by design. The trust boundary works. It also means annotation-only agents see less than humans do. Both facts belong in the open.
+
 ## Three Layers, One Stack
 
 Agentic Microformats doesn't operate in isolation. It's the page-level layer in a stack that's emerging across three levels of the web.
 
-At the repository level, **AGENTS.md** — now adopted by over 60,000 projects and backed by the Linux Foundation — gives coding agents instructions for working within a codebase. What to build, how to test, what conventions to follow.
+At the repository level, **AGENTS.md** — now widely adopted across open-source projects — gives coding agents instructions for working within a codebase. What to build, how to test, what conventions to follow.
 
 At the site level, **llms.txt** provides a curated Markdown overview of a site's purpose and structure, designed for LLM consumption. Think of it as a cover letter for your website, addressed to an AI reader.
 
@@ -100,8 +116,8 @@ Agentic Microformats takes the opposite position. The web already has an interfa
 
 Adding `data-agent-*` attributes to existing elements is a minimal intervention with outsized leverage. The page still works exactly the same for humans. But now an agent can read the same page and understand what it means, what it can do, and what it should be careful about.
 
-The lesson from the AgentShop demo isn't that agents can shop online. It's that the gap between "AI agent" and "useful AI assistant" might not require a new protocol or a vision model or a purpose-built API. It might require twelve HTML attributes and the willingness to describe what your interface already does.
+The measured lesson isn't that agents can shop online — today's models can already read any page you put in front of them, and our own benchmark proved annotations add nothing there. The lesson is what happens when a page declares its contracts: a model a fraction of the size, at a fraction of the cost — or running free on a laptop — can *operate* the site, recover from failures mid-flow, and hand anything risky back to a human. Closing the gap between "AI agent" and "useful AI assistant" might not require a new protocol or a vision model or a purpose-built API. It might require a couple dozen HTML attributes and the willingness to describe what your interface already does.
 
-The specification is open, the demo is live, and the repo is at [github.com/ikangai/agentic-microformats](https://github.com/ikangai/agentic-microformats).
+The specification is open, the demo store and the full benchmark harness — including every run this post quotes — are one `docker compose up` and one `npm run agent-bench` away, and the repo is at [github.com/ikangai/agentic-microformats](https://github.com/ikangai/agentic-microformats).
 
 *The web remains a human interface. Agents become assistants who can read the room — because the room finally describes itself.*
