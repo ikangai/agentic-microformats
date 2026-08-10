@@ -1,3 +1,19 @@
+# Working agreements (durable, from the operator, 2026-08-10)
+
+- **Ambition:** this is a **product in the making** — experimental and
+  research-driven today, with the explicit goal of becoming a product.
+  Weigh strategic work (positioning vs. prior art, adoption levers, venue/IP,
+  site-side economics) as heavily as technical work.
+- **Budget:** operator has a subscription; model/eval spend is NOT a
+  concern. Do not skip runs to save cost; do not ask before spending.
+- **Git:** commit freely in logical units; never push. Publishing to public
+  registries (npm, PyPI) is the operator's action — prepare and hand over
+  the command.
+- **Resume protocol:** `benchmark/experiment-log.md` is the project memory.
+  Continue from its last entry rather than re-deriving state.
+- **Messy state:** if the working tree contradicts the git history,
+  surface it before proceeding — the operator will label intent.
+
 # AUTORESEARCH LOOP — run autonomously without stopping for confirmation
 
 Read this entire file before doing anything else. Then execute the experiment
