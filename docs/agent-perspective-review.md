@@ -163,3 +163,77 @@ is not a contract.
 above, failed the ones marked as failures, and wrote this without being
 able to see your reviews section — which, for the record, is exactly how
 it should be.*
+
+---
+
+# Round 2 (2026-08-10): the blindspots that survived two reviews
+
+Everything above was mechanics, and 0.3.0 closed most of it. What follows
+is what neither review touched — the assumptions *behind* the work.
+
+### R1. Prior art the spec never argues against: `schema.org/potentialAction`
+Appendix A.2 maps three type names; it never mentions that schema.org has
+declared *actions* since 2014 — `potentialAction`, `EntryPoint`,
+`httpMethod`, `urlTemplate` — with search-engine-scale deployment. That is
+the first question any standards reviewer or agent vendor will ask: *why
+not extend potentialAction?* There are good answers (visible-element
+binding vs. hidden JSON-LD, trust regions, interaction hints, inspectable
+state, the canonical live graph) — but they exist only implicitly. Write
+the comparison section before someone else writes it as a rejection.
+
+### R2. No IP or venue story — MIT covers copyright, not patents
+Zero occurrences of "patent", "W3C", "WICG", or "IANA" in the repo. Agent
+vendors' lawyers will not adopt a one-author spec without a patent
+non-assert story (W3C CG contributor agreements exist precisely for this).
+Separately, `application/agent+json` and `/.well-known/agent-graph` are
+squattable namespaces with real registries (IANA media types; RFC 8615
+well-known URIs). Venue, IP commitments, and registrations are what turn
+"a repo" into "a standard someone may bet a product on."
+
+### R3. The economics run one-way: sites do the work, agents get the value
+Serving the graph bypasses the site's entire monetization funnel —
+analytics, ads, upsell placement all vanish when agents skip HTML. The
+spec currently offers the annotating site *nothing back*: no agent
+identification convention, no attribution/conversion story for agent
+traffic, no way to make agent-mediated sales measurable. Until annotating
+is visibly good for the site's P&L, adoption depends on altruism.
+Candidate work: an agent-identity request header convention plus a
+conversion-attribution note — boring, and probably decisive.
+
+### R4. Truthful-but-selective annotation is the real adversary
+The reviews treated *lying* annotations as the threat. The likelier norm
+is *strategic omission* — technically true graphs that skip shipping
+costs, bury unfavorable variants, or annotate only flattering facts.
+SEO is the precedent. No validator can catch material omission; the
+countermeasure is spot-auditing (agents occasionally diff graph vs.
+rendered page and penalize divergence) — which reintroduces HTML reading
+and partially unwinds the cost story. The "Visible Truth" principle needs
+an enforcement economics section, not just an ideal.
+
+### R5. Every benchmark task was designed by the same agent that fixed the failures
+The evaluation designer, the strategy optimizer, and the implementation
+fixer were one context. The suite therefore measures what its designer
+could imagine — crisp, well-specified goals. Two consequences: (a) an
+independent red team (different vendor, no repo context) should author the
+next episode suite; (b) nothing tests the *first mile* — fuzzy human
+intent ("I need a cheap charger before Friday") down to a plan — which is
+where agent products actually struggle. The spec optimizes the last mile.
+
+### R6. The benchmark is now public — and therefore expiring
+Tasks, pages, and expected answers ship in a public repo and will end up
+in training corpora. Scores against future models become unfalsifiable.
+Standard fix: a held-out private task set, or continuous task rotation
+with published *generators* instead of published *instances*.
+
+### R7. The spec's most underrated feature may be legal, not technical
+Annotations are a machine-readable *invitation*: "automation is welcome
+here, within these declared bounds" — a robots.txt for actions. In the
+current bot-litigation climate, that consent semantics could be the
+strongest adoption argument for agent vendors (and for cautious sites, the
+strongest reason to annotate precisely). Nothing in the spec states it.
+One normative paragraph — "annotations constitute permission for
+conforming agents to perform declared actions" — might matter more than
+any attribute added this month.
+
+*(Still open from Round 1, acknowledged, not forgotten: CI for the repo
+itself, PyPI upload, wild-web evidence, and the 0.4 functional contracts.)*
