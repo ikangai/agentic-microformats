@@ -1,6 +1,6 @@
 # Agentic Microformats: Agent State Layer
 
-**Version:** 0.2.0-dev
+**Version:** exploratory draft (does not track a core release)
 **Status:** Working Draft — Exploratory
 **Date:** February 2026
 **Authors:** Martin Treiber, [IKANGAI](https://www.ikangai.com)

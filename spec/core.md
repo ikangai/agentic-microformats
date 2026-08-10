@@ -823,7 +823,7 @@ A `responseSchemas` object describes the expected JSON response for each action:
 
 Type values match the vocabulary from Section 5.3. This complements per-action `data-agent-response` attributes (Section 6.7) by providing a centralized reference.
 
-### 9.4 Discovery Through Navigation
+### 9.3 Discovery Through Navigation
 
 Agents discover site capabilities through navigation, not centralized manifests. As agents traverse pages, they encounter resources, actions, and patterns, building understanding incrementally.
 
@@ -839,7 +839,7 @@ Sites MAY provide navigation hints:
 
 There is no required central manifest. The sum of all page-level annotations *is* the site's agent interface.
 
-### 9.5 Linking Related Resources
+### 9.4 Linking Related Resources
 
 Sites with complementary documentation MAY reference it:
 
@@ -858,7 +858,7 @@ This helps agents find additional context without requiring a separate discovery
 
 ---
 
-### 9.6 Announcing Annotation Support
+### 9.5 Announcing Annotation Support
 
 Agents need a cheap way to discover that a site carries annotations without
 downloading and parsing every page. Annotated sites SHOULD provide at least
@@ -1756,7 +1756,7 @@ Driven by measured findings from the benchmark suite (see
 - Self-containment rule for property values (5.2)
 - Navigability rule: resources with canonical pages MUST declare a `url` property (5.2)
 - New principle 2.11 Inspectable State
-- Announcing annotation support: meta tag / HTTP header / llms.txt (9.6)
+- Announcing annotation support: meta tag / HTTP header / llms.txt (9.5)
 - Canonical graph serialization and server-side delivery: see `graph-serialization.md`
 - `verified` trust semantics defined as reserved; aggregates-over-untrusted pattern (10.1)
 - Endpoint origin policy: same-origin MUST with explicit opt-out (12.5)

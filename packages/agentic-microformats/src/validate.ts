@@ -78,7 +78,7 @@ export function validate(root: AgentElement, opts: { origin?: string } = {}): Va
     const attrs: string[] = (el as any).getAttributeNames?.() ?? [];
     for (const attr of attrs) {
       if (!attr.startsWith('data-agent')) continue;
-      // x- extension prefix is always allowed (spec §14)
+      // x- extension prefix is always allowed (spec §15 Extensibility)
       if (attr.startsWith('data-agent-x-')) continue;
       if (!KNOWN_ATTRIBUTES.has(attr)) {
         push('error', 'unknown-attribute', `"${attr}" is not a registered attribute`, el);

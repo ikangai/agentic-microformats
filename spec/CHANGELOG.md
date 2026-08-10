@@ -11,7 +11,7 @@ All notable changes to the Agentic Microformats specification.
 - Self-containment rule: property values must survive without surrounding prose (§5.2)
 - Navigability rule: resources with canonical pages MUST declare a `url` property (§5.2)
 - Design principle 2.11 Inspectable State: mutable resources SHOULD have annotated read surfaces
-- Annotation announcement: `<meta name="agent-annotations">`, `X-Agent-Annotations` header, llms.txt (§9.6)
+- Annotation announcement: `<meta name="agent-annotations">`, `X-Agent-Annotations` header, llms.txt (§9.5)
 - **`graph-serialization.md`**: canonical JSON graph format + server-side delivery (content negotiation `application/agent+json`, `/.well-known/agent-graph`)
 - `verified` trust semantics defined (reserved, parse-as-system); aggregates-over-untrusted-regions pattern (§10.1)
 - Reference implementation 0.3.0: canonical serializer, structural validator, repeated properties, idempotency

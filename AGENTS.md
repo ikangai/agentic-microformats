@@ -10,15 +10,18 @@ Repository: https://github.com/ikangai/agentic-microformats
 
 ```
 ├── spec/                    # Specification documents
-│   ├── core.md              # Main spec (v0.2.0) — all attribute definitions
-│   ├── advanced.md          # v0.2.0-dev patterns (async, batch, settlement)
+│   ├── core.md              # Main spec (v0.3.0 Working Draft) — all attribute definitions
+│   ├── graph-serialization.md # Canonical JSON graph + HTTP delivery (0.3.0)
+│   ├── advanced.md          # Non-normative exploration (async, batch, settlement)
 │   ├── agent-state-layer.md # Exploratory: agent-carried state across pages
 │   └── CHANGELOG.md
 ├── docs/                    # Analysis and proposals
 │   ├── CONTRIBUTING.md
-│   ├── critical-analysis.md # Gap analysis with priorities (P0/P1/P2)
-│   ├── proposals.md         # Proposed v0.2.0 improvements
-│   └── plans/               # Implementation plans
+│   ├── critical-analysis.md # Gap analysis vs 0.1.0 (partially outdated, see header)
+│   ├── agent-perspective-review.md # Adoption review + round-2 blindspots
+│   ├── adopt-in-30-minutes.md # Site-owner onboarding path
+│   ├── proposals.md         # Historical 0.2.0-era proposals
+│   └── plans/               # Implementation plans + v0.4 roadmap
 ├── examples/                # Standalone HTML examples
 │   ├── basic/               # Simple annotated pages
 │   └── forms/               # Form and parameter examples

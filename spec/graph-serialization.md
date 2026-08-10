@@ -113,7 +113,7 @@ Content-Type: application/agent+json
 
 Sites MAY expose `/.well-known/agent-graph?page=<path>` returning the graph
 for the named page path, and SHOULD advertise it via the announcement header
-(core spec 9.6): `X-Agent-Annotations: 0.3; graph=/.well-known/agent-graph`.
+(core spec 9.5): `X-Agent-Annotations: 0.3; graph=/.well-known/agent-graph`.
 
 ### 3.3 Consistency
 
