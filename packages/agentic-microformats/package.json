@@ -40,7 +40,7 @@
   },
   "license": "MIT",
   "bin": {
-    "agentic-microformats": "./bin/cli.js"
+    "agentic-microformats": "bin/cli.js"
   },
   "dependencies": {
     "linkedom": "^0.18.0"
