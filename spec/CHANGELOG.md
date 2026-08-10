@@ -2,6 +2,26 @@
 
 All notable changes to the Agentic Microformats specification.
 
+## [0.3.0] - August 2026 (Working Draft)
+
+### Added
+- `data-agent-idempotent` — retry safety, distinct from reversibility (§6.9)
+- `data-agent-cross-origin` + endpoint origin policy: same-origin MUST with explicit opt-out; no credentials cross-origin ever (§12.5)
+- Repeated-property semantics: same-name properties collect into arrays, never overwrite (§5.2)
+- Self-containment rule: property values must survive without surrounding prose (§5.2)
+- Navigability rule: resources with canonical pages MUST declare a `url` property (§5.2)
+- Design principle 2.11 Inspectable State: mutable resources SHOULD have annotated read surfaces
+- Annotation announcement: `<meta name="agent-annotations">`, `X-Agent-Annotations` header, llms.txt (§9.6)
+- **`graph-serialization.md`**: canonical JSON graph format + server-side delivery (content negotiation `application/agent+json`, `/.well-known/agent-graph`)
+- `verified` trust semantics defined (reserved, parse-as-system); aggregates-over-untrusted-regions pattern (§10.1)
+- Reference implementation 0.3.0: canonical serializer, structural validator, repeated properties, idempotency
+
+### Fixed
+- `data-agent-cost-currency` and `data-agent-meta` registered in §4.1 and the ABNF (previously used but unregistered)
+
+### Context
+- Every addition traces to a measured failure or recovery pattern in the benchmark suite (`benchmark/experiment-log.md`)
+
 ## [0.2.0] - February 2026
 
 ### Added

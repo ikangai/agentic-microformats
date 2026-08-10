@@ -1,8 +1,8 @@
 # Agentic Microformats Specification
 
-**Version:** 0.2.0
+**Version:** 0.3.0
 **Status:** Working Draft
-**Date:** February 2026  
+**Date:** August 2026  
 **Authors:** Martin Treiber, [IKANGAI](https://www.ikangai.com)
 **License:** MIT
 
@@ -191,6 +191,16 @@ Because humans and agents share the same interface, humans can always:
 
 There is no black box. The DOM is always visible, always inspectable, always controllable.
 
+### 2.11 Inspectable State
+
+Every mutable resource that actions operate on SHOULD have an annotated read
+surface — a page or region where the resource's current state can be
+extracted. Error recovery depends on this: after a lost response, an agent
+can only distinguish "my write landed" from "my write was lost" by reading
+state back. Action `data-agent-on-success` hints SHOULD point at the
+relevant state surface. A site without inspectable state opts its users'
+agents out of safe recovery.
+
 ---
 
 ## 3. Conformance
@@ -250,6 +260,8 @@ A conforming agent:
 | `data-agent-cost-currency` | Hint | ISO 4217 currency code for `data-agent-cost` |
 | `data-agent-on-success` | Action | Expected outcome after successful execution |
 | `data-agent-response` | Action | JSON describing the response schema |
+| `data-agent-idempotent` | Action | Whether repeating the request yields the same state |
+| `data-agent-cross-origin` | Action | Explicit opt-in for a non-same-origin endpoint |
 | `data-agent-min` | Parameter | Minimum allowed value |
 | `data-agent-max` | Parameter | Maximum allowed value |
 | `data-agent-description` | Meta | Human-readable description for agents |
@@ -309,6 +321,23 @@ Properties are data fields belonging to a resource:
   <span data-agent-prop="availability">in_stock</span>
 </div>
 ```
+
+**Repeated properties.** When the same property name appears more than once
+within a single resource, consumers MUST collect all occurrences in document
+order — they MUST NOT keep only one. (Rationale: a release entry may
+legitimately declare several `deprecation` properties; silent overwrite is
+invisible data loss.)
+
+**Self-containment.** A property's value MUST be interpretable without the
+prose surrounding it. `data-agent-value="SDK >= 4.2.0"` is meaningless once
+extracted; `data-agent-value="streaming exports: SDK >= 4.2.0"` survives.
+Annotations are read by consumers that never see the page text.
+
+**Navigability.** A resource that has its own canonical page MUST declare it
+as a `url` property (`data-agent-prop="url"` with `data-agent-typehint="url"`),
+typically on the resource's primary link. Plain `<a href>` links are not part
+of the extraction graph; a graph without `url` properties cannot be navigated
+by agents that do not read HTML.
 
 ### 5.3 Type Hints
 
@@ -506,6 +535,27 @@ Actions MAY describe the expected outcome after successful execution using `data
 The value is natural-language text describing what happens next—whether the page updates in place, a redirect occurs, or the agent should navigate elsewhere. This helps agents chain actions into multi-step workflows.
 
 ---
+
+### 6.9 Idempotency
+
+Actions MAY declare whether repeating the same request produces the same
+server state:
+
+```html
+<form data-agent="action"
+      data-agent-name="update_quantity"
+      data-agent-method="PATCH"
+      data-agent-endpoint="/api/cart/item-1"
+      data-agent-idempotent="true">
+```
+
+This is distinct from `data-agent-reversible`: *reversible* answers "can the
+effect be undone?", *idempotent* answers "is it safe to retry blindly?".
+After a transport failure where the response was lost, an agent facing
+`data-agent-idempotent="true"` MAY simply retry; facing `"false"` (or no
+declaration) it SHOULD verify state via the resource's read surface (Section
+2.11) before re-sending. Endpoints that honor an `Idempotency-Key` request
+header SHOULD say so via `data-agent-headers`.
 
 ## 7. Parameter Layer
 
@@ -783,6 +833,25 @@ This helps agents find additional context without requiring a separate discovery
 
 ---
 
+### 9.6 Announcing Annotation Support
+
+Agents need a cheap way to discover that a site carries annotations without
+downloading and parsing every page. Annotated sites SHOULD provide at least
+one of:
+
+```html
+<meta name="agent-annotations" content="0.3">
+```
+
+```
+X-Agent-Annotations: 0.3        (HTTP response header)
+```
+
+and SHOULD mention annotation support in `/llms.txt`. Sites that serve the
+canonical graph directly (see `graph-serialization.md`) SHOULD announce that
+too — the header value `0.3; graph=/.well-known/agent-graph` names the
+delivery endpoint.
+
 ## 10. Trust and Scope
 
 ### 10.1 Trust Levels
@@ -804,6 +873,19 @@ User-generated content may contain malicious annotations. Mark trust boundaries 
 | `system` | Site-generated content (default) |
 | `untrusted` | User-generated content—ignore agent attributes |
 | `verified` | Verified content (e.g., verified reviews) |
+
+**`verified` semantics.** Until a cryptographic trust layer exists, agents
+MUST treat `verified` regions exactly like `system` for parsing purposes.
+The value is reserved: when a verification mechanism ships, agents MAY
+require proof before acting on `verified` content. Sites MUST NOT use
+`verified` as a way to launder user-generated content past trust filters.
+
+**Aggregates over untrusted regions.** Because consumers that read only the
+extraction graph never see untrusted content, sites SHOULD expose
+site-authored summary facts about such regions as ordinary properties in
+trusted scope — e.g. `data-agent-prop="review_count"` and
+`data-agent-prop="average_rating"` adjacent to an untrusted reviews section.
+This gives graph-only agents the summary without the injection surface.
 
 ### 10.2 Ignoring Subtrees
 
@@ -901,6 +983,18 @@ This is the opposite of "AI magic behind the scenes."
 ### 12.4 Rate Limiting
 
 Respect `agent_policies.rate_limit`. Default to conservative behavior (1 request/second) when unspecified.
+
+### 12.5 Endpoint Origin
+
+`data-agent-endpoint` values MUST be same-origin with the page that declares
+them, expressed as relative paths, unless the element carries an explicit
+opt-out: `data-agent-cross-origin="true"` with an absolute URL. Agents MUST
+refuse absolute endpoints on other origins that lack the opt-out, and MUST
+NOT send credentials (cookies, authentication headers) to cross-origin
+endpoints even when opted out. Rationale: an agent operating inside a
+user's session (Section 6.5) that follows an attacker-injected endpoint is
+performing a credentialed cross-site request — the annotation layer must
+not become a CSRF vector.
 
 ---
 
@@ -1163,6 +1257,8 @@ action-params     = 'data-agent-params="' params-list '"'
 action-headers    = 'data-agent-headers="' json-value '"'
 action-on-success = 'data-agent-on-success="' text-value '"'
 action-response   = 'data-agent-response="' json-value '"'
+action-idempotent = 'data-agent-idempotent="' bool-value '"'
+action-crossorigin = 'data-agent-cross-origin="' bool-value '"'
 
 ; Parameter
 param-decl        = 'data-agent-param="' param-path '"'
@@ -1594,6 +1690,22 @@ This is the tightest human-agent coupling this specification envisions, and brow
 ---
 
 ## Changelog
+
+### Version 0.3.0 (August 2026, Working Draft)
+
+Driven by measured findings from the benchmark suite (see
+`benchmark/experiment-log.md` in the reference repository):
+
+- New attributes: `data-agent-idempotent` (6.9), `data-agent-cross-origin` (12.5)
+- Repeated-property semantics: same-name properties collect, never overwrite (5.2)
+- Self-containment rule for property values (5.2)
+- Navigability rule: resources with canonical pages MUST declare a `url` property (5.2)
+- New principle 2.11 Inspectable State
+- Announcing annotation support: meta tag / HTTP header / llms.txt (9.6)
+- Canonical graph serialization and server-side delivery: see `graph-serialization.md`
+- `verified` trust semantics defined as reserved; aggregates-over-untrusted pattern (10.1)
+- Endpoint origin policy: same-origin MUST with explicit opt-out (12.5)
+- Registered `data-agent-cost-currency` and `data-agent-meta` in 4.1 and the ABNF
 
 ### Version 0.2.0 (February 2026)
 
