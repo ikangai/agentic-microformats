@@ -1,0 +1,84 @@
+{
+  "agentGraph": "0.3",
+  "meta": {
+    "provider": {
+      "name": "Example Shop GmbH",
+      "jurisdiction": "AT"
+    },
+    "defaults": {
+      "currency": "EUR",
+      "locale": "de-AT"
+    },
+    "page": {
+      "type": "product-detail"
+    }
+  },
+  "resources": [
+    {
+      "type": "product",
+      "id": "SKU-USB-C-2M",
+      "properties": {
+        "name": {
+          "value": "USB-C Cable 2m"
+        },
+        "description": {
+          "value": "High-quality braided USB-C cable, 2 meters length, \n        supports 100W charging and 10Gbps data transfer."
+        },
+        "price": {
+          "value": 14.99,
+          "typehint": "currency",
+          "currency": "EUR"
+        },
+        "availability": {
+          "value": "in_stock"
+        },
+        "rating": {
+          "value": 4.7,
+          "typehint": "number"
+        },
+        "rating_count": {
+          "value": 246,
+          "typehint": "integer"
+        }
+      },
+      "actions": [
+        {
+          "name": "add_to_cart",
+          "method": "POST",
+          "endpoint": "/cart/add",
+          "target": "SKU-USB-C-2M",
+          "description": "Qty:\n          \n        \n        \n        Add to Cart",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "hints": {
+            "role": "primary"
+          },
+          "params": [
+            {
+              "name": "product_id",
+              "value": "SKU-USB-C-2M"
+            },
+            {
+              "name": "quantity",
+              "typehint": "integer",
+              "required": true,
+              "value": "1"
+            }
+          ]
+        },
+        {
+          "name": "add_to_wishlist",
+          "method": "POST",
+          "endpoint": "/wishlist/add",
+          "target": "SKU-USB-C-2M",
+          "description": "Add USB-C Cable 2m to your wishlist",
+          "hints": {
+            "role": "secondary"
+          }
+        }
+      ]
+    }
+  ],
+  "actions": []
+}

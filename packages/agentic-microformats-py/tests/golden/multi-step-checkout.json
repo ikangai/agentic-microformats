@@ -1,0 +1,100 @@
+{
+  "agentGraph": "0.3",
+  "meta": {
+    "provider": {
+      "name": "ShopExample"
+    },
+    "page": {
+      "type": "checkout-workflow"
+    }
+  },
+  "resources": [
+    {
+      "type": "workflow",
+      "id": "checkout-2025-001",
+      "properties": {
+        "total": {
+          "value": 199.98,
+          "typehint": "currency",
+          "currency": "USD"
+        },
+        "order_number": {
+          "value": "#ORD-2025-001"
+        }
+      },
+      "actions": [
+        {
+          "name": "edit_shipping",
+          "method": "POST",
+          "target": "checkout-2025-001",
+          "description": "Edit"
+        },
+        {
+          "name": "save_payment",
+          "method": "POST",
+          "endpoint": "/api/checkout/payment",
+          "target": "checkout-2025-001",
+          "description": "Card Number\n            \n          \n          \n          \n            \n              Expiry Date\n              \n            \n            \n              CVV\n              \n            \n          \n          \n          \n            Cardholder Name\n            \n          \n          \n          \n            \n            \n              Continue to Review →\n            \n            \n            \n            \n              ← Back to Shipping",
+          "params": [
+            {
+              "name": "payment.card_number",
+              "required": true
+            },
+            {
+              "name": "payment.expiry",
+              "required": true
+            },
+            {
+              "name": "payment.cvv",
+              "required": true
+            },
+            {
+              "name": "payment.cardholder_name",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "go_to_shipping",
+          "method": "POST",
+          "target": "checkout-2025-001",
+          "description": "← Back to Shipping"
+        },
+        {
+          "name": "confirm_order",
+          "method": "POST",
+          "endpoint": "/api/checkout/confirm",
+          "target": "checkout-2025-001",
+          "description": "✓ Place Order - $199.98",
+          "hints": {
+            "risk": "high",
+            "cost": 199.98,
+            "costCurrency": "USD"
+          }
+        },
+        {
+          "name": "go_to_payment",
+          "method": "POST",
+          "target": "checkout-2025-001",
+          "description": "← Back"
+        }
+      ],
+      "children": [
+        {
+          "type": "order-item",
+          "properties": {
+            "name": {
+              "value": "Premium Widget x2"
+            },
+            "price": {
+              "value": 199.98,
+              "typehint": "currency",
+              "currency": "USD"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "actions": []
+}

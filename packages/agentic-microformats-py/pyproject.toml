@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agentic-microformats"
+version = "0.3.0"
+description = "Agentic Microformats extractor — canonical graph serialization of data-agent-* annotated HTML"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Martin Treiber, IKANGAI" }]
+requires-python = ">=3.10"
+keywords = ["agents", "microformats", "html", "semantic-web", "ai-agents", "data-agent"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Topic :: Text Processing :: Markup :: HTML",
+]
+
+[project.urls]
+Repository = "https://github.com/ikangai/agentic-microformats"
+
+[tool.setuptools.packages.find]
+include = ["agentic_microformats*"]

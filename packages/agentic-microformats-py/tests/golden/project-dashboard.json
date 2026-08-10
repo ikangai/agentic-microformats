@@ -1,0 +1,190 @@
+{
+  "agentGraph": "0.3",
+  "meta": {
+    "provider": {
+      "name": "IKANGAI GmbH",
+      "url": "https://ikangai.com"
+    },
+    "defaults": {
+      "currency": "EUR",
+      "timezone": "Europe/Vienna",
+      "locale": "de-AT"
+    },
+    "page": {
+      "type": "project-dashboard"
+    },
+    "agentPolicies": {
+      "rateLimit": {
+        "requestsPerMinute": 60
+      },
+      "requireAuth": true,
+      "authMethod": "session"
+    }
+  },
+  "resources": [
+    {
+      "type": "project",
+      "id": "PRJ-2025-001",
+      "properties": {
+        "name": {
+          "value": "Website Redesign"
+        },
+        "status": {
+          "value": "active"
+        },
+        "phase": {
+          "value": "development"
+        },
+        "owner": {
+          "value": "maria.schmidt@example.com",
+          "typehint": "email"
+        },
+        "budget": {
+          "value": 50,
+          "typehint": "currency",
+          "currency": "EUR"
+        },
+        "due_date": {
+          "value": "2025-03-31",
+          "typehint": "date"
+        },
+        "progress": {
+          "value": 65,
+          "typehint": "integer"
+        }
+      },
+      "actions": [
+        {
+          "name": "update_progress",
+          "method": "PATCH",
+          "endpoint": "/api/projects/PRJ-2025-001",
+          "target": "PRJ-2025-001",
+          "description": "Update Progress",
+          "hints": {
+            "role": "primary"
+          }
+        },
+        {
+          "name": "mark_complete",
+          "method": "POST",
+          "endpoint": "/api/projects/PRJ-2025-001/complete",
+          "target": "PRJ-2025-001",
+          "description": "Mark this project as complete",
+          "hints": {
+            "role": "primary",
+            "humanPreferred": true
+          }
+        },
+        {
+          "name": "archive",
+          "method": "POST",
+          "endpoint": "/api/projects/PRJ-2025-001/archive",
+          "target": "PRJ-2025-001",
+          "description": "Archive this project",
+          "hints": {
+            "role": "secondary",
+            "risk": "medium",
+            "reversible": true
+          }
+        },
+        {
+          "name": "delete",
+          "method": "DELETE",
+          "endpoint": "/api/projects/PRJ-2025-001",
+          "target": "PRJ-2025-001",
+          "description": "Permanently delete this project and all associated data including tasks, files, and history",
+          "hints": {
+            "role": "danger",
+            "risk": "high",
+            "humanPreferred": true,
+            "reversible": false
+          }
+        }
+      ]
+    },
+    {
+      "type": "project",
+      "id": "PRJ-2025-002",
+      "properties": {
+        "name": {
+          "value": "Mobile App v2"
+        },
+        "status": {
+          "value": "planning"
+        },
+        "phase": {
+          "value": "requirements"
+        },
+        "owner": {
+          "value": "thomas.weber@example.com",
+          "typehint": "email"
+        },
+        "budget": {
+          "value": 120,
+          "typehint": "currency",
+          "currency": "EUR"
+        },
+        "due_date": {
+          "value": "2025-09-30",
+          "typehint": "date"
+        },
+        "progress": {
+          "value": 10,
+          "typehint": "integer"
+        }
+      },
+      "actions": [
+        {
+          "name": "update_progress",
+          "method": "PATCH",
+          "endpoint": "/api/projects/PRJ-2025-002",
+          "target": "PRJ-2025-002",
+          "description": "Update Progress",
+          "hints": {
+            "role": "primary"
+          }
+        },
+        {
+          "name": "start_project",
+          "method": "POST",
+          "endpoint": "/api/projects/PRJ-2025-002/start",
+          "target": "PRJ-2025-002",
+          "description": "🚀 Start Project",
+          "hints": {
+            "role": "primary",
+            "humanPreferred": true
+          }
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "name": "create_project",
+      "method": "POST",
+      "endpoint": "/api/projects",
+      "description": "+ Create Project",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "hints": {
+        "role": "primary"
+      },
+      "params": [
+        {
+          "name": "name",
+          "required": true
+        },
+        {
+          "name": "owner",
+          "typehint": "email",
+          "required": true
+        },
+        {
+          "name": "budget",
+          "typehint": "number"
+        }
+      ]
+    }
+  ]
+}

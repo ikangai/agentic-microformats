@@ -1,0 +1,70 @@
+{
+  "agentGraph": "0.3",
+  "meta": {
+    "provider": {
+      "name": "Example App"
+    },
+    "defaults": {
+      "locale": "en-US"
+    },
+    "page": {
+      "type": "user-settings"
+    }
+  },
+  "resources": [],
+  "actions": [
+    {
+      "name": "update_user_settings",
+      "method": "PUT",
+      "endpoint": "/api/users/current/settings",
+      "description": "Update all user settings including profile, preferences, and notification options",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "params": [
+        {
+          "name": "user.profile.display_name",
+          "required": true,
+          "value": "Martin Konzett"
+        },
+        {
+          "name": "user.profile.bio",
+          "value": "AI Consultant & Developer"
+        },
+        {
+          "name": "user.profile.email",
+          "typehint": "email",
+          "required": true,
+          "value": "martin@ikangai.com"
+        },
+        {
+          "name": "user.preferences.theme",
+          "value": "dark"
+        },
+        {
+          "name": "user.preferences.language",
+          "value": "de"
+        },
+        {
+          "name": "user.preferences.timezone",
+          "value": "Europe/Vienna"
+        },
+        {
+          "name": "user.notifications.email",
+          "typehint": "boolean",
+          "value": "true"
+        },
+        {
+          "name": "user.notifications.push",
+          "typehint": "boolean",
+          "value": "false"
+        },
+        {
+          "name": "user.notifications.weekly_digest",
+          "typehint": "boolean",
+          "value": "true"
+        }
+      ]
+    }
+  ]
+}
