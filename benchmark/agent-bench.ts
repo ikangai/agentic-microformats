@@ -347,52 +347,12 @@ async function fetchPage(baseUrl: string, jar: CookieJar, url: string): Promise<
 // Page representation (extraction via the reference library, or raw HTML)
 // ---------------------------------------------------------------------------
 
-function serializeAction(a: any): any {
-  return {
-    name: a.name || undefined, method: a.method, endpoint: a.endpoint,
-    target: a.target, description: a.description, onSuccess: a.onSuccess,
-    response: a.response,
-    hints: {
-      role: a.hints?.role, risk: a.hints?.risk,
-      humanPreferred: a.hints?.humanPreferred || undefined,
-      reversible: a.hints?.reversible, cost: a.hints?.cost,
-    },
-    params: (a.params ?? []).map((p: any) => ({
-      name: p.name, typehint: p.typehint, required: p.required || undefined,
-      value: p.value ?? undefined, min: p.min, max: p.max,
-    })),
-  };
-}
-
-function serializeResource(r: any): any {
-  const properties: Record<string, any> = {};
-  for (const [name, p] of Object.entries<any>(r.properties ?? {})) {
-    properties[name] = {
-      value: p.value,
-      typehint: p.typehint === "string" ? undefined : p.typehint,
-      currency: p.currency,
-    };
-  }
-  return {
-    type: r.type || undefined, id: r.id || undefined, properties,
-    actions: (r.actions ?? []).map(serializeAction),
-    children: (r.children ?? []).map(serializeResource),
-  };
-}
-
-function extractGraph(html: string): any {
-  const { document } = parseHTML(html);
-  const result = lib.extractAll(document.documentElement);
-  return {
-    meta: result.meta,
-    resources: result.resources.map(serializeResource),
-    standalone_actions: result.actions.map(serializeAction),
-  };
-}
-
 function representPage(html: string, mode: string): string {
   if (mode === "html") return "```html\n" + html + "\n```";
-  return JSON.stringify(extractGraph(html));
+  // Canonical serialization (spec/graph-serialization.md) — identical to
+  // what the demo serves under Accept: application/agent+json.
+  const { document } = parseHTML(html);
+  return lib.toGraphJSON(lib.extractAll(document.documentElement));
 }
 
 // ---------------------------------------------------------------------------

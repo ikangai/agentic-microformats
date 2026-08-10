@@ -5,7 +5,7 @@
     "page_type": "ecommerce",
     "task": "What is the current selling price of the product 'Trekkingstock Carbon Pro Duo'? Return only the number as a decimal with a dot separator (e.g. 12.34).",
     "expected": "44.90",
-    "match_type": "contains",
+    "match_type": "numeric",
     "category": "property_extraction"
   },
   {

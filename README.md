@@ -6,6 +6,13 @@ Agentic Microformats is a lightweight specification for embedding machine-readab
 
 This is not automation. It's assisted operation of the web.
 
+**Measured, not promised** (full data: [benchmark/experiment-log.md](benchmark/experiment-log.md)):
+
+- The annotation graph extracts **deterministically in milliseconds at zero model tokens**, at ~⅓ of the HTML's size — and sites can serve it directly (`Accept: application/agent+json`).
+- A small model reading the graph **beats a frontier model reading HTML** on the QA suite: 15/15 at $0.37 vs 14/15 at $1.94.
+- Three different agents — frontier, small, and a **local open-weights model at $0.00** — all operate the annotated demo store end-to-end (checkout, response chaining, fault recovery): 12/13 each. Annotate once, any model works.
+- Injected-fault episodes (lost responses, rate limits) were **recoverable only because state pages are annotated** — machine-readable state is what makes agent errors survivable.
+
 ## The Idea
 
 When a user interacts with a web page, what actually happens is a sequence of DOM changes. Humans interpret these changes semantically—they understand intention, progress, success, failure. AI agents can observe the same changes but need help interpreting what they mean.
@@ -109,7 +116,7 @@ The semantic annotations don't control agents or define automation rules. They h
 
 📄 **[Read the full specification →](spec/core.md)**
 
-Current version: **0.2.0** (Working Draft, February 2026)
+Current version: **0.3.0** (Working Draft, August 2026) · [Canonical graph serialization →](spec/graph-serialization.md)
 
 ## What's in This Repo
 

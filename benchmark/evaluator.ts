@@ -69,7 +69,8 @@ type MatchType =
   | "contains_ci"
   | "all_contained"
   | "all_contained_ci"
-  | "exact";
+  | "exact"
+  | "numeric";
 
 interface Task {
   id: string;
@@ -192,6 +193,12 @@ function checkMatch(
       return containsToken(response.toLowerCase(), expected.toLowerCase());
     case "exact":
       return response.trim() === expected.trim();
+    case "numeric": {
+      // Compare by value: "44.9", "44.90", "€44.90" all equal 44.90
+      const want = parseFloat(expected);
+      const m = response.replace(",", ".").match(/-?\d+(\.\d+)?/);
+      return m !== null && Math.abs(parseFloat(m[0]) - want) < 1e-9;
+    }
     default:
       return containsToken(response, expected);
   }

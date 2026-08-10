@@ -367,4 +367,47 @@ worked action example + constraints restated at the end; `max_tokens` 4096
 
 ---
 
+## Spec 0.3.0 Implementation Sweep — 2026-08-10
+
+**Goal:** implement everything actionable from
+`docs/agent-perspective-review.md` ("do all").
+
+**Shipped:**
+- Library 0.3.0: canonical graph serializer (`toGraph`/`toGraphJSON`),
+  repeated-property collection, `data-agent-idempotent`, structural
+  validator. 102 tests green. Publish dry-run verified (51 files, 22.7 kB).
+- Spec 0.3.0 Working Draft: navigability/repeated-properties/
+  self-containment rules, Inspectable State principle, idempotency,
+  endpoint origin policy, annotation announcement, verified semantics,
+  trust aggregates — plus new `graph-serialization.md` (canonical JSON +
+  `Accept: application/agent+json` + `/.well-known/agent-graph`).
+- Python port (`packages/agentic-microformats-py`, stdlib-only) with
+  golden-parity tests against the TS reference: exact match on all four
+  example fixtures on first run.
+- Demo: announcement meta tag + header, graph content negotiation and
+  well-known endpoint (session-aware), idempotency on all five actions,
+  llms.txt updated.
+- Benchmarks now consume the library's canonical serializer — one shape
+  everywhere, and it is leaner: structure is **27.9 %** of HTML (was
+  35.7 % ad-hoc), prompt tokens −12 %.
+
+**Regression runs (haiku, isolated):**
+| Arm | Result | Note |
+|-----|--------|------|
+| extract-pipeline | **15/15**, $0.33 | after adding a `numeric` match type — the canonical serializer emits `44.9` for `44,90 €`, haiku answered "44.9", and the old string matcher rejected a numerically correct answer (V01 switched to `numeric`) |
+| agent-bench G01–G08 | **7/8** | identical profile; G06 = trust-boundary marker |
+| agent-bench E01–E05 | **5/5** | recovery unaffected by serializer/demo changes |
+
+**Finding:** the canonicalization pass paid for itself immediately — smaller
+prompts at equal scores, one interchange shape across TS, Python, the demo's
+HTTP delivery, and both benchmark arms. The V01 episode is a reminder that
+string matchers rot when representations improve; prefer semantic matchers.
+
+**Left deliberately unpublished:** `npm publish` (public, irreversible) —
+tarball verified, one command away. Remaining functional gaps (async, error
+taxonomy, notifications, signed graphs, wild-web evidence) are scoped in
+`docs/plans/2026-08-10-v0.4-roadmap.md`.
+
+---
+
 <!-- Experiments appended below by the agent -->

@@ -52,7 +52,7 @@ const MAX_ATTEMPTS = 2;
 // Types (matching evaluator.ts result shapes where they overlap)
 // ---------------------------------------------------------------------------
 
-type MatchType = "contains" | "contains_ci" | "all_contained" | "all_contained_ci" | "exact";
+type MatchType = "contains" | "contains_ci" | "all_contained" | "all_contained_ci" | "exact" | "numeric";
 
 interface Task {
   id: string;
@@ -122,6 +122,11 @@ function checkMatch(response: string, expected: string | string[], matchType: Ma
     case "contains": return containsToken(response, expected);
     case "contains_ci": return containsToken(response.toLowerCase(), expected.toLowerCase());
     case "exact": return response.trim() === expected.trim();
+    case "numeric": {
+      const want = parseFloat(expected);
+      const m = response.replace(",", ".").match(/-?\d+(\.\d+)?/);
+      return m !== null && Math.abs(parseFloat(m[0]) - want) < 1e-9;
+    }
     default: return containsToken(response, expected);
   }
 }
@@ -179,74 +184,21 @@ function runClaudeP(prompt: string, model: string): { response: string; stats?: 
 }
 
 // ---------------------------------------------------------------------------
-// Deterministic extraction + JSON-safe serialization (drops DOM references)
+// Deterministic extraction via the library's CANONICAL serialization
+// (spec/graph-serialization.md) — the same shape sites serve via
+// Accept: application/agent+json.
 // ---------------------------------------------------------------------------
-
-function serializeAction(a: any): any {
-  return {
-    name: a.name || undefined,
-    method: a.method,
-    endpoint: a.endpoint,
-    target: a.target,
-    description: a.description,
-    onSuccess: a.onSuccess,
-    response: a.response,
-    hints: {
-      role: a.hints?.role,
-      risk: a.hints?.risk,
-      humanPreferred: a.hints?.humanPreferred || undefined,
-      reversible: a.hints?.reversible,
-      cost: a.hints?.cost,
-      costCurrency: a.hints?.costCurrency,
-    },
-    params: (a.params ?? []).map((p: any) => ({
-      name: p.name,
-      typehint: p.typehint,
-      required: p.required || undefined,
-      value: p.value ?? undefined,
-      min: p.min,
-      max: p.max,
-    })),
-  };
-}
-
-function serializeResource(r: any): any {
-  const properties: Record<string, any> = {};
-  for (const [name, p] of Object.entries<any>(r.properties ?? {})) {
-    properties[name] = {
-      value: p.value,
-      raw: p.rawValue,
-      typehint: p.typehint === "string" ? undefined : p.typehint,
-      currency: p.currency,
-    };
-  }
-  return {
-    type: r.type || undefined,
-    id: r.id || undefined,
-    properties,
-    actions: (r.actions ?? []).map(serializeAction),
-    children: (r.children ?? []).map(serializeResource),
-  };
-}
 
 function extractPage(html: string): { json: string; info: ExtractionInfo } {
   const t0 = Date.now();
   const { document } = parseHTML(html);
-  const root = document.documentElement;
-  const result = lib.extractAll(root);
+  const result = lib.extractAll(document.documentElement);
+  const json: string = lib.toGraphJSON(result);
 
   const countResources = (rs: any[]): number =>
     rs.reduce((n, r) => n + 1 + countResources(r.children ?? []), 0);
   const countActions = (rs: any[]): number =>
     rs.reduce((n, r) => n + (r.actions?.length ?? 0) + countActions(r.children ?? []), 0);
-
-  const payload = {
-    meta: result.meta,
-    resources: result.resources.map(serializeResource),
-    standalone_actions: result.actions.map(serializeAction),
-  };
-  // Drop undefined values for compactness
-  const json = JSON.stringify(payload, (_k, v) => (v === undefined ? undefined : v));
 
   return {
     json,
