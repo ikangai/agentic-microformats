@@ -237,3 +237,111 @@ any attribute added this month.
 
 *(Still open from Round 1, acknowledged, not forgotten: CI for the repo
 itself, PyPI upload, wild-web evidence, and the 0.4 functional contracts.)*
+
+---
+
+# Round 3 (2026-08-11): the demand side doesn't exist yet
+
+Written the day after the first real deployment. ikangai.com is now perfectly
+annotated — 7 resources, 1 action, valid. And **not one agent in the world
+will read it.** Rounds 1–2 were about the supply side (make sites
+annotate-able). Standing on a live annotated page, the missing half is
+obvious: this is a two-sided market and we have built only one side.
+
+### D1. "Attractive for agents" is a category error — name the real buyer
+Agents have no preferences; the people shipping them do. The phrase
+decomposes into three unrelated pitches, and we have been writing none of
+them on purpose:
+- **Agent-framework authors** (browser-use, LangChain, the coding-agent
+  harnesses): would they add a `data-agent-*` parser? Pitch: zero-config
+  site operation, one integration covers every model. This is the closest,
+  most winnable buyer and we have no outreach aimed at them.
+- **Foundation-model labs**: would they post-train a model to look for the
+  vocabulary? (See D5.) Pitch: cheaper, more reliable browsing for every
+  downstream agent.
+- **End users**: never see it; it's infrastructure.
+Everything in the repo is aimed at the *site owner*. The consumer of the
+annotations — the actual "agent" in "attractive for agents" — has no
+document addressed to it, no SDK quickstart, no "add web-operation to your
+agent in 20 lines." Supply has a 30-minute guide; demand has nothing.
+
+### D2. The competitor for agent-builder attention is MCP, not schema.org
+Round 2 spent its prior-art energy on schema.org. Wrong opponent. In
+2025–26 an agent builder asking "how do I let my agent use this website"
+reaches for an **MCP server**, full stop — that is where the mindshare and
+tooling are. The spec mentions MCP only as an *export target* (§A.1:
+"actions can be exposed as MCP tools"), which quietly concedes MCP is the
+real interface and this is a markup format feeding it. The honest, strong
+positioning is the opposite and unmade: **MCP requires the site to build
+and host a server; Agentic Microformats requires nothing but attributes on
+HTML you already serve.** Zero-integration vs. build-a-server, for the long
+tail of sites that will never staff an MCP server. That comparison section
+matters more than the schema.org one and does not exist.
+
+### D3. Two-sided cold-start — pick a beachhead that owns both sides
+Sites won't annotate until agents read; agents won't read until sites
+annotate. You don't clear this by growing both evenly — you find one actor
+who **controls supply and demand at once** and gets value from a single
+site. Candidates: a marketplace that annotates its own listings for its own
+shopping agent; a SaaS that annotates its app for its own official agent; a
+docs site plus its own "ask-the-docs" agent. ikangai.com is exactly this
+shape — IKANGAI owns the site *and* builds agents — which makes it the
+correct first beachhead, not merely a dogfood. The strategy doc should name
+the pattern: **ship both halves for one property, measure the loop, then
+externalize.** Growing the open web first is the losing order.
+
+### D4. The flywheel we can start today: Agent Engine Optimization (AEO)
+The benchmark already proved annotated pages cost an agent less (tokens,
+latency) and fail less. Turn that into the demand-generating pitch nobody
+has written: **annotated sites win agent-mediated transactions.** When an
+agent choosing between two vendors can operate site A cheaply and reliably
+and must scrape site B, it will prefer A — and as agent-mediated commerce
+grows, that preference is money. "SEO for agents" is a pitch a marketing
+team funds *immediately*, and it pulls supply without waiting for altruism.
+The missing artifact: a measured head-to-head — same task, annotated
+vendor vs. unannotated vendor, which one the agent completes — turning the
+cost delta into a revenue argument.
+
+### D5. The highest-leverage distribution is the model, not the spec
+If one frontier model were post-trained to natively check for `data-agent-*`
+when browsing, every agent built on it inherits the behavior for free — the
+demand side appears overnight without convincing a single framework author.
+That reframes the whole project: the spec's real product may be a **public
+training corpus** — thousands of consistently-annotated pages plus documented
+expected behavior — designed to make "look for the agent graph" a cheap,
+natural browsing prior for the next model generation. We have the generator
+(annotator + demo + now a live site); we've never framed the corpus as the
+deliverable, or asked what volume/consistency a lab would need to justify
+including it.
+
+### D6. The consuming agent has no liability shield — and that's what it buys
+Round 2's consent framing (§3.3) protects the *site*. It does nothing for
+the *agent vendor*, who is the one exposing users to "the annotation said
+POST here." An agent builder's actual adoption blocker is their own
+liability: what stops a malicious annotation from making their agent do
+harm on their user's behalf? The safety hints, same-origin policy, and
+`human-preferred` are the raw material, but there is no **"conforming agent"
+profile** an agent vendor can implement and point to as due diligence — a
+named, testable behavior set (refuse cross-origin, confirm high-risk, never
+exceed declared rate limits, treat untrusted regions as hostile). That
+profile, plus the validator as its site-side mirror, is what converts "nice
+idea" into "safe for us to ship." It is the single most important artifact
+for the demand side and it isn't written.
+
+### D7. An annotated web is undiscoverable
+There is no way for an agent to learn a site is annotated except by
+fetching it and finding out — exactly what ikangai.com looked like the
+moment before it wasn't empty. robots.txt has sitemaps; search engines
+crawl them. Annotated sites point nowhere and are pointed to by nothing. At
+minimum the ecosystem needs a convention for *advertising* annotation
+coverage that something can aggregate — a well-known index, a sitemap
+extension, a registry agents can consult — or every agent pays the
+discovery tax per-URL forever and the rational agent behavior is to never
+bother checking.
+
+**The through-line:** we have spent the project making the web *legible*
+to agents and almost none of it making agents *want to read* — because the
+buyer was never named. The next phase is demand-side: a consumer quickstart
+(D1), the MCP positioning (D2), a both-sides beachhead measured end to end
+(D3), the AEO head-to-head (D4), a conformance profile for agent vendors
+(D6). The corpus-for-training bet (D5) is the swing-for-the-fences.
