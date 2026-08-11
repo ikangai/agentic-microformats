@@ -4,6 +4,39 @@ Ready-to-paste `data-agent-*` annotations for www.ikangai.com, built against
 the live markup fetched 2026-08-10 and **verified locally**: each snippet was
 applied to the fetched HTML and validated with the reference CLI.
 
+## ✅ DEPLOYED 2026-08-11 — live on production
+
+ikangai.com is the spec's first live production site. Verified against the
+running site:
+
+```
+$ npx agentic-microformats https://www.ikangai.com/
+  announced   : meta ✓ (0.3)
+  agent sees  : 7 resources, 1 action        ← 4 services + 3 news teasers + contact CTA
+  ✓ Valid. Agents can operate this page.
+
+$ npx agentic-microformats https://www.ikangai.com/news-2/
+  agent sees  : 17 resources, 1 action       ← every article, with name + canonical URL
+  ✓ Valid.
+```
+
+**How it was deployed (and how to revert):** the site is a SiteOrigin
+page-builder theme (Polestar Child), whose TinyMCE widgets strip unknown
+`data-*` attributes on save — so widget-level pasting was not viable.
+Instead the annotations are applied **server-side** by a single WPCode PHP
+snippet (front-end output filter, additive only, no visual change). The exact
+snippet is committed alongside this file as
+[`ikangai.com.snippet.php`](./ikangai.com.snippet.php).
+
+- **Location:** wp-admin → Code Snippets → "Agentic Microformats annotations
+  (data-agent-*)" (snippet id 17717).
+- **Revert:** toggle that snippet Inactive (or delete it) and clear cache —
+  the site returns to exactly its prior HTML. Fully reversible, one switch.
+- The meta announcement tag is separate: WPCode → Header & Footer → Header.
+
+The snippets below document the *intended markup* per element (what the PHP
+filter injects), useful for a theme-native implementation or for other sites.
+
 ## Before / after (measured on the real pages)
 
 | Page | Before | After (this pack) |
