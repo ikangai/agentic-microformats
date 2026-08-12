@@ -410,4 +410,51 @@ wild-web evidence) are scoped in `docs/plans/2026-08-10-v0.4-roadmap.md`.
 
 ---
 
+## Content Observation Benchmark — 2026-08-12 (the pivot, measured)
+
+**Goal:** measure the new content layer the way agent-bench measures actions —
+but deterministically, no LLM: **content recall** (did `extractContent` capture
+each expected fact) and **citation accuracy** (does every emitted
+TextQuoteSelector re-resolve in the visible text, and every CssSelector resolve
+in the document). A grounding layer whose citations don't resolve is worse than
+none, so citation accuracy is first-class and checked independently of the
+extractor that produced the selectors.
+
+**Corpus** (`benchmark/content-pages/`, 3 markup styles, no `data-agent-*`
+content annotation): a Schema.org JSON-LD article, a Microformats2 `h-entry`
+(German, no JSON-LD), and a bare semantic-HTML + OpenGraph review page that
+also carries a `data-agent-provenance="user"` reviews section containing a
+prompt-injection string.
+
+**Result:**
+
+| Metric | Score |
+|--------|-------|
+| Pages fully passing | **3/3** |
+| Content recall | **24/24 (100%)** |
+| Citation accuracy | **30/30 (100%)** |
+
+**Findings:**
+1. The bridge extracts title, author, published date, section outline,
+   keywords, language, and word count across all three formats with no content
+   annotation — recall is format-independent.
+2. Every grounding pointer resolves: TextQuoteSelectors locate their value in
+   visible text; CssSelectors resolve in the document. The extractor does not
+   emit a citation it cannot back up (confirmed: it attaches a quote only when
+   the value is visibly present).
+3. The injection-laden reviews section is captured as **1 quarantined region
+   (provenance user, instructionAuthority none)** — readable but inert — while
+   the article body extracts cleanly. This is the provenance model working:
+   the agent can *read* the review without being *commanded* by it.
+4. Harness lesson: CSS selectors are document-scoped; the first cut queried
+   them from `documentElement` (descendants only) and under-counted
+   `html[lang]`. Fixed — a reminder that grounding must be verified the way an
+   agent would actually resolve it.
+
+**Run:** `npm run content-bench`. Live spot-check: the ikangai MCP article
+(81 KB) yields title/authors/both-dates/publisher/6 categories/keywords/1202
+words/7-section outline, with a verifiable quote on the title.
+
+---
+
 <!-- Experiments appended below by the agent -->

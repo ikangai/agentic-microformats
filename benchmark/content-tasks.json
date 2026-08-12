@@ -1,0 +1,38 @@
+[
+  {
+    "page": "01-jsonld-article.html",
+    "expect": {
+      "title": "Grounding Agents in the Page",
+      "authors_include": "Priya Raghavan",
+      "published_date": "2026-03-04",
+      "sections_include": ["Why citations matter", "The selector model"],
+      "keywords_include": "provenance",
+      "min_words": 40,
+      "quarantined": 0
+    }
+  },
+  {
+    "page": "02-microformats-hentry.html",
+    "expect": {
+      "title": "Werkzeuge für Agenten",
+      "authors_include": "Johanna Altmann",
+      "published_date": "2025-11-08",
+      "sections_include": ["Microformats2", "Fallback"],
+      "language": "de",
+      "min_words": 20,
+      "quarantined": 0
+    }
+  },
+  {
+    "page": "03-semantic-og-with-reviews.html",
+    "expect": {
+      "title": "The Trekking Pole Nobody Asked For",
+      "authors_include": "Sam Okoro",
+      "published_date": "2026-02-11",
+      "sections_include": ["Build quality", "Verdict"],
+      "min_words": 30,
+      "quarantined": 1,
+      "quarantined_provenance": "user"
+    }
+  }
+]
