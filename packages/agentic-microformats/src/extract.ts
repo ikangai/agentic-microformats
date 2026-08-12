@@ -214,7 +214,9 @@ function extractResourceTree(el: AgentElement, root?: AgentElement): Resource {
 
 export function extractMeta(root: AgentElement): PageMeta {
   const script = root.querySelector('script[data-agent-meta]');
-  if (!script) return {};
+  // Trust boundary (hardened 0.3.2): a page-level meta block injected inside
+  // an untrusted or ignored region MUST NOT be read as site-authored metadata.
+  if (!script || shouldSkip(script)) return {};
 
   try {
     const raw = JSON.parse(script.textContent ?? '{}');

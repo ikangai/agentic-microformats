@@ -17,6 +17,12 @@ gates failing open.
 - §3.4 **"Annotations as Consent" reframed as an "Invitation Signal"** — a signal of intent, not proof of authorization (a plugin/theme/third-party script may emit it); legal permission rests on ownership and site terms
 - Abstract repositioned: "HTML affordance markup for agents," explicitly **not** a complete agent protocol; complements Schema.org/Microformats2 (descriptive) and OpenAPI/MCP (full API)
 
+### Security (spec §10 + reference implementation 0.3.2)
+- **Trust is now monotonic and fail-closed** (§10.1): an inner `system`/`verified` can no longer escalate out of an outer `untrusted` region; unknown/misspelled trust values fail closed to `untrusted`; a `data-agent-meta` block inside an untrusted region is ignored. (Verified escalation bug reported by external review.)
+- **Prototype-pollution guard**: nested parameter names containing `__proto__`/`prototype`/`constructor` are rejected (previously a crafted `data-agent-param` mutated `Object.prototype`)
+- Clarified that `system` means *publisher-marked*, not *agent-trusted*
+- CLI no longer claims "agents can operate this page" — reports graded structural conformance and states it checks structure only
+
 ### Fixed (reference implementation 0.3.2)
 - `requiresConfirmation` now fails closed: `humanPreferred` and un-hinted mutating methods require confirmation (previously returned `false`)
 - `prepareAction` enforces the same-origin policy (§12.5) — cross-origin endpoints without opt-out are returned `blocked: true` and must not be sent — and captures `data-agent-cross-origin`

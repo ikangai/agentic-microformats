@@ -18,7 +18,7 @@ describe('CLI', () => {
     const { stdout, code } = run([join(REPO, 'examples/ecommerce/product-page.html')]);
     expect(code).toBe(0);
     expect(stdout).toContain('1 resource');
-    expect(stdout).toContain('Valid');
+    expect(stdout).toContain('structurally valid');
   });
 
   test('--json emits a machine-readable report', () => {

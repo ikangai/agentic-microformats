@@ -259,9 +259,22 @@ def coerce_value(raw: str, typehint: str):
 # Trust — mirrors trust.ts
 # ---------------------------------------------------------------------------
 
+_TRUST_SAFE = {"system", "verified"}
+
+
+def _get_trust_level(el: Node) -> str:
+    # Monotonic + fail-closed (mirrors trust.ts, hardened 0.3.2).
+    if el.closest('[data-agent-trust="untrusted"]') is not None:
+        return "untrusted"
+    boundary = el.closest("[data-agent-trust]")
+    if boundary is None:
+        return "system"
+    value = boundary.get_attribute("data-agent-trust")
+    return value if value in _TRUST_SAFE else "untrusted"
+
+
 def _should_skip(el: Node) -> bool:
-    trust = el.closest("[data-agent-trust]")
-    if trust is not None and trust.get_attribute("data-agent-trust") == "untrusted":
+    if _get_trust_level(el) == "untrusted":
         return True
     if el.closest('[data-agent-ignore="true"]') is not None:
         return True
@@ -481,7 +494,9 @@ def _extract_resource_tree(el: Node, root: Node) -> dict:
 
 def _extract_meta(root: Node) -> dict:
     script = root.query_selector("script[data-agent-meta]")
-    if script is None:
+    # Trust boundary (hardened 0.3.2): ignore a meta block injected into an
+    # untrusted/ignored region.
+    if script is None or _should_skip(script):
         return {}
     try:
         raw = json.loads(script.text_content or "{}")

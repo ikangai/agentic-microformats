@@ -14,6 +14,23 @@ add_action('template_redirect', function () {
 function ikg_agent_annotate($html) {
     if (!is_string($html) || stripos($html, '</html>') === false) return $html;
 
+    // --- Organization: the hero H1 becomes an `organization` resource ---
+    $html = str_replace(
+        'class="ikg-h-fix ikg-h-fix-1">IKANGAI</h1>',
+        'class="ikg-h-fix ikg-h-fix-1" data-agent="resource"'
+        . ' data-agent-type="organization" data-agent-id="ikangai">'
+        . '<span data-agent-prop="name">IKANGAI</span>'
+        . '<span data-agent-prop="description" data-agent-value="AI consulting,'
+        . ' workshops, tool and platform selection, and project delivery —'
+        . ' helping teams discover, understand and successfully deploy AI'
+        . ' solutions." hidden></span>'
+        . '<span data-agent-prop="url" data-agent-typehint="url"'
+        . ' data-agent-value="/" hidden></span>'
+        . '<span data-agent-prop="contact" data-agent-typehint="url"'
+        . ' data-agent-value="/contact/" hidden></span></h1>',
+        $html
+    );
+
     // --- Services: each heading becomes a `service` resource (name + url) ---
     $services = array(
         'AI Workshops'                     => 'ai-workshops',

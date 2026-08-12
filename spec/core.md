@@ -977,6 +977,19 @@ User-generated content may contain malicious annotations. Mark trust boundaries 
 | `untrusted` | User-generated content—ignore agent attributes |
 | `verified` | Verified content (e.g., verified reviews) |
 
+**Monotonicity and fail-closed (normative).** Trust classification is
+monotonic: once a region is `untrusted`, no descendant may raise its own trust
+back to `system` or `verified` — an inner declaration cannot escape an outer
+`untrusted` boundary. Any unknown or misspelled `data-agent-trust` value MUST
+be treated as `untrusted` (fail closed), never as `system`. The page-level
+`data-agent-meta` block (§9) MUST be ignored when it falls inside an untrusted
+or ignored region.
+
+**Terminology.** `system` means *publisher-marked*, not *trusted by the
+agent*. It marks content the site authored (as opposed to user-generated), and
+is evidence — the consuming agent remains the authority on whether to trust it
+(§3.2). A future revision may rename this value accordingly.
+
 **`verified` semantics.** Until a cryptographic trust layer exists, agents
 MUST treat `verified` regions exactly like `system` for parsing purposes.
 The value is reserved: when a verification mechanism ships, agents MAY

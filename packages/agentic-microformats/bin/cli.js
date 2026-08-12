@@ -105,8 +105,21 @@ const show = (list, label) => {
 show(errors, `${errors.length} error${errors.length === 1 ? "" : "s"}`);
 show(warnings, `${warnings.length} warning${warnings.length === 1 ? "" : "s"}`);
 
-if (!errors.length && !warnings.length && (nResources || nActions)) {
-  console.log(`\n  ✓ Valid. Agents can operate this page.`);
-}
+// Graded conformance, not a blanket "can operate" (validation checks
+// STRUCTURE only — it cannot see content coverage or whether acting is safe).
+const navigable = (function hasUrl(rs) {
+  return rs.some((r) => r.properties?.url || hasUrl(r.children ?? []));
+})(result.resources);
+const level =
+  errors.length ? "invalid — fix errors above"
+  : (nResources || nActions)
+    ? [
+        "structurally valid",
+        navigable ? "navigable" : null,
+        nActions ? "has actions" : null,
+      ].filter(Boolean).join(", ")
+    : "structurally valid but empty (no agent-readable content)";
+console.log(`\n  ${errors.length ? "✗" : "•"} ${level}`);
+console.log(`  (structural check only: not a claim about content completeness, grounding, or safety to act)`);
 console.log();
 process.exit(errors.length ? 1 : 0);

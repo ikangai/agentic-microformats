@@ -35,9 +35,9 @@ describe('isUntrusted', () => {
     expect(isUntrusted(q(root, '#t'))).toBe(false);
   });
 
-  test('trust override: system inside untrusted', () => {
+  test('monotonic: system inside untrusted cannot escalate — stays untrusted', () => {
     const root = dom('<div data-agent-trust="untrusted"><div data-agent-trust="system"><span id="t">hi</span></div></div>');
-    expect(isUntrusted(q(root, '#t'))).toBe(false);
+    expect(isUntrusted(q(root, '#t'))).toBe(true);
   });
 });
 
@@ -64,8 +64,8 @@ describe('getTrustLevel', () => {
     expect(getTrustLevel(q(root, '#t'))).toBe('verified');
   });
 
-  test('nearest ancestor wins', () => {
+  test('monotonic: an outer untrusted boundary wins over a nearer verified', () => {
     const root = dom('<div data-agent-trust="untrusted"><div data-agent-trust="verified"><span id="t">hi</span></div></div>');
-    expect(getTrustLevel(q(root, '#t'))).toBe('verified');
+    expect(getTrustLevel(q(root, '#t'))).toBe('untrusted');
   });
 });

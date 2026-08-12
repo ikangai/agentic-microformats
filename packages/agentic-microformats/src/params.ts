@@ -68,6 +68,9 @@ export function extractParameters(actionEl: AgentElement): Parameter[] {
   return params;
 }
 
+// Keys that would let a crafted parameter name reach into Object.prototype.
+const FORBIDDEN_KEYS = new Set(['__proto__', 'prototype', 'constructor']);
+
 export function buildNestedParams(params: Parameter[]): Record<string, unknown> {
   const result: Record<string, unknown> = {};
 
@@ -75,15 +78,22 @@ export function buildNestedParams(params: Parameter[]): Record<string, unknown> 
     if (param.disabled) continue;
     if (param.value === null) continue;
 
-    const coerced = coerceValue(param.value, param.typehint);
     const parts = param.name.split('.');
+    // Prototype-pollution guard (hardened 0.3.2): a name like
+    // "__proto__.polluted" must never mutate Object.prototype. Reject the
+    // whole parameter if any path segment is a dangerous key.
+    if (parts.some((p) => FORBIDDEN_KEYS.has(p))) continue;
+
+    const coerced = coerceValue(param.value, param.typehint);
     let current: Record<string, unknown> = result;
 
     for (let i = 0; i < parts.length - 1; i++) {
-      if (!(parts[i] in current) || typeof current[parts[i]] !== 'object') {
-        current[parts[i]] = {};
+      const key = parts[i];
+      const own = Object.prototype.hasOwnProperty.call(current, key);
+      if (!own || typeof current[key] !== 'object' || current[key] === null) {
+        current[key] = {};
       }
-      current = current[parts[i]] as Record<string, unknown>;
+      current = current[key] as Record<string, unknown>;
     }
 
     current[parts[parts.length - 1]] = coerced;
