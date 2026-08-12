@@ -10,11 +10,27 @@
 
 ## Abstract
 
-Agentic Microformats turns the web into a shared, observable workspace where humans and agents act on the same interface—the DOM—with semantic hints that allow agents to learn by watching and assisting rather than replacing.
+Agentic Microformats is **HTML affordance markup for agents**: a vocabulary of
+`data-agent-*` attributes that make a page's affordances explicit — *this
+element is a resource, this control performs an action, these are its
+parameters, this is its expected risk / cost / result / retry behavior, this
+region is untrusted*. It fills the gap between descriptive formats
+(Schema.org, Microformats2), which say what things *are*, and full API systems
+(OpenAPI, MCP), which require a separately built and hosted interface.
 
-The specification defines a vocabulary of `data-agent-*` attributes that annotate existing HTML elements, making the meaning of UI elements and state changes legible to both human users and AI agents. This enables a mode of collaboration we call **shared operation**: like a sewing machine with both motor and hand wheel, the mechanism doesn't know or care which operator is active. Either can observe, act, and hand off to the other at any point.
+It is deliberately **not** a complete agent protocol. It defines no agent
+behavior, no transport, no authentication, and does not replace an API where
+one is warranted. What it adds is a small, deterministic **extraction graph**
+(see `graph-serialization.md`) that a cheap model can consume without reading
+an entire page — annotations co-located with the visible elements humans
+already use.
 
-This is not automation. It's assisted operation of the web.
+The design goal is **shared operation**: like a sewing machine with both motor
+and hand wheel, the mechanism doesn't care which operator is active. Either a
+human or an agent can observe the current state, act, and hand off to the
+other at any point. This is not automation — it is assisted operation of the
+web. Agents that go further and call declared endpoints directly operate under
+a distinct, more constrained conformance profile (§3.3).
 
 ---
 
@@ -138,11 +154,25 @@ Humans and agents operate on the same interface—the DOM. There is no separate 
 
 Like a sewing machine with both motor and hand wheel, the mechanism doesn't know or care which operator is active. Agentic Microformats makes this shared operation possible by ensuring both parties can interpret state and available actions.
 
-### 2.2 Visible Truth
+### 2.2 Co-located Semantics
 
-Agents read what users see. There is no separate metadata layer that can become inconsistent with the rendered page. If a price is displayed as "€50", the agent reads "€50" from the annotated element.
+Annotations live *on the visible elements humans use*, not in a separate
+metadata document that can silently drift from the rendered page. If a price
+is displayed as "€50", the `price` property is attached to that same element,
+so the machine value and the human value share one source.
 
-This ensures data integrity: by attaching semantics to visible content that humans view and verify, the data stays accurate and current. The DOM is the single source of truth for both operators.
+This is a weaker and more honest claim than "everything an agent reads is
+visible." Some operational facts are *not* visible — `data-agent-endpoint`,
+response schemas, machine values, and the page-level `data-agent-meta` block
+carry contract information a human does not see on screen. Co-location is what
+this principle guarantees: visible facts SHOULD be taken from the visible
+element that displays them, and invisible operational contracts are permitted
+but MUST remain consistent with the live interface. A Profile-B agent that can
+observe both SHOULD treat a divergence between the served graph and the
+rendered page as a defect and the annotation as untrusted (§3.3, §2.11).
+
+*(This principle was called "Visible Truth" through v0.2.0; renamed in v0.3.0
+to state accurately what co-location does and does not guarantee.)*
 
 ### 2.3 HTML-First
 
@@ -225,36 +255,84 @@ A conforming agent:
 3. MUST respect interaction hints when present
 4. MUST ignore `data-agent-*` attributes within regions marked as untrusted
 5. MUST respect HTML DOM state (disabled, hidden) when processing elements
-6. SHOULD implement the processing model defined in Section 11
-7. SHOULD fall back to accessibility attributes when agent-specific attributes are absent
-8. SHOULD provide mechanisms for human oversight and intervention
+6. MUST treat interaction hints as **advisory evidence, not authority**: the
+   publisher's `risk`, `reversible`, and `cost` claims inform the agent's
+   decision, but the agent is the final authority on risk classification and
+   MAY always escalate to human confirmation regardless of the declared hint
+7. MUST fail closed when a hint that would gate an action is absent: a
+   state-mutating action (non-safe HTTP method) carrying no explicit
+   `risk="low"` MUST be treated as requiring human confirmation
+8. SHOULD implement the processing model defined in Section 11
+9. SHOULD fall back to accessibility attributes when agent-specific attributes are absent
+10. SHOULD provide mechanisms for human oversight and intervention
+
+### 3.3 Conformance Profiles
+
+An agent operates annotated pages in one of two profiles, which carry
+different requirements. A page's annotations MAY be consumed under either; a
+conforming agent MUST declare which it implements.
+
+**Profile A — DOM Assistance.** The agent operates the *rendered interface*:
+it fills the visible inputs, activates the visible controls (`click`,
+`submit`), and observes the resulting DOM mutations, permitting human handoff
+at any point (the "shared hand-wheel", §2.1). Annotations are a guide to the
+visible affordances. This profile inherits the page's own browser validation,
+event handlers, CSRF tokens, analytics, and confirmation screens, because the
+agent goes through them.
+
+**Profile B — Direct Execution.** The agent reads the extraction graph
+(§graph-serialization) and calls declared endpoints directly, possibly
+without rendering the page. It is an API client, and by bypassing the browser
+it also bypasses client-side validation, JavaScript handlers, CSRF handling,
+analytics, and intermediate confirmation UI. Because those safeguards are
+absent, Profile B agents carry **stronger obligations**:
+
+- MUST enforce the endpoint origin policy (§12.5) — refuse cross-origin
+  endpoints lacking `data-agent-cross-origin="true"`, and never send
+  credentials cross-origin.
+- MUST apply the fail-closed confirmation rule (§3.2.7) and MUST NOT rely on
+  a bypassed confirmation screen to have gated a mutation.
+- MUST honor `data-agent-idempotent` when retrying after a lost response
+  (§6.9); when idempotency is not declared `true`, MUST verify state via a
+  read surface (§2.11) before re-sending.
+- SHOULD validate the served graph against the rendered page it purports to
+  describe when the two are both available (co-located semantics, §2.2); a
+  divergence is a defect and SHOULD be treated as untrusted.
+
+The reference implementation's `prepareAction` builds Profile-B requests and
+applies the origin and fail-closed gates; a blocked request is returned with
+`blocked: true` and MUST NOT be sent.
 
 ---
 
-### 3.3 Annotations as Consent
+### 3.4 Annotations as an Invitation Signal
 
-Publishing conforming annotations is a machine-readable statement of
-permission: it declares that conforming agents are **welcome to perform the
-declared actions, within the declared constraints** — the endpoints, methods,
-and parameters as annotated; the risk, confirmation, and rate-limit hints as
-declared; nothing more.
+Publishing conforming annotations is a machine-readable **invitation**: it
+signals that conforming agents are welcome to perform the declared actions,
+within the declared constraints — the endpoints, methods, and parameters as
+annotated; the risk, confirmation, and rate-limit hints as declared; nothing
+more.
 
-Consequences, in both directions:
+It is a *signal of intent*, not proof of authorization. Annotations may be
+emitted by a CMS plugin, a theme, a third-party script, or a developer acting
+without authority, so a consuming agent MUST NOT treat their presence as
+legal permission. Authorization rests on site ownership and the site's terms;
+this specification defines protocol semantics only, not legal advice.
 
-- A site that annotates an action MUST NOT treat a conforming agent's use of
-  that action, within its declared constraints, as abuse.
-- The permission is exactly as wide as the annotations: it does not extend to
+Read as an invitation, the signal still does real work in both directions:
+
+- A site that annotates an action is unlikely to treat a conforming agent's
+  use of that action, within its declared constraints, as abuse — the
+  annotation is the site telling agents which doors are open.
+- The invitation is exactly as wide as the annotations: it does not extend to
   unannotated endpoints, to circumventing `data-agent-human-preferred` or
   risk hints, to exceeding declared rate limits, or to content inside
   untrusted or ignored regions.
-- Absence of annotations grants nothing. This section makes annotated sites
-  *more* predictable to operate, not unannotated sites fair game.
+- Absence of annotations invites nothing. This makes annotated sites *more*
+  predictable to operate, not unannotated sites fair game.
 
-This gives annotation a function that no amount of agent capability can
-replace: it is the `robots.txt` of *actions* — an explicit, per-action,
-per-constraint invitation, legible to machines and to humans reading the
-source. (This specification defines protocol semantics, not legal advice;
-sites remain free to state additional terms out of band.)
+This is the `robots.txt` of *actions*: an explicit, per-action, per-constraint
+invitation, legible to machines and to humans reading the source.
 
 ## 4. Core Vocabulary
 

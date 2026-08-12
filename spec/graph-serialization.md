@@ -119,8 +119,10 @@ for the named page path, and SHOULD advertise it via the announcement header
 
 A served graph MUST be equivalent to what a conforming extractor would
 produce from the corresponding HTML at the same moment. Divergence between
-the two is a defect: the annotations' contract with agents is *visible
-truth* (core spec 2.2), and a graph that disagrees with the page breaks it.
+the two is a defect: the annotations' contract with agents is *co-located
+semantics* (core spec §2.2) — the machine view and the rendered page must
+agree — and a graph that disagrees with the page breaks it. A Profile-B agent
+(core spec §3.3) that can see both SHOULD treat the divergence as untrusted.
 
 ## 4. Media Type
 

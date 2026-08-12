@@ -73,6 +73,12 @@ export interface Action {
    * it?", idempotent answers "is it safe to retry blindly?".
    */
   idempotent?: boolean;
+  /**
+   * Explicit opt-in for a non-same-origin endpoint (spec §12.5,
+   * `data-agent-cross-origin="true"`). Absent/false means agents MUST refuse
+   * an absolute cross-origin endpoint.
+   */
+  crossOrigin?: boolean;
   hints: InteractionHints;
   element: import('./dom.js').AgentElement;
 }
@@ -129,5 +135,11 @@ export interface PreparedAction {
   headers: Record<string, string>;
   body: Record<string, unknown>;
   confirmationRequired: boolean;
+  /**
+   * The prepared request MUST NOT be sent when true — the endpoint is
+   * cross-origin without an explicit opt-out (spec §12.5), or otherwise
+   * failed a fail-closed safety gate. `warnings` explains why.
+   */
+  blocked: boolean;
   warnings: string[];
 }

@@ -36,10 +36,25 @@ export function extractHints(el: AgentElement): InteractionHints {
   return hints;
 }
 
-export function requiresConfirmation(hints: InteractionHints): boolean {
+const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
+
+/**
+ * Whether an agent must obtain explicit human confirmation before executing.
+ *
+ * Fail-closed (spec §3.2, §8): confirmation is required for any declared
+ * danger signal, for a human-preferred action, AND — when the request method
+ * is known — for a state-mutating action the site did NOT explicitly mark
+ * `risk="low"`. Passing the method is strongly recommended; without it the
+ * missing-hints case cannot be evaluated and only the explicit signals gate.
+ * Hints are advisory: the agent remains the final authority and MAY escalate.
+ */
+export function requiresConfirmation(hints: InteractionHints, method?: string): boolean {
   if (hints.risk === 'high') return true;
   if (hints.cost !== undefined && hints.cost > 0) return true;
   if (hints.reversible === false) return true;
   if (hints.role === 'danger') return true;
+  if (hints.humanPreferred) return true;
+  const mutating = method !== undefined && !SAFE_METHODS.has(method.toUpperCase());
+  if (mutating && hints.risk === undefined) return true;
   return false;
 }

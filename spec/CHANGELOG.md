@@ -2,6 +2,25 @@
 
 All notable changes to the Agentic Microformats specification.
 
+## [0.3.1] - August 2026 (Working Draft)
+
+Prompted by an independent external review (ChatGPT "Sol") that separated the
+two operating models the draft had conflated, and found the reference safety
+gates failing open.
+
+### Added
+- §3.3 Conformance Profiles: **Profile A (DOM Assistance)** vs **Profile B (Direct Execution)**, with stronger security obligations on Profile B (origin enforcement, fail-closed confirmation, idempotent retry, graph/DOM consistency)
+- §3.2: fail-closed conformance rules — hints are advisory evidence not authority; the agent is the final risk authority; a state-mutating action with no explicit `risk="low"` MUST require confirmation
+
+### Changed
+- §2.2 **"Visible Truth" renamed to "Co-located Semantics"** — states honestly that operational contracts (endpoints, schemas, meta) are invisible but MUST stay consistent with the live interface, rather than claiming everything is visible
+- §3.4 **"Annotations as Consent" reframed as an "Invitation Signal"** — a signal of intent, not proof of authorization (a plugin/theme/third-party script may emit it); legal permission rests on ownership and site terms
+- Abstract repositioned: "HTML affordance markup for agents," explicitly **not** a complete agent protocol; complements Schema.org/Microformats2 (descriptive) and OpenAPI/MCP (full API)
+
+### Fixed (reference implementation 0.3.2)
+- `requiresConfirmation` now fails closed: `humanPreferred` and un-hinted mutating methods require confirmation (previously returned `false`)
+- `prepareAction` enforces the same-origin policy (§12.5) — cross-origin endpoints without opt-out are returned `blocked: true` and must not be sent — and captures `data-agent-cross-origin`
+
 ## [0.3.0] - August 2026 (Working Draft)
 
 ### Added

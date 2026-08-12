@@ -85,11 +85,26 @@ export class AgentDOM {
     });
   }
 
-  prepareAction(action: Action, paramValues?: Record<string, unknown>): PreparedAction {
+  /**
+   * Build an executable request from an action, applying fail-closed safety
+   * gates (spec §3.2, §12.5). Pass `opts.origin` (the page's origin) to enable
+   * same-origin enforcement — an absolute cross-origin endpoint without
+   * `data-agent-cross-origin="true"` is refused (`blocked: true`) and MUST NOT
+   * be sent. `confirmationRequired` is method-aware: a state-mutating action
+   * with no explicit `risk="low"` requires confirmation.
+   */
+  prepareAction(
+    action: Action,
+    paramValues?: Record<string, unknown>,
+    opts?: { origin?: string }
+  ): PreparedAction {
     const warnings: string[] = [];
 
     if (action.hints.risk === 'high') warnings.push('High risk action');
     if (action.hints.risk === 'medium') warnings.push('Medium risk action');
+    if (action.hints.risk === undefined && !this.isSafeMethod(action.method)) {
+      warnings.push('State-changing action with no declared risk level — treated as requiring confirmation');
+    }
     if (action.hints.reversible === false) warnings.push('Irreversible action');
     if (action.hints.humanPreferred) warnings.push('Human confirmation preferred');
     if (action.hints.cost !== undefined && action.hints.cost > 0) {
@@ -97,6 +112,16 @@ export class AgentDOM {
       warnings.push(`Cost: ${action.hints.cost}${currency ? ' ' + currency : ''}`);
     }
     if (action.hints.role === 'danger') warnings.push('Danger action');
+
+    const url = action.endpoint ?? '';
+    let blocked = false;
+    const crossOrigin = this.isCrossOrigin(url, opts?.origin);
+    if (crossOrigin && action.crossOrigin !== true) {
+      blocked = true;
+      warnings.push(
+        `Refused: cross-origin endpoint "${url}" without data-agent-cross-origin="true" (spec §12.5)`
+      );
+    }
 
     let body: Record<string, unknown>;
     if (paramValues) {
@@ -107,11 +132,27 @@ export class AgentDOM {
 
     return {
       method: action.method,
-      url: action.endpoint ?? '',
+      url,
       headers: action.headers ?? {},
       body,
-      confirmationRequired: requiresConfirmation(action.hints),
+      confirmationRequired: blocked || requiresConfirmation(action.hints, action.method),
+      blocked,
       warnings,
     };
+  }
+
+  private isSafeMethod(method: string): boolean {
+    return ['GET', 'HEAD', 'OPTIONS'].includes(method.toUpperCase());
+  }
+
+  /** True only when the endpoint is an absolute URL on a different origin. */
+  private isCrossOrigin(endpoint: string, origin?: string): boolean {
+    if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(endpoint)) return false; // relative → same-origin
+    if (!origin) return true; // absolute endpoint, no origin to compare → treat as cross-origin
+    try {
+      return new URL(endpoint).origin !== new URL(origin).origin;
+    } catch {
+      return true;
+    }
   }
 }

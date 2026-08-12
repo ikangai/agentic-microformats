@@ -72,6 +72,11 @@ function extractAction(el: AgentElement, inheritedTargetId?: string, root?: Agen
     idempotentAttr === 'true' ? true :
     idempotentAttr === 'false' ? false : undefined;
 
+  const crossOriginAttr = el.getAttribute('data-agent-cross-origin');
+  const crossOrigin =
+    crossOriginAttr === 'true' ? true :
+    crossOriginAttr === 'false' ? false : undefined;
+
   let response: Record<string, string> | undefined;
   const responseAttr = el.getAttribute('data-agent-response');
   if (responseAttr) {
@@ -97,6 +102,7 @@ function extractAction(el: AgentElement, inheritedTargetId?: string, root?: Agen
     onSuccess,
     response,
     idempotent,
+    crossOrigin,
     hints: extractHints(el),
     element: el,
   };

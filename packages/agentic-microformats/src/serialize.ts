@@ -41,6 +41,7 @@ function serializeAction(a: Action): Record<string, unknown> {
   if (a.onSuccess) out.onSuccess = a.onSuccess;
   if (a.response) out.response = a.response;
   if (a.idempotent !== undefined) out.idempotent = a.idempotent;
+  if (a.crossOrigin !== undefined) out.crossOrigin = a.crossOrigin;
   if (a.headers) out.headers = a.headers;
 
   const hints: Record<string, unknown> = {};

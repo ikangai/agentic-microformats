@@ -124,7 +124,9 @@ describe('AgentDOM', () => {
 
     expect(prepared.body).toEqual({ name: 'Widget', count: 5 });
     expect(prepared.headers).toEqual({ 'Content-Type': 'application/json' });
-    expect(prepared.confirmationRequired).toBe(false);
+    // Fail-closed: a POST with no declared risk requires confirmation.
+    expect(prepared.confirmationRequired).toBe(true);
+    expect(prepared.blocked).toBe(false);
   });
 
   test('extract() forces re-parse', () => {

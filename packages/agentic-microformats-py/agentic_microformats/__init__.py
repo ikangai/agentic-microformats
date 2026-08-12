@@ -18,7 +18,7 @@ import re
 from html.parser import HTMLParser
 from typing import Any, Optional
 
-__version__ = "0.3.0"
+__version__ = "0.3.2"
 
 GRAPH_FORMAT_VERSION = "0.3"
 
@@ -398,6 +398,9 @@ def _extract_action(el: Node, inherited_target: Optional[str], root: Node) -> di
     idem_attr = el.get_attribute("data-agent-idempotent")
     idempotent = True if idem_attr == "true" else False if idem_attr == "false" else None
 
+    xo_attr = el.get_attribute("data-agent-cross-origin")
+    cross_origin = True if xo_attr == "true" else False if xo_attr == "false" else None
+
     explicit_target = el.get_attribute("data-agent-target")
 
     return {
@@ -411,6 +414,7 @@ def _extract_action(el: Node, inherited_target: Optional[str], root: Node) -> di
         "onSuccess": el.get_attribute("data-agent-on-success"),
         "response": response,
         "idempotent": idempotent,
+        "crossOrigin": cross_origin,
         "hints": _extract_hints(el),
     }
 
@@ -565,6 +569,8 @@ def _ser_action(a: dict) -> dict:
         out["response"] = a["response"]
     if a["idempotent"] is not None:
         out["idempotent"] = a["idempotent"]
+    if a.get("crossOrigin") is not None:
+        out["crossOrigin"] = a["crossOrigin"]
     if a["headers"]:
         out["headers"] = a["headers"]
     if a["hints"]:
