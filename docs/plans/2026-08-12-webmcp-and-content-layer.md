@@ -60,6 +60,17 @@ action layer as a *binding to the control* and immediately explains why
 
 ## Phase 2 — the content-reading profile (the new core value)
 
+**Status: core delivered (0.4.0).** `extractContent` + `spec/content-observation.md`
++ CLI `--content` bridge JSON-LD / Microformats2 / Open Graph / semantic HTML
+into a grounded, provenance-tagged observation with a section outline — no new
+annotation. Demonstrated live: the ikangai MCP article (81 KB, previously "0
+resources, 1 nav link" to the action graph) now yields title, authors,
+published/modified dates, publisher, 6 categories, keywords, 1202-word count,
+and a 7-section outline. Remaining in this phase: full Web Annotation
+TextQuote/TextPosition grounding (items 6), per-section body text across
+arbitrary nesting, value-status/coverage (item 3), and Python parity for the
+content module.
+
 4. **Observation envelope** on every graph: `sourceURL`, `canonicalURL`,
    `baseURL`, `observedAt`, `etag`, `language`, `direction`, `locale`,
    `authScope`, `variant`, `coverage`. Per-value language/direction where it

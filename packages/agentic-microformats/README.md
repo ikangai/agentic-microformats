@@ -37,9 +37,29 @@ const prepared = agentDom.prepareAction(actions[0]);
 | `hints` | Interaction hints: role, risk, reversibility, cost, human-preferred |
 | `observe` | MutationObserver-based annotation change feed (browser only) |
 
+## Content observation (0.4.0) — no annotation required
+
+`extractContent(root)` reads what a page *says* — title, authors, dates,
+publisher, section, keywords, word count, language, excerpt, and a heading
+outline — bridged from **Schema.org JSON-LD, Microformats2, Open Graph, and
+semantic HTML that the page already carries**. Every field is grounded:
+`{ value, source, selector }`. Try it on any article:
+
+```bash
+npx agentic-microformats <url> --content
+```
+
+This is the "own the layer WebMCP lacks" direction: a portable, server-
+renderable, grounded reading an agent uses before and after it acts. See
+`spec/content-observation.md`.
+
 ## Spec coverage
 
-Implements core spec **v0.2.0**, including `data-agent-on-success`, `data-agent-response`, `data-agent-min`/`max`, and the extended meta layer (`workflow`, `actions`, `responseSchemas`, `errorFormat`). The proposed vocabulary in `spec/advanced.md` and the workflow/async example attributes are **not** implemented — they are not part of the released spec.
+Implements core spec **v0.3.x** (`data-agent-idempotent`, endpoint origin
+policy, conformance profiles, monotonic trust) plus the **0.4.0 content
+observation layer**. The proposed vocabulary in `spec/advanced.md` and the
+workflow/async example attributes are **not** implemented — they are not part
+of the released spec.
 
 ## License
 

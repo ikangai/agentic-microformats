@@ -25,6 +25,8 @@ export { extractMeta, extractResources, extractActions, extractAll } from './ext
 export { toGraph, toGraphJSON, GRAPH_FORMAT_VERSION } from './serialize.js';
 export { validate } from './validate.js';
 export type { ValidationIssue } from './validate.js';
+export { extractContent } from './content.js';
+export type { ContentObservation, ContentSection, Grounded, ContentSource } from './content.js';
 export { observe } from './observe.js';
 export type { AgentMutation, MutationCallback } from './observe.js';
 

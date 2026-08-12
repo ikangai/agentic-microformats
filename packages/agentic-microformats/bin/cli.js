@@ -13,18 +13,26 @@
  */
 import { readFileSync } from "node:fs";
 import { parseHTML } from "linkedom";
-import { extractAll, toGraph, toGraphJSON, validate } from "../dist/index.js";
+import { extractAll, toGraph, toGraphJSON, validate, extractContent } from "../dist/index.js";
 
 const args = process.argv.slice(2);
 const target = args.find((a) => !a.startsWith("--"));
 const wantGraph = args.includes("--graph");
 const wantJson = args.includes("--json");
+const wantContent = args.includes("--content");
 
 if (!target || args.includes("--help")) {
-  console.log(`Usage: agentic-microformats <url-or-file> [--graph] [--json]
+  console.log(`Usage: agentic-microformats <url-or-file> [--graph] [--json] [--content]
 
 Checks a page's Agentic Microformats annotations: extracts the graph,
 validates it, and summarizes what an agent can see and do.
+
+  --graph    print the canonical action/resource graph (JSON)
+  --content  print the content observation — title, author, dates, sections,
+             keywords — bridged from Schema.org / Microformats2 / semantic HTML,
+             with per-field provenance. Needs no data-agent-* annotations.
+  --json     machine-readable report
+
 Spec: https://github.com/ikangai/agentic-microformats`);
   process.exit(target ? 0 : 2);
 }
@@ -62,6 +70,38 @@ const countResources = (rs) => rs.reduce((n, r) => n + 1 + countResources(r.chil
 const countActions = (rs) => rs.reduce((n, r) => n + (r.actions?.length ?? 0) + countActions(r.children ?? []), 0);
 const nResources = countResources(result.resources);
 const nActions = countActions(result.resources) + result.actions.length;
+
+if (wantContent) {
+  const obs = extractContent(root);
+  if (wantJson) { console.log(JSON.stringify(obs, null, 2)); process.exit(0); }
+  const d = obs.document;
+  const line = (label, g) => {
+    if (!g) return;
+    const v = Array.isArray(g.value) ? g.value.join(", ") : g.value;
+    console.log(`  ${label.padEnd(10)}: ${String(v).slice(0, 100)}  [${g.source}]`);
+  };
+  console.log(`\ncontent observation: ${target}\n`);
+  if (obs.envelope.canonicalURL) console.log(`  canonical : ${obs.envelope.canonicalURL}`);
+  if (obs.envelope.language) console.log(`  language  : ${obs.envelope.language}`);
+  line("title", d.title);
+  line("authors", d.authors);
+  line("published", d.published);
+  line("modified", d.modified);
+  line("publisher", d.publisher);
+  line("section", d.section);
+  line("keywords", d.keywords);
+  line("words", d.wordCount);
+  line("excerpt", d.excerpt);
+  if (obs.sections.length) {
+    console.log(`\n  outline (${obs.sections.length} sections):`);
+    for (const s of obs.sections.slice(0, 30)) {
+      console.log(`    ${"  ".repeat(Math.max(0, s.level - 2))}H${s.level} ${s.headingPath[s.headingPath.length - 1]}`);
+    }
+  }
+  console.log(`\n  bridged from: ${obs.provenance.join(", ") || "(no structured content sources found)"}`);
+  console.log(`  (no data-agent-* annotation required — read from existing markup)\n`);
+  process.exit(0);
+}
 
 if (wantGraph) {
   console.log(toGraphJSON(result, true));

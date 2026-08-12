@@ -2,6 +2,21 @@
 
 All notable changes to the Agentic Microformats specification.
 
+## [0.4.0] - August 2026 (Working Draft) — the pivot begins
+
+First step of the "own the content/state/grounding layer WebMCP lacks"
+direction (see `docs/plans/2026-08-12-webmcp-and-content-layer.md`).
+
+### Added
+- **Content Observation Layer** (`content-observation.md`): a grounded,
+  provenance-tagged reading of what a page *says* — title, authors, dates,
+  publisher, section, keywords, word count, language, excerpt, and a
+  nested-aware heading outline — **bridged from Schema.org JSON-LD /
+  Microformats2 / Open Graph / semantic HTML with zero `data-agent-*`
+  annotation**. Reference: `extractContent`; CLI `--content`.
+- Every content value carries `{ value, source, selector }` so agents can
+  cite and re-verify, and `derived` values are marked as lower-confidence.
+
 ## [0.3.1] - August 2026 (Working Draft)
 
 Prompted by an independent external review (ChatGPT "Sol") that separated the
