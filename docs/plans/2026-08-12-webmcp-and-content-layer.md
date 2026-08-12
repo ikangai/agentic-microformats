@@ -88,10 +88,21 @@ content module.
 
 ## Phase 3 — interaction done right (with, not against, WebMCP)
 
+**Status: binding adapter delivered (impl 0.5.0).** `toWebMCPTools` /
+`registerWebMCPTools` + `spec/webmcp-binding.md` + CLI `--webmcp` compile
+actions into WebMCP tool descriptors (JSON Schema inputs, MCP tool annotations,
+DOM-control binding via `form.requestSubmit()`), with the fail-closed
+confirmation gate enforced at the runtime. Demonstrated on the demo product
+page and live ikangai. The normative progressive-enhancement rule is in the
+binding spec. Remaining in this phase: richer effect declarations (item 8),
+reversibility-as-contract (item 9), and confirmation-binding + concurrency
+(item 10).
+
 7. **Action = {operation, resource, input controls, effects, binding,
    outcome}.** Binding is the HTML control / form / WebMCP tool. Provide an
    adapter: annotations → native form affordance → WebMCP tool → compact
-   observation graph.
+   observation graph. *(Adapter shipped; the effects/outcome vocabulary
+   expansion is items 8–9.)*
 8. **Effect declarations** replace the single `risk` scalar: read-only /
    creates-or-changes / sends-external / spends-money / deletes / discloses-PII
    / reversible(how,until) / idempotent / requires-fresh-version. These are

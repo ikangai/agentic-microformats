@@ -2,6 +2,23 @@
 
 All notable changes to the Agentic Microformats specification.
 
+## [0.4.0 / impl 0.5.0] - August 2026 (Working Draft) — WebMCP binding
+
+Phase 3 of the pivot: the interaction half, done *with* WebMCP, not against it.
+
+### Added
+- **WebMCP binding** (`webmcp-binding.md`): actions compile to WebMCP tool
+  descriptors — JSON Schema inputs (from typehint/min/max/required), the
+  standard MCP tool annotations (`readOnlyHint`/`destructiveHint`/
+  `idempotentHint` + `humanConfirmationHint`/`costHint` derived from hints and
+  the fail-closed rule), and a **binding that defaults to the real HTML control**
+  (`form.requestSubmit()`), the endpoint only as fallback.
+- Normative progressive-enhancement rule: removing annotations leaves a
+  complete human workflow; an agent's invocation takes the same
+  validation/auth/logic path as a human click.
+- Reference: `toWebMCPTools` (pure) + `registerWebMCPTools` (live, binds to the
+  DOM control, enforces the confirmation gate); CLI `--webmcp`.
+
 ## [0.4.0] - August 2026 (Working Draft) — the pivot begins
 
 First step of the "own the content/state/grounding layer WebMCP lacks"

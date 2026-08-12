@@ -30,6 +30,11 @@ export type {
   ContentObservation, ContentSection, Grounded, ContentSource,
   Selector, Provenance, QuarantinedContent,
 } from './content.js';
+export { toWebMCPTools, registerWebMCPTools } from './webmcp.js';
+export type {
+  WebMCPTool, ToolAnnotations, ToolBinding, JSONSchema, JSONSchemaProperty,
+  ModelContextHost, RegisterOptions, Registration,
+} from './webmcp.js';
 export { observe } from './observe.js';
 export type { AgentMutation, MutationCallback } from './observe.js';
 

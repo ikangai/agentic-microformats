@@ -53,6 +53,25 @@ This is the "own the layer WebMCP lacks" direction: a portable, server-
 renderable, grounded reading an agent uses before and after it acts. See
 `spec/content-observation.md`.
 
+## WebMCP binding (0.5.0)
+
+`toWebMCPTools(extractAll(root))` compiles the actions into
+[WebMCP](https://webmachinelearning.github.io/webmcp/) tool descriptors —
+JSON Schema inputs, standard MCP tool annotations (`readOnlyHint` /
+`destructiveHint` / `idempotentHint` / `humanConfirmationHint`), and a binding
+that **defaults to the real HTML control** (`form.requestSubmit()`), not a
+shadow endpoint. `registerWebMCPTools(result, navigator.modelContext)` registers
+them live and enforces the fail-closed confirmation gate. Inspect any page:
+
+```bash
+npx agentic-microformats <url> --webmcp
+```
+
+See `spec/webmcp-binding.md`. This is the interaction half of the pivot: the
+same annotations a zero-JS agent reads statically also drive live WebMCP
+invocation in a capable browser — Agentic Microformats does not compete with
+WebMCP's runtime, it feeds it.
+
 ## Spec coverage
 
 Implements core spec **v0.3.x** (`data-agent-idempotent`, endpoint origin

@@ -13,16 +13,17 @@
  */
 import { readFileSync } from "node:fs";
 import { parseHTML } from "linkedom";
-import { extractAll, toGraph, toGraphJSON, validate, extractContent } from "../dist/index.js";
+import { extractAll, toGraph, toGraphJSON, validate, extractContent, toWebMCPTools } from "../dist/index.js";
 
 const args = process.argv.slice(2);
 const target = args.find((a) => !a.startsWith("--"));
 const wantGraph = args.includes("--graph");
 const wantJson = args.includes("--json");
 const wantContent = args.includes("--content");
+const wantWebmcp = args.includes("--webmcp");
 
 if (!target || args.includes("--help")) {
-  console.log(`Usage: agentic-microformats <url-or-file> [--graph] [--json] [--content]
+  console.log(`Usage: agentic-microformats <url-or-file> [--graph] [--content] [--webmcp] [--json]
 
 Checks a page's Agentic Microformats annotations: extracts the graph,
 validates it, and summarizes what an agent can see and do.
@@ -31,6 +32,8 @@ validates it, and summarizes what an agent can see and do.
   --content  print the content observation — title, author, dates, sections,
              keywords — bridged from Schema.org / Microformats2 / semantic HTML,
              with per-field provenance. Needs no data-agent-* annotations.
+  --webmcp   compile the actions into WebMCP tool descriptors (JSON Schema
+             inputs + MCP tool annotations, DOM-control binding)
   --json     machine-readable report
 
 Spec: https://github.com/ikangai/agentic-microformats`);
@@ -106,6 +109,32 @@ if (wantContent) {
   }
   console.log(`\n  bridged from: ${obs.provenance.join(", ") || "(no structured content sources found)"}`);
   console.log(`  (no data-agent-* annotation required — read from existing markup)\n`);
+  process.exit(0);
+}
+
+if (wantWebmcp) {
+  const tools = toWebMCPTools(result);
+  if (wantJson) { console.log(JSON.stringify(tools, null, 2)); process.exit(0); }
+  console.log(`\nWebMCP tools compiled from annotations: ${target}\n`);
+  if (!tools.length) console.log("  (no actions found)");
+  for (const t of tools) {
+    const a = t.annotations;
+    const flags = [
+      a.readOnlyHint ? "read-only" : null,
+      a.destructiveHint ? "destructive" : null,
+      a.idempotentHint ? "idempotent" : null,
+      a.humanConfirmationHint ? "needs-confirmation" : null,
+      a.costHint ? `cost ${a.costHint.amount}${a.costHint.currency ? " " + a.costHint.currency : ""}` : null,
+    ].filter(Boolean).join(", ");
+    const params = Object.entries(t.inputSchema.properties)
+      .map(([n, p]) => `${n}:${p.type}${(t.inputSchema.required || []).includes(n) ? "*" : ""}`)
+      .join(", ");
+    console.log(`  • ${t.name}  [${t.binding.type}]`);
+    if (t.description) console.log(`      ${t.description.slice(0, 88)}`);
+    console.log(`      inputs: {${params || "—"}}`);
+    console.log(`      hints : ${flags || "—"}`);
+  }
+  console.log(`\n  binding = the real HTML control (form.requestSubmit), not a shadow endpoint\n`);
   process.exit(0);
 }
 
