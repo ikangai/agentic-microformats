@@ -12,13 +12,23 @@ running site:
 ```
 $ npx agentic-microformats https://www.ikangai.com/
   announced   : meta ✓ (0.3)
-  agent sees  : 7 resources, 1 action        ← 4 services + 3 news teasers + contact CTA
-  ✓ Valid. Agents can operate this page.
+  agent sees  : 8 resources, 1 action   ← organization + 4 services + 3 news teasers + contact CTA
+  • structurally valid, navigable, has actions
 
 $ npx agentic-microformats https://www.ikangai.com/news-2/
-  agent sees  : 17 resources, 1 action       ← every article, with name + canonical URL
-  ✓ Valid.
+  agent sees  : 17 resources, 1 action  ← every article, with name + canonical URL
 ```
+
+The homepage also serves a page-level `data-agent-meta` provider block
+(name / url / jurisdiction / locale) and an `organization` resource carrying
+IKANGAI's description and contact URL, so a graph-only agent gets the site's
+identity, not just a list of links.
+
+> Content-layer caveat (external review, Aug 2026): this is a good navigation
+> and identity index, but not yet a rich *content* interface — article dates,
+> authors, summaries, and the article body are not in the graph. The existing
+> `hentry`/Schema.org markup already carries them; bridging those into the
+> graph is 0.4 direction work (see `docs/plans/2026-08-12-webmcp-and-content-layer.md`).
 
 **How it was deployed (and how to revert):** the site is a SiteOrigin
 page-builder theme (Polestar Child), whose TinyMCE widgets strip unknown

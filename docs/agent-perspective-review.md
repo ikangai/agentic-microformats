@@ -345,3 +345,107 @@ buyer was never named. The next phase is demand-side: a consumer quickstart
 (D1), the MCP positioning (D2), a both-sides beachhead measured end to end
 (D3), the AEO head-to-head (D4), a conformance profile for agent vendors
 (D6). The corpus-for-training bet (D5) is the swing-for-the-fences.
+
+---
+
+# Round 4 (2026-08-12): WebMCP changes the question — and points to a sharper thesis
+
+Round 2 named schema.org as the prior-art opponent; Round 3 named MCP as the
+attention opponent. A second independent review (Sol) supplied the decisive
+fact both missed: **WebMCP now exists** — a W3C Community Group draft backed by
+Google and Microsoft, with Chrome experimentation (July 2026), that
+declaratively turns HTML forms into agent tools while keeping browser origins,
+permissions, tab lifecycle, auth state, and UI updates. It overlaps almost
+exactly with *our action layer*. Building a parallel HTTP action protocol
+against that is a losing fight. But the collision clarifies what this project
+should actually be — and the answer is more defensible than the action layer
+ever was.
+
+### The pivot: own the layer WebMCP doesn't
+
+Split the stack by what each part is best at:
+
+- **Agentic Microformats** → the **content, entity, state, provenance, and
+  grounding layer**: an inspectable, server-renderable, zero-JS *observation*
+  of what's on the page and what it means, that a cheap model can read *before
+  and after* it acts.
+- **Native HTML + WebMCP** → the interaction mechanics: forms, validation,
+  accessibility, origin/permission control, live invocation in capable
+  browsers.
+- **Agent policy** → risk, confirmation, privacy (already agent-owned since
+  Round-1/§3.2).
+
+The action layer doesn't disappear; it becomes a **binding**, and the default
+binding is the annotated HTML control itself (`requestSubmit()` on the real
+form), not a shadow HTTP endpoint. `data-agent-endpoint` and direct HTTP move
+into an *optional* binding profile; the canonical graph compiles *toward*
+WebMCP rather than competing with it. The strongest one-line framing Sol
+landed on, and I agree: **"HTML-native agent affordances" — the missing,
+inspectable content-and-state observation layer that gives browser agents
+grounded understanding before and after they use tools.**
+
+### The thesis test that makes it progressive enhancement
+
+One conformance rule captures the whole repositioning and should become
+normative:
+
+> Removing all Agentic Microformats annotations MUST leave a complete,
+> accessible human workflow; and an agent invoking an annotated action MUST
+> pass through the same validation, authorization, and application logic as
+> the human clicking the control.
+
+Our current `data-agent-endpoint` design *fails* this test — a Profile-B agent
+bypasses exactly that logic. That is the real content of Round-1's "two
+profiles" split, sharpened: Profile B should bind to the control, not the
+endpoint.
+
+### What this makes urgent (verified defects first — several now fixed)
+
+Sol verified concrete bugs; the exploitable ones are fixed in 0.3.2 (monotonic
+fail-closed trust, prototype-pollution guard, honest CLI — see CHANGELOG). The
+rest are direction, sequenced in
+`docs/plans/2026-08-12-webmcp-and-content-layer.md`. The load-bearing ones:
+
+1. **DOM attributes are not live state.** `value`/`checked`/`selected`
+   *attributes* hold initial state, not what the user has currently typed. A
+   browser agent MUST read live DOM properties / `FormData`, or it overwrites
+   the human's in-progress work — the exact "shared hand-wheel" scenario the
+   project is named for. (Server-side extraction can't fix this; the
+   browser-facing `AgentDOM` must.)
+2. **Trust is self-asserted; "system" is the wrong frame.** Replace the
+   trust *level* mental model with **provenance** (publisher / user / third
+   party / quotation / generated) + **instruction authority** (almost always
+   none). Untrusted content should be *quarantined and still readable* (so
+   agents can summarize reviews/comments through an isolated path), not
+   erased — today we erase it.
+3. **Missing ≠ absent.** An omitted property could mean unknown, withheld,
+   unloaded, inapplicable, or unannotated. Add explicit value-status +
+   coverage semantics, or agents cannot reason about what they didn't get.
+4. **Tiny graph can mean data loss.** We *reward* compression (graph = 2% of
+   HTML) even when the useful content is what got dropped. Measure grounded
+   recall and citation accuracy, not graph size.
+5. **Grounding.** Every extracted value should cite back to the exact visible
+   passage (reuse W3C Web Annotation selectors + PROV-O), so agents can verify
+   normalized values against what a human sees and detect when a page revision
+   invalidates an extraction.
+6. **Concurrency.** "Shared operation" assumed polite turn-taking; reality is
+   simultaneous edits, multiple tabs, background refreshes, in-flight
+   cancellation. Needs state versions, action lifecycle, `If-Match`/ETag
+   confirmation binding, `AbortSignal`, conflict detection.
+7. **Prior art to map to, not rediscover:** W3C **WoT Thing Description**
+   (properties/actions/events, data schemas, `safe`/`idempotent`, security
+   defs) has spent years on this exact information model; **Web Annotation +
+   PROV-O** for grounding; **JSON Schema** for I/O; **HTTP conditional
+   requests** for concurrency. We are independently rediscovering a narrower
+   version.
+
+### The strategic recommendation
+
+Do not bootstrap a parallel browser ecosystem. Take a **narrow, sharp
+proposal — the inspectable content/state/grounding observation layer — to the
+WebMCP community**, positioned as the zero-JS, server-renderable complement
+that gives their tools grounded context. That is a collaboration story with
+the actors who already own the demand side (Round 3's unsolved problem),
+instead of a competition story against them. It is, by a wide margin, the most
+credible path from "interesting working draft" to "thing browser-agent authors
+adopt."
