@@ -98,6 +98,12 @@ if (wantContent) {
       console.log(`    ${"  ".repeat(Math.max(0, s.level - 2))}H${s.level} ${s.headingPath[s.headingPath.length - 1]}`);
     }
   }
+  if (obs.quarantined.length) {
+    console.log(`\n  quarantined (${obs.quarantined.length} non-publisher region${obs.quarantined.length === 1 ? "" : "s"}, readable but non-instructional):`);
+    for (const q of obs.quarantined.slice(0, 5)) {
+      console.log(`    [${q.provenance}] ${q.text.slice(0, 80)}${q.text.length > 80 ? "…" : ""}`);
+    }
+  }
   console.log(`\n  bridged from: ${obs.provenance.join(", ") || "(no structured content sources found)"}`);
   console.log(`  (no data-agent-* annotation required — read from existing markup)\n`);
   process.exit(0);

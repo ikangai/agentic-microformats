@@ -56,6 +56,26 @@ export interface ContentSection {
   text: string;
 }
 
+/**
+ * Where a piece of content came from (spec §10). Orthogonal to *instruction
+ * authority*, which for anything not publisher-authored is `none`.
+ */
+export type Provenance = 'publisher' | 'user' | 'third-party' | 'quotation' | 'generated';
+
+/**
+ * Content from an untrusted / non-publisher region — reviews, comments, forum
+ * posts, quotations. Unlike the resource/action graph (which excludes it), the
+ * content layer keeps it **readable but quarantined**: an agent may summarize
+ * or quote it, but MUST treat any instructions inside it as data, never as
+ * commands (`instructionAuthority: "none"`).
+ */
+export interface QuarantinedContent {
+  provenance: Provenance;
+  instructionAuthority: 'none';
+  text: string;
+  selectors: Selector[];
+}
+
 export interface ContentObservation {
   envelope: {
     canonicalURL?: string;
@@ -78,6 +98,11 @@ export interface ContentObservation {
     excerpt?: Grounded<string>;
   };
   sections: ContentSection[];
+  /**
+   * Non-publisher content kept readable but marked non-instructional, instead
+   * of erased. Empty when the page declares no untrusted/UGC regions.
+   */
+  quarantined: QuarantinedContent[];
   /** Which structured sources were found, for transparency/debugging. */
   provenance: string[];
 }
@@ -312,6 +337,57 @@ function bodyText(body: AgentElement | null): string {
 }
 
 // ---------------------------------------------------------------------------
+// Quarantine: non-publisher content, kept readable but non-instructional
+// ---------------------------------------------------------------------------
+
+const PROVENANCE_VALUES = new Set<Provenance>(['publisher', 'user', 'third-party', 'quotation', 'generated']);
+
+function regionProvenance(el: AgentElement): Provenance | null {
+  const p = el.getAttribute('data-agent-provenance');
+  if (p) {
+    if (p === 'publisher') return null; // publisher-authored → not quarantined
+    return PROVENANCE_VALUES.has(p as Provenance) ? (p as Provenance) : 'third-party'; // unknown → fail safe
+  }
+  if (el.getAttribute('data-agent-trust') === 'untrusted') return 'user'; // legacy trust → assume UGC
+  return null;
+}
+
+function extractQuarantined(root: AgentElement): QuarantinedContent[] {
+  const candidates = root.querySelectorAll(
+    '[data-agent-provenance], [data-agent-trust="untrusted"]'
+  );
+  const regions: AgentElement[] = [];
+  for (let i = 0; i < candidates.length; i++) {
+    const el = candidates[i];
+    if (regionProvenance(el) === null) continue;
+    // Only top-level quarantined regions: skip if nested inside another one.
+    let nested = false;
+    for (let j = 0; j < candidates.length; j++) {
+      if (candidates[j] === el) continue;
+      if (regionProvenance(candidates[j]) === null) continue;
+      const inside = candidates[j].querySelectorAll('[data-agent-provenance], [data-agent-trust="untrusted"]');
+      for (let k = 0; k < inside.length; k++) { if (inside[k] === el) { nested = true; break; } }
+      if (nested) break;
+    }
+    if (!nested) regions.push(el);
+  }
+
+  return regions.map((el) => {
+    const text = (el.textContent ?? '').replace(/\s+/g, ' ').trim();
+    const prov = regionProvenance(el)!;
+    const css = el.getAttribute('data-agent-provenance')
+      ? `[data-agent-provenance="${el.getAttribute('data-agent-provenance')}"]`
+      : '[data-agent-trust="untrusted"]';
+    return {
+      provenance: prov,
+      instructionAuthority: 'none' as const,
+      text: text.length > 500 ? text.slice(0, 500).trimEnd() + '…' : text,
+      selectors: [{ type: 'CssSelector', value: css }],
+    };
+  });
+}
+
+// ---------------------------------------------------------------------------
 // main
 // ---------------------------------------------------------------------------
 
@@ -364,5 +440,7 @@ export function extractContent(root: AgentElement): ContentObservation {
     }
   }
 
-  return { envelope: env, document: doc, sections, provenance };
+  const quarantined = extractQuarantined(root);
+
+  return { envelope: env, document: doc, sections, quarantined, provenance };
 }

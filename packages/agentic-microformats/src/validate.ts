@@ -33,6 +33,7 @@ const KNOWN_ATTRIBUTES = new Set([
   'data-agent-reversible', 'data-agent-cost', 'data-agent-cost-currency',
   'data-agent-description', 'data-agent-meta',
   'data-agent-trust', 'data-agent-ignore', 'data-agent-cross-origin',
+  'data-agent-provenance',
 ]);
 
 const ENUMS: Record<string, readonly string[]> = {
@@ -40,6 +41,7 @@ const ENUMS: Record<string, readonly string[]> = {
   'data-agent-role': ['primary', 'secondary', 'danger'],
   'data-agent-risk': ['low', 'medium', 'high'],
   'data-agent-trust': ['system', 'untrusted', 'verified'],
+  'data-agent-provenance': ['publisher', 'user', 'third-party', 'quotation', 'generated'],
   'data-agent-typehint': [
     'string', 'number', 'integer', 'boolean', 'currency',
     'date', 'datetime', 'url', 'email', 'enum', 'json',

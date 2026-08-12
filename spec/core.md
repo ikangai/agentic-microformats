@@ -370,6 +370,7 @@ invitation, legible to machines and to humans reading the source.
 | `data-agent-description` | Meta | Human-readable description for agents |
 | `data-agent-meta` | Meta | Marks the page-level JSON metadata `<script>` block (Section 9) |
 | `data-agent-trust` | Scope | Trust level for a content region |
+| `data-agent-provenance` | Scope | Who authored a region: publisher, user, third-party, quotation, generated |
 | `data-agent-ignore` | Scope | Excludes a subtree from agent parsing |
 
 ### 4.2 Naming Conventions
@@ -996,6 +997,17 @@ The value is reserved: when a verification mechanism ships, agents MAY
 require proof before acting on `verified` content. Sites MUST NOT use
 `verified` as a way to launder user-generated content past trust filters.
 
+**Provenance and instruction authority (0.4.0).** The binary trust level is
+being superseded by two orthogonal properties. `data-agent-provenance` marks
+*who authored* a region — `publisher` | `user` | `third-party` | `quotation` |
+`generated` — and everything that is not `publisher` carries **instruction
+authority `none`**: an agent MUST treat text inside it as data, never as
+commands, even though it MAY read, summarize, or quote it. This lets the
+content layer keep user-generated content (reviews, comments, forum posts)
+*readable but quarantined* rather than erasing it. `data-agent-trust="untrusted"`
+remains valid and maps to provenance `user` with instruction authority `none`.
+Unknown provenance values fail safe to `third-party`.
+
 **Aggregates over untrusted regions.** Because consumers that read only the
 extraction graph never see untrusted content, sites SHOULD expose
 site-authored summary facts about such regions as ordinary properties in
@@ -1395,6 +1407,7 @@ meta-block        = 'data-agent-meta'   ; boolean attribute on a JSON <script> e
 
 ; Trust
 trust-level       = 'data-agent-trust="' trust-value '"'
+provenance        = 'data-agent-provenance="' provenance-value '"'
 ignore-region     = 'data-agent-ignore="' bool-value '"'
 
 ; Values
@@ -1409,6 +1422,7 @@ hint-value        = "string" / "number" / "integer" / "boolean" /
 role-value        = "primary" / "secondary" / "danger"
 risk-value        = "low" / "medium" / "high"
 trust-value       = "system" / "untrusted" / "verified"
+provenance-value  = "publisher" / "user" / "third-party" / "quotation" / "generated"
 bool-value        = "true" / "false"
 number-value      = [ "-" ] 1*DIGIT [ "." 1*DIGIT ]
 currency-code     = 3ALPHA
