@@ -113,8 +113,11 @@ content module.
     formalize the ladder.)
 12. **Benchmark on independent, hostile pages** for: content recall + citation
     accuracy, action success, unsafe-action rate, data disclosed, stale-state
-    conflicts, human interventions, recovery correctness. Test shadow DOM,
-    iframes, SPAs, virtualized lists, CSS-hidden content, files, custom
+    conflicts, human interventions, recovery correctness.
+    *Started (0.4.0): `benchmark/content-bench.ts` scores content recall +
+    citation accuracy deterministically over a 3-format corpus (100%/100%);
+    remaining metrics and hostile/independent pages still to add.* Test shadow
+    DOM, iframes, SPAs, virtualized lists, CSS-hidden content, files, custom
     controls, multiple tabs, multilingual pages.
 13. **Map the information model to prior art** rather than rediscovering it:
     WoT Thing Description (affordances, `safe`/`idempotent`, security defs),
