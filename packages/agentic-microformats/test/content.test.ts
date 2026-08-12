@@ -84,6 +84,27 @@ describe('content observation — bridges existing formats (no data-agent-* need
     expect(obs.document.wordCount?.source).toBe('derived');
   });
 
+  test('grounds a JSON-LD value against visible text with a TextQuoteSelector', () => {
+    const html = `<!DOCTYPE html><html><head>
+      <script type="application/ld+json">${JSON.stringify({ '@type': 'Article', headline: 'The Real Title' })}</script>
+      </head><body><article><h1>The Real Title</h1><div class="entry-content"><p>Body.</p></div></article></body></html>`;
+    const obs = extractContent(dom(html));
+    const sels = obs.document.title!.selectors!;
+    expect(sels.some((s) => s.type === 'CssSelector')).toBe(true);
+    const quote = sels.find((s) => s.type === 'TextQuoteSelector');
+    expect(quote).toBeDefined();
+    expect((quote as any).exact).toBe('The Real Title'); // verifiable against the visible h1
+  });
+
+  test('does NOT fabricate a quote for a value absent from visible text', () => {
+    const html = `<!DOCTYPE html><html><head>
+      <script type="application/ld+json">${JSON.stringify({ '@type': 'Article', headline: 'Hidden Headline', description: 'Not on the page anywhere' })}</script>
+      </head><body><article><div class="entry-content"><p>Unrelated body text.</p></div></article></body></html>`;
+    const obs = extractContent(dom(html));
+    // summary text isn't in the visible body → CssSelector only, no false quote
+    expect(obs.document.summary!.selectors!.every((s) => s.type === 'CssSelector')).toBe(true);
+  });
+
   test('empty page yields an empty-but-valid observation', () => {
     const obs = extractContent(dom('<!DOCTYPE html><html><body></body></html>'));
     expect(obs.document.title).toBeUndefined();

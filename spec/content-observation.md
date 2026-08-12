@@ -36,7 +36,14 @@ reading of the document.
     "title": "…"
   },
   "document": {
-    "title":     { "value": "The Model Context Protocol", "source": "jsonld", "selector": "script[type=\"application/ld+json\"]" },
+    "title": {
+      "value": "The Model Context Protocol",
+      "source": "jsonld",
+      "selectors": [
+        { "type": "CssSelector", "value": "script[type=\"application/ld+json\"]" },
+        { "type": "TextQuoteSelector", "exact": "The Model Context Protocol", "suffix": "  Anthropic's Model Cont" }
+      ]
+    },
     "authors":   { "value": ["Ada L"], "source": "jsonld" },
     "published": { "value": "2024-12-02T06:46:23+00:00", "source": "jsonld" },
     "modified":  { "value": "2026-04-14T18:24:05+00:00", "source": "jsonld" },
@@ -55,18 +62,26 @@ reading of the document.
 
 ## 2. Grounding (normative)
 
-Every value in `document` is a **grounded value**: `{ value, source, selector? }`.
+Every value in `document` is a **grounded value**:
+`{ value, source, selectors? }`.
 
 - `source` names *how* it was found: `jsonld` | `microformats` | `opengraph` |
-  `meta` | `semantic-html` | `derived`. This lets an agent weight, cite, and
-  re-verify each fact, and lets a human audit the extraction.
-- `selector` points at the origin, so a value can be checked against what a
-  human sees. (This is a deliberately light form of W3C Web Annotation
-  selectors; richer TextQuote/TextPosition grounding is planned.)
+  `meta` | `semantic-html` | `derived`. This lets an agent weight each fact and
+  lets a human audit the extraction.
+- `selectors` follows the **W3C Web Annotation** selector model:
+  - a **`CssSelector`** always names the origin element;
+  - a **`TextQuoteSelector`** (`exact` + `prefix`/`suffix` context) is added
+    when the value's text was located in the page's **visible** content (never
+    inside `<script>`/`<style>`). Its presence means the value is *verifiable*:
+    an agent can cite the exact passage, confirm a normalized JSON-LD value
+    against what a human sees, and detect when a page revision has moved or
+    removed it.
 
 An agent MUST NOT treat a `derived` value with the same confidence as one from
-a structured source, and SHOULD prefer citing the visible passage a `selector`
-points at over the normalized value.
+a structured source, SHOULD prefer citing a `TextQuoteSelector` passage over
+the normalized value, and MUST NOT assume a value is on-screen when it carries
+no `TextQuoteSelector` (a JSON-LD field can describe the page without appearing
+in it).
 
 ## 3. Precedence
 

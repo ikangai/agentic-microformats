@@ -25,12 +25,26 @@ export type ContentSource =
   | 'semantic-html'
   | 'derived';
 
+/**
+ * A pointer back into the source, following the W3C Web Annotation selector
+ * model. A `CssSelector` names the origin element; a `TextQuoteSelector` lets
+ * an agent locate and verify a value against the exact visible passage, and
+ * detect when a page revision has invalidated an extraction.
+ */
+export type Selector =
+  | { type: 'CssSelector'; value: string }
+  | { type: 'TextQuoteSelector'; exact: string; prefix?: string; suffix?: string };
+
 /** A value plus where it came from, so agents can cite and re-verify it. */
 export interface Grounded<T> {
   value: T;
   source: ContentSource;
-  /** A CSS-ish pointer to the origin element, when one applies. */
-  selector?: string;
+  /**
+   * Grounding pointers (Web Annotation model). Always includes a CssSelector
+   * for the origin; includes a TextQuoteSelector when the value's text was
+   * located in the page's visible content (verifiable grounding).
+   */
+  selectors?: Selector[];
 }
 
 export interface ContentSection {
@@ -75,6 +89,29 @@ export interface ContentObservation {
 function textOf(el: AgentElement | null): string | undefined {
   const t = el?.textContent?.trim();
   return t || undefined;
+}
+
+function grounded<T>(value: T, source: ContentSource, css: string): Grounded<T> {
+  return { value, source, selectors: [{ type: 'CssSelector', value: css }] };
+}
+
+/**
+ * Locate `needle` in the page's visible text and return a TextQuoteSelector
+ * with a little surrounding context, so an agent can verify the value against
+ * exactly what a human sees. Returns null when the text is not visibly present
+ * (e.g. a JSON-LD value that does not appear on screen — honestly ungrounded).
+ */
+function quoteIn(haystack: string, needle: string): Selector | null {
+  if (!needle || needle.length < 2) return null;
+  const idx = haystack.indexOf(needle);
+  if (idx === -1) return null;
+  const CTX = 24;
+  const prefix = haystack.slice(Math.max(0, idx - CTX), idx).trimStart();
+  const suffix = haystack.slice(idx + needle.length, idx + needle.length + CTX).trimEnd();
+  const sel: Selector = { type: 'TextQuoteSelector', exact: needle };
+  if (prefix) sel.prefix = prefix;
+  if (suffix) sel.suffix = suffix;
+  return sel;
 }
 
 function normalizeAuthor(a: unknown): string[] {
@@ -130,7 +167,7 @@ function readJsonLd(root: AgentElement, doc: ContentObservation['document'], pro
   }
   if (!article) return;
   provenance.push('jsonld:Article');
-  const g = <T>(value: T): Grounded<T> => ({ value, source: 'jsonld', selector: 'script[type="application/ld+json"]' });
+  const g = <T>(value: T): Grounded<T> => grounded(value, 'jsonld', 'script[type="application/ld+json"]');
   // Resolve a possible {"@id": ...} reference into the node it points at.
   const deref = (v: any): any => (v && typeof v === 'object' && v['@id'] && byId.has(v['@id']) ? byId.get(v['@id']) : v);
 
@@ -159,7 +196,7 @@ function readMicroformats(root: AgentElement, doc: ContentObservation['document'
   const entry = root.querySelector('.h-entry') ?? root.querySelector('.hentry') ?? root.querySelector('article');
   if (!entry) return;
   let used = false;
-  const g = <T>(value: T, selector: string): Grounded<T> => ({ value, source: 'microformats', selector });
+  const g = <T>(value: T, selector: string): Grounded<T> => grounded(value, 'microformats', selector);
 
   const titleEl = entry.querySelector('.p-name') ?? entry.querySelector('.entry-title');
   const title = textOf(titleEl);
@@ -195,7 +232,7 @@ function readMetaAndSemantic(
 ): void {
   const htmlEl = root.getAttribute('lang') !== null ? root : root.querySelector('html');
   const lang = htmlEl?.getAttribute('lang') ?? undefined;
-  if (lang) { env.language = lang; doc.language ??= { value: lang, source: 'semantic-html', selector: 'html[lang]' }; }
+  if (lang) { env.language = lang; doc.language ??= grounded(lang, 'semantic-html', 'html[lang]'); }
   const dir = (htmlEl?.getAttribute('dir') ?? '').toLowerCase();
   if (dir === 'ltr' || dir === 'rtl') env.direction = dir;
 
@@ -204,25 +241,25 @@ function readMetaAndSemantic(
 
   let og = false;
   const ogTitle = metaContent(root, 'meta[property="og:title"]');
-  if (ogTitle && !doc.title) { doc.title = { value: ogTitle, source: 'opengraph', selector: 'meta[property="og:title"]' }; og = true; }
+  if (ogTitle && !doc.title) { doc.title = grounded(ogTitle, 'opengraph', 'meta[property="og:title"]'); og = true; }
   const ogDesc = metaContent(root, 'meta[property="og:description"]');
-  if (ogDesc && !doc.summary) { doc.summary = { value: ogDesc, source: 'opengraph', selector: 'meta[property="og:description"]' }; og = true; }
+  if (ogDesc && !doc.summary) { doc.summary = grounded(ogDesc, 'opengraph', 'meta[property="og:description"]'); og = true; }
   if (og) provenance.push('opengraph');
 
   const metaDesc = metaContent(root, 'meta[name="description"]');
-  if (metaDesc && !doc.summary) { doc.summary = { value: metaDesc, source: 'meta', selector: 'meta[name="description"]' }; provenance.push('meta'); }
+  if (metaDesc && !doc.summary) { doc.summary = grounded(metaDesc, 'meta', 'meta[name="description"]'); provenance.push('meta'); }
   const metaAuthor = metaContent(root, 'meta[name="author"]');
-  if (metaAuthor && !doc.authors) doc.authors = { value: [metaAuthor], source: 'meta', selector: 'meta[name="author"]' };
+  if (metaAuthor && !doc.authors) doc.authors = grounded([metaAuthor], 'meta', 'meta[name="author"]');
 
   // Fallbacks from bare semantic HTML.
   if (!doc.title) {
     const h1 = textOf(root.querySelector('article h1') ?? root.querySelector('h1'));
-    if (h1) doc.title = { value: h1, source: 'semantic-html', selector: 'h1' };
+    if (h1) doc.title = grounded(h1, 'semantic-html', 'h1');
   }
   if (!doc.published) {
     const t = root.querySelector('article time[datetime]') ?? root.querySelector('time[datetime]');
     const dt = t?.getAttribute('datetime');
-    if (dt) doc.published = { value: dt, source: 'semantic-html', selector: 'time[datetime]' };
+    if (dt) doc.published = grounded(dt, 'semantic-html', 'time[datetime]');
   }
 }
 
@@ -292,15 +329,38 @@ export function extractContent(root: AgentElement): ContentObservation {
 
   const full = bodyText(body);
   if (full) {
-    doc.excerpt ??= {
-      value: full.length > 320 ? full.slice(0, 320).trimEnd() + '…' : full,
-      source: 'derived',
-      selector: '.entry-content',
-    };
-    // Only derive a word count if a structured source didn't provide one.
+    doc.excerpt ??= grounded(
+      full.length > 320 ? full.slice(0, 320).trimEnd() + '…' : full,
+      'derived', '.entry-content'
+    );
     if (!doc.wordCount) {
       const words = full.split(/\s+/).filter(Boolean).length;
-      if (words > 0) doc.wordCount = { value: words, source: 'derived', selector: '.entry-content' };
+      if (words > 0) doc.wordCount = grounded(words, 'derived', '.entry-content');
+    }
+  }
+
+  // Verifiable grounding: attach a TextQuoteSelector to each string value that
+  // actually appears in the page's VISIBLE text (title + body, never scripts),
+  // so an agent can cite the passage and check a normalized JSON-LD value
+  // against what a human sees.
+  const titleEl =
+    root.querySelector('.p-name') ?? root.querySelector('.entry-title') ??
+    root.querySelector('article h1') ?? root.querySelector('h1');
+  const visible = [textOf(titleEl), full].filter(Boolean).join('  ');
+  if (visible) {
+    const addQuote = (g: Grounded<string> | undefined) => {
+      if (!g || !g.selectors) return;
+      if (g.selectors.some((s) => s.type === 'TextQuoteSelector')) return;
+      const q = quoteIn(visible, g.value);
+      if (q) g.selectors.push(q);
+    };
+    addQuote(doc.title);
+    addQuote(doc.summary);
+    addQuote(doc.excerpt);
+    addQuote(doc.publisher);
+    if (doc.authors?.selectors && doc.authors.value[0]) {
+      const q = quoteIn(visible, doc.authors.value[0]);
+      if (q) doc.authors.selectors.push(q);
     }
   }
 
