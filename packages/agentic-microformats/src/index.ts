@@ -39,6 +39,10 @@ export { operate } from './operate.js';
 export type {
   AgentAction, PageState, OperateOptions, EpisodeResult, StepRecord,
 } from './operate.js';
+export { toOpenAITools, toAnthropicTools, toMCPTools, executeTool } from './adapters.js';
+export type {
+  OpenAITool, AnthropicTool, MCPTool, ExecuteToolOptions, ToolResult,
+} from './adapters.js';
 export { observe } from './observe.js';
 export type { AgentMutation, MutationCallback } from './observe.js';
 

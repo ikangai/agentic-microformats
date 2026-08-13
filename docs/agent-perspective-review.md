@@ -463,9 +463,11 @@ breaks, and what did we never see because we have only ever been the producer?
 > now a supported `operate()` export (model-agnostic `decide`, environment-
 > agnostic transport). C2 addressed via `mode: 'http' | 'browser'`. C3 addressed
 > structurally: `fetchPage`/`sendRequest` are consumer-supplied, so the user's
-> session/auth rides the transport. Still open: C4 (task→tool selection), C5
-> (action-graph freshness), C6 (typed errors), C7 (OpenAI/Anthropic/MCP
-> adapters), C8 (Python parity), C9 (stability tier), C10 (trust posture).
+> session/auth rides the transport. **C7 shipped (0.7.0):**
+> `toOpenAITools`/`toAnthropicTools`/`toMCPTools` + `executeTool` (safe
+> execution of a model's tool call). Still open: C4 (task→tool selection), C5
+> (action-graph freshness), C6 (typed errors), C8 (Python parity), C9
+> (stability tier), C10 (trust posture).
 
 ## The frame: we ship a parser; the consumer needs a driver
 

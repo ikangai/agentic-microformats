@@ -2,6 +2,21 @@
 
 All notable changes to the Agentic Microformats specification.
 
+## [impl 0.7.0] - August 2026 — tool-format adapters
+
+Consumer-facing (reference implementation only). Addresses Round-5 C7.
+
+### Added
+- **`toOpenAITools` / `toAnthropicTools` / `toMCPTools`**: the actions in the
+  format each SDK already speaks. MCP keeps the safety hints as native tool
+  annotations; OpenAI/Anthropic fold them into the description.
+- **`executeTool(dom, name, args, opts)`**: run a model's tool call through the
+  same fail-closed gates as `operate()` (cross-origin refusal, confirmation
+  gate) — never sends a blocked or unconfirmed request. Returns
+  `{ ok, refused?, result?, error? }`.
+- Extraction/execution core factored into `runtime.ts`, shared by `operate()`
+  and `executeTool()`. 8 tests (158 total); README SDK quickstart.
+
 ## [impl 0.6.0] - August 2026 — the agent runtime (`operate`)
 
 Consumer-facing (reference implementation only; no spec vocabulary change).

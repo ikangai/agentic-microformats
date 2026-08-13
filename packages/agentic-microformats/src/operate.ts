@@ -27,6 +27,7 @@ import { AgentDOM } from './agent-dom.js';
 import { toGraph } from './serialize.js';
 import { extractContent, type ContentObservation } from './content.js';
 import { toWebMCPTools, type WebMCPTool } from './webmcp.js';
+import { executePrepared } from './runtime.js';
 
 /** One decision the agent can make each turn. */
 export type AgentAction =
@@ -91,41 +92,6 @@ export interface EpisodeResult {
   stepsUsed: number;
   /** True if the loop stopped by hitting maxSteps rather than answering. */
   exhausted: boolean;
-}
-
-async function executeInvoke(
-  action: any, prepared: PreparedAction, opts: OperateOptions
-): Promise<unknown> {
-  if ((opts.mode ?? 'http') === 'browser') {
-    // Drive the real control: fill inputs, requestSubmit — same path as a human.
-    const el: any = action.element;
-    for (const p of action.params) {
-      const input = p.element;
-      if (input && p.name in (prepared.body as object)) {
-        const v = (prepared.body as any)[p.name];
-        if ((input.type || '').toLowerCase() === 'checkbox') input.checked = !!v;
-        else input.value = String(v);
-      }
-    }
-    const form = (el?.tagName || '').toUpperCase() === 'FORM' ? el : el?.form ?? el?.closest?.('form');
-    if (form?.requestSubmit) { form.requestSubmit(el !== form ? el : undefined); return { bound: 'dom-form' }; }
-    if (el?.click) { el.click(); return { bound: 'dom-element' }; }
-    throw new Error('browser mode: no control to drive');
-  }
-  // http mode
-  if (opts.sendRequest) {
-    return opts.sendRequest({ method: prepared.method, url: prepared.url, headers: prepared.headers, body: prepared.body });
-  }
-  const g: any = globalThis as any;
-  if (typeof g.fetch !== 'function') throw new Error('http mode: provide sendRequest or a global fetch');
-  const safe = ['GET', 'HEAD', 'OPTIONS'].includes(prepared.method.toUpperCase());
-  const res = await g.fetch(prepared.url, {
-    method: prepared.method,
-    headers: { 'Content-Type': 'application/json', ...prepared.headers },
-    body: safe ? undefined : JSON.stringify(prepared.body),
-  });
-  let body: unknown; try { body = await res.json(); } catch { body = await res.text().catch(() => ''); }
-  return { status: res.status, body };
 }
 
 /**
@@ -198,7 +164,7 @@ export async function operate(opts: OperateOptions): Promise<EpisodeResult> {
       if (!ok) { step.refused = 'confirmation required and not granted'; steps.push(step); continue; }
     }
     try {
-      step.result = await executeInvoke(target, prepared, opts);
+      step.result = await executePrepared(target, prepared, { mode: opts.mode, sendRequest: opts.sendRequest });
     } catch (e: any) {
       step.error = `execute failed: ${String(e?.message ?? e)}`;
     }

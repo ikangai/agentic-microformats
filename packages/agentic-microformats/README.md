@@ -58,6 +58,34 @@ same-origin enforcement, re-observation after each mutation). You own the model
 and the session. `mode: 'browser'` drives the real `form.requestSubmit()`
 instead of an HTTP call.
 
+## Use it with your existing SDK (OpenAI / Anthropic / MCP)
+
+Already using function-calling? Get the tools in your SDK's format and execute
+the model's calls through the same fail-closed safety gates:
+
+```ts
+import { extractAll, toOpenAITools, toAnthropicTools, toMCPTools, executeTool, AgentDOM } from 'agentic-microformats';
+
+const dom = new AgentDOM(root);
+const result = dom.extractAll();
+
+const tools = toOpenAITools(result);      // or toAnthropicTools / toMCPTools
+const reply = await openai.chat.completions.create({ model, messages, tools });
+
+for (const call of reply.choices[0].message.tool_calls ?? []) {
+  const out = await executeTool(dom, call.function.name, JSON.parse(call.function.arguments), {
+    origin: location.origin,
+    sendRequest: myAuthedFetch,                    // your session
+    onConfirm: ({ tool, prepared }) => askHuman(tool, prepared),
+  });
+  // out.ok / out.refused (cross-origin or unconfirmed) / out.result
+}
+```
+
+MCP keeps the safety hints as native tool annotations
+(`readOnlyHint`/`destructiveHint`/`idempotentHint`); OpenAI/Anthropic fold them
+into the description, where the model reads them.
+
 ## Lower-level extraction
 
 ```ts
