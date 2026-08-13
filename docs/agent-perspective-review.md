@@ -459,6 +459,14 @@ we have never actually sat in: an engineer who just ran `npm install
 agentic-microformats` to give their agent the ability to use websites. What
 breaks, and what did we never see because we have only ever been the producer?
 
+> **Partly resolved 2026-08-13 (impl 0.6.0):** C1 shipped — the episode loop is
+> now a supported `operate()` export (model-agnostic `decide`, environment-
+> agnostic transport). C2 addressed via `mode: 'http' | 'browser'`. C3 addressed
+> structurally: `fetchPage`/`sendRequest` are consumer-supplied, so the user's
+> session/auth rides the transport. Still open: C4 (task→tool selection), C5
+> (action-graph freshness), C6 (typed errors), C7 (OpenAI/Anthropic/MCP
+> adapters), C8 (Python parity), C9 (stability tier), C10 (trust posture).
+
 ## The frame: we ship a parser; the consumer needs a driver
 
 The consumer is not buying "parse the annotations." They are buying "my agent

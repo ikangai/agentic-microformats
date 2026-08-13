@@ -2,6 +2,25 @@
 
 All notable changes to the Agentic Microformats specification.
 
+## [impl 0.6.0] - August 2026 — the agent runtime (`operate`)
+
+Consumer-facing (reference implementation only; no spec vocabulary change).
+Addresses the Round-5 review's central finding — "we ship a parser, the
+consumer needs a driver, and the driver was buried in `test/`."
+
+### Added
+- **`operate()`**: the agent episode runtime — observe (graph + content +
+  WebMCP tools) → decide → safety-gated execute → re-observe → loop, until the
+  agent answers or `maxSteps`. **Model-agnostic** (`decide` injected) and
+  **environment-agnostic** (`fetchPage`/`sendRequest`/`parse` injected).
+- Two execution modes: `http` (server-side agent, endpoint via `sendRequest`)
+  and `browser` (drives the real `form.requestSubmit()`).
+- **Auth by construction:** the consumer's transport carries the user's
+  session, so authenticated actions work without the spec defining auth.
+- Fail-closed safety flows through the loop: confirmation gate (`onConfirm`),
+  same-origin refusal, re-observation after each mutation. 7 tests (150 total).
+- README consumer quickstart: web-operation in ~20 lines.
+
 ## [0.4.0 / impl 0.5.0] - August 2026 (Working Draft) — WebMCP binding
 
 Phase 3 of the pivot: the interaction half, done *with* WebMCP, not against it.

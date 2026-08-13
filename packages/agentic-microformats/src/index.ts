@@ -35,6 +35,10 @@ export type {
   WebMCPTool, ToolAnnotations, ToolBinding, JSONSchema, JSONSchemaProperty,
   ModelContextHost, RegisterOptions, Registration,
 } from './webmcp.js';
+export { operate } from './operate.js';
+export type {
+  AgentAction, PageState, OperateOptions, EpisodeResult, StepRecord,
+} from './operate.js';
 export { observe } from './observe.js';
 export type { AgentMutation, MutationCallback } from './observe.js';
 
