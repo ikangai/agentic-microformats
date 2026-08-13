@@ -449,3 +449,123 @@ the actors who already own the demand side (Round 3's unsolved problem),
 instead of a competition story against them. It is, by a wide margin, the most
 credible path from "interesting working draft" to "thing browser-agent authors
 adopt."
+
+---
+
+# Round 5 (2026-08-13): the consumer's unknown unknowns
+
+Prior rounds reviewed the *spec* and the *site owner*. This one takes the seat
+we have never actually sat in: an engineer who just ran `npm install
+agentic-microformats` to give their agent the ability to use websites. What
+breaks, and what did we never see because we have only ever been the producer?
+
+## The frame: we ship a parser; the consumer needs a driver
+
+The consumer is not buying "parse the annotations." They are buying "my agent
+can now operate a real, authenticated, changing website and recover when it
+goes wrong." We keep shipping better *parsing* — content, grounding, WebMCP
+descriptors — which is the easy 20%. The hard, differentiating 80% is the
+**runtime**: the loop that reads → lets the model choose → executes → observes
+the result → continues, with auth, staleness, and errors handled.
+
+The cruel part: **we already built that runtime and filed it under `test/`.**
+`benchmark/agent-bench.ts` is a working episode loop — cookie jar, action
+execution, server-state readback, fault-injection recovery — and we treat it as
+throwaway test scaffolding. The single most valuable consumer artifact in the
+whole repo is unexported. A consumer will reinvent it, worse.
+
+## The specific blindspots
+
+### C1. The reusable agent loop is unshipped
+See above. `AgentDOM.prepareAction` exists, but the *episode* — plan/act/observe
+with retries — lives only in the benchmark. **Productize the loop** as a
+supported export (`operate(page, task, policy)`); it is mostly written.
+
+### C2. Two consumer environments; we designed for one
+The WebMCP binding and the whole progressive-enhancement safety story assume a
+**browser** (`form.requestSubmit()`, live session, CSRF token, client
+validation). But a large share of consumers are **server-side** agents
+(Python backends, cron jobs, LangChain-style tools) with no DOM. For them the
+HTTP endpoint is the *only* path — which means they silently lose CSRF, session
+cookies, and client-side validation, the exact safeguards our safety model
+leans on. We have no coherent, safe execution model for the server-side
+consumer, who may be the more common one today.
+
+### C3. Auth/session is the first wall, and we never touch it
+Real sites require login; the agent must act *as the user*. In a browser the
+session cookies ride along; a standalone agent using this library against a
+fetched page has none, so every interesting action 401s. Our demo has no auth,
+which hid this completely. "I extracted `add_to_cart` but I'm not logged in" is
+the first thing a real consumer hits. The spec declines to define auth — fine —
+but the consumer still needs *guidance and hooks* for carrying a session.
+
+### C4. No task → tool selection
+A consumer has an intent ("buy the cheapest charger"), not a desire for all 12
+tools. We give them the whole graph and let them shovel it into the model every
+step — which is exactly the token-heavy path we ourselves benchmarked. There is
+no relevance/filtering/`which-tool-for-this-intent` layer. Real agents need the
+graph narrowed before it hits context.
+
+### C5. The graph is a snapshot; acting on stale state is unguarded
+The consumer extracts, the model thinks for 3 seconds, the page changes (price,
+stock, cart count), the agent acts on a stale view. The *content* observation
+got an envelope with `observedAt`/`etag`; the *action* graph did not. The
+consumer has no "has this changed since I read it?" primitive, no version to
+pass as `If-Match`. (Adjacent to Sol's live-state point, but broader: the whole
+action graph goes stale, not just form values.)
+
+### C6. Errors aren't typed, so consumers can't write recovery
+When an action fails, the consumer gets whatever the server returned. There is
+no normalized taxonomy (retryable / validation / auth / rate-limit / conflict)
+to program against. Our E-suite showed agents *inferring* error meaning from
+prose — a demo can infer; a shipped product cannot be built on inference.
+
+### C7. Only WebMCP; not the tool formats consumers actually use
+`toWebMCPTools` is great and forward-looking, but the most common integration
+today is "turn these into *my* LLM's tool format" — OpenAI functions, Anthropic
+tools, an MCP server. We provide none of those adapters, so every non-WebMCP
+consumer writes the conversion themselves. This is low-effort for us
+(the descriptor is already normalized) and high-leverage for reach.
+
+### C8. Python is second-class for exactly the new value
+Consumer agents skew Python. The Python port does extraction + `toGraph`, but
+**not** content observation, **not** WebMCP tools, **not** the safety-gated
+action prep. A Python consumer gets the least-differentiated slice and misses
+the pivot's entire payload.
+
+### C9. No API stability contract
+0.3 → 0.4 → 0.5 shipped fast with shape changes (`Grounded.selector` →
+`selectors[]`). A consumer who bet on 0.4 and bumped to 0.5 ate a breaking
+change. The *graph format* has a version marker; the *library API* has no
+documented stability tier or migration notes. For someone shipping a product on
+this, churn is a real adoption risk.
+
+### C10. No trust posture or observability for the acting agent
+A consumer shipping to users inherits liability for what their agent does on an
+arbitrary annotated site whose hints are self-asserted. We give them no runtime
+posture (diff graph vs rendered, sandbox the first mutation, dry-run) and no
+trace of *why* the agent chose an action. Debugging agents is brutal; grounding
+helps for content but there is nothing for the action path.
+
+## What this means for the build
+
+The through-line: **the consumer's product is 80% runtime and we shipped the
+20% that was extraction — then hid the best runtime code in `test/`.** In
+priority order:
+
+1. **Ship the loop.** Promote `agent-bench`'s episode engine to a supported
+   `operate()` export with a pluggable policy (confirm / auth / stop) and a
+   `mode` for browser (`requestSubmit`) vs server (HTTP + explicit session).
+   This is the consumer product; it is mostly already written. (C1, C2)
+2. **Tool-format adapters:** `toOpenAITools` / `toAnthropicTools` / an MCP
+   server wrapper next to `toWebMCPTools`. Cheap, and it meets consumers where
+   they are. (C7)
+3. **Session hooks + a typed error surface** so recovery is programmable, not
+   inferred. (C3, C6)
+4. **Freshness on the action graph** (`observedAt`/`etag`, `If-Match` support)
+   and a **stability tier** doc. (C5, C9)
+5. **Python parity for content + webmcp**, since that is where the consumers
+   are. (C8)
+
+The one-line version: stop improving the parser; ship the driver — starting
+with the one we already wrote and mislabeled as a test.
