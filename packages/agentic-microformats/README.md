@@ -86,6 +86,23 @@ MCP keeps the safety hints as native tool annotations
 (`readOnlyHint`/`destructiveHint`/`idempotentHint`); OpenAI/Anthropic fold them
 into the description, where the model reads them.
 
+Failures come back **typed**, so recovery is a rule, not a guess:
+
+```ts
+const out = await executeTool(dom, name, args, opts);
+if (!out.ok && out.error) {
+  const e = out.error;            // { kind, retryable, retryAfter?, requiresFreshState? }
+  if (e.kind === 'conflict') { /* re-read the page, then retry */ }
+  else if (e.retryable && toolIsIdempotent) { await sleep(e.retryAfter ?? 1); /* retry */ }
+  else if (e.kind === 'auth') { /* re-authenticate */ }
+  else { /* validation / forbidden / not-found → surface to the user */ }
+}
+```
+
+`retryable` describes the *error* (does the server invite another attempt);
+whether the *action* is safe to repeat is the separate `idempotentHint`. Retry
+only when both hold — or, for a `conflict`, re-read state first.
+
 ## Lower-level extraction
 
 ```ts

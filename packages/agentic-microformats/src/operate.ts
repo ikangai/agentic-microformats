@@ -28,6 +28,8 @@ import { toGraph } from './serialize.js';
 import { extractContent, type ContentObservation } from './content.js';
 import { toWebMCPTools, type WebMCPTool } from './webmcp.js';
 import { executePrepared } from './runtime.js';
+import { classifyNetworkError, type AgentError } from './errors.js';
+import { interpretExecution } from './adapters.js';
 
 /** One decision the agent can make each turn. */
 export type AgentAction =
@@ -39,11 +41,14 @@ export interface StepRecord {
   n: number;
   url: string;
   action: AgentAction;
-  /** Execution outcome (transport response), when the step executed one. */
+  /** Execution outcome (transport response) for a successful step. */
   result?: unknown;
   /** Set when a safety gate stopped the action (blocked / unconfirmed). */
   refused?: string;
+  /** Human-readable note for loop-level problems (bad action, decide failure). */
   error?: string;
+  /** Typed execution failure (http error / network) — program against this. */
+  errorInfo?: AgentError;
 }
 
 /** What the consumer's `decide` sees each turn. Feed to your model as you like. */
@@ -164,9 +169,13 @@ export async function operate(opts: OperateOptions): Promise<EpisodeResult> {
       if (!ok) { step.refused = 'confirmation required and not granted'; steps.push(step); continue; }
     }
     try {
-      step.result = await executePrepared(target, prepared, { mode: opts.mode, sendRequest: opts.sendRequest });
-    } catch (e: any) {
-      step.error = `execute failed: ${String(e?.message ?? e)}`;
+      const raw = await executePrepared(target, prepared, { mode: opts.mode, sendRequest: opts.sendRequest });
+      const interpreted = interpretExecution(raw);
+      if ('error' in interpreted) { step.errorInfo = interpreted.error; step.error = interpreted.error.message; }
+      else step.result = interpreted.result;
+    } catch (e) {
+      step.errorInfo = classifyNetworkError(e);
+      step.error = step.errorInfo.message;
     }
     steps.push(step);
 

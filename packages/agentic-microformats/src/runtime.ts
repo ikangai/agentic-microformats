@@ -11,10 +11,13 @@ const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 export interface ExecuteEnv {
   /** 'http' (default): call the endpoint via sendRequest. 'browser': drive the DOM control. */
   mode?: 'http' | 'browser';
-  /** http transport — implement with the user's session/cookies. */
+  /**
+   * http transport — implement with the user's session/cookies. Returning
+   * `headers` lets the error classifier read `Retry-After` on 429/503.
+   */
   sendRequest?: (req: {
     method: string; url: string; headers: Record<string, string>; body: Record<string, unknown>;
-  }) => Promise<{ status: number; body: unknown }>;
+  }) => Promise<{ status: number; body: unknown; headers?: Record<string, string> }>;
 }
 
 /**
@@ -53,5 +56,7 @@ export async function executePrepared(
     body: safe ? undefined : JSON.stringify(prepared.body),
   });
   let body: unknown; try { body = await res.json(); } catch { body = await res.text().catch(() => ''); }
-  return { status: res.status, body };
+  const headers: Record<string, string> = {};
+  try { res.headers?.forEach?.((v: string, k: string) => { headers[k] = v; }); } catch { /* no headers */ }
+  return { status: res.status, body, headers };
 }

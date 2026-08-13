@@ -16,6 +16,7 @@ import type { AgentDOM } from './agent-dom.js';
 import type { ExtractionResult } from './types.js';
 import { toWebMCPTools, type WebMCPTool, type ToolAnnotations, type JSONSchema } from './webmcp.js';
 import { executePrepared, type ExecuteEnv } from './runtime.js';
+import { classifyResponse, classifyNetworkError, type AgentError } from './errors.js';
 
 function hintSuffix(a: ToolAnnotations): string {
   const parts: string[] = [];
@@ -107,8 +108,19 @@ export interface ToolResult {
   ok: boolean;
   /** Set when refused by a safety gate (blocked / unconfirmed) rather than run. */
   refused?: string;
+  /** Success payload (transport response for a 2xx, or the DOM-bind marker). */
   result?: unknown;
-  error?: string;
+  /** Typed failure — classify by `kind`/`retryable` instead of parsing prose. */
+  error?: AgentError;
+}
+
+/** Turn an http execution result / throw into ok-or-typed-error. */
+export function interpretExecution(raw: unknown): { result: unknown } | { error: AgentError } {
+  if (raw && typeof raw === 'object' && typeof (raw as any).status === 'number') {
+    const { status, body, headers } = raw as { status: number; body?: unknown; headers?: Record<string, string> };
+    if (status >= 400) return { error: classifyResponse(status, body, headers) };
+  }
+  return { result: raw };
 }
 
 /**
@@ -121,17 +133,19 @@ export async function executeTool(
   dom: AgentDOM, name: string, args: Record<string, unknown> = {}, opts: ExecuteToolOptions = {}
 ): Promise<ToolResult> {
   const action = dom.getAction(name, opts.target);
-  if (!action) return { ok: false, error: `no action named "${name}"` };
+  if (!action) return { ok: false, error: { kind: 'client', retryable: false, message: `no action named "${name}"` } };
   const prepared = dom.prepareAction(action, args, opts.origin ? { origin: opts.origin } : undefined);
   if (prepared.blocked) return { ok: false, refused: prepared.warnings.find((w) => /refused/i.test(w)) ?? 'blocked' };
   if (prepared.confirmationRequired) {
     const okC = opts.onConfirm ? await opts.onConfirm({ tool: name, prepared }) : false;
     if (!okC) return { ok: false, refused: 'confirmation required and not granted' };
   }
+  let raw: unknown;
   try {
-    const result = await executePrepared(action, prepared, { mode: opts.mode, sendRequest: opts.sendRequest });
-    return { ok: true, result };
-  } catch (e: any) {
-    return { ok: false, error: `execute failed: ${String(e?.message ?? e)}` };
+    raw = await executePrepared(action, prepared, { mode: opts.mode, sendRequest: opts.sendRequest });
+  } catch (e) {
+    return { ok: false, error: classifyNetworkError(e) };
   }
+  const interpreted = interpretExecution(raw);
+  return 'error' in interpreted ? { ok: false, error: interpreted.error } : { ok: true, result: interpreted.result };
 }

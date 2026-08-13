@@ -465,9 +465,11 @@ breaks, and what did we never see because we have only ever been the producer?
 > structurally: `fetchPage`/`sendRequest` are consumer-supplied, so the user's
 > session/auth rides the transport. **C7 shipped (0.7.0):**
 > `toOpenAITools`/`toAnthropicTools`/`toMCPTools` + `executeTool` (safe
-> execution of a model's tool call). Still open: C4 (task→tool selection), C5
-> (action-graph freshness), C6 (typed errors), C8 (Python parity), C9
-> (stability tier), C10 (trust posture).
+> execution of a model's tool call). **C6 shipped (0.8.0):** typed `AgentError`
+> (`kind`/`retryable`/`retryAfter`/`requiresFreshState`) from `executeTool` and
+> `operate`, so recovery is a rule not prose inference. Still open: C4 (task→tool
+> selection), C5 (action-graph freshness), C8 (Python parity), C9 (stability
+> tier), C10 (trust posture).
 
 ## The frame: we ship a parser; the consumer needs a driver
 

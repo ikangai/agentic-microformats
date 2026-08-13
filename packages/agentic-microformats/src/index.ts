@@ -39,10 +39,12 @@ export { operate } from './operate.js';
 export type {
   AgentAction, PageState, OperateOptions, EpisodeResult, StepRecord,
 } from './operate.js';
-export { toOpenAITools, toAnthropicTools, toMCPTools, executeTool } from './adapters.js';
+export { toOpenAITools, toAnthropicTools, toMCPTools, executeTool, interpretExecution } from './adapters.js';
 export type {
   OpenAITool, AnthropicTool, MCPTool, ExecuteToolOptions, ToolResult,
 } from './adapters.js';
+export { classifyResponse, classifyNetworkError } from './errors.js';
+export type { AgentError, ErrorKind } from './errors.js';
 export { observe } from './observe.js';
 export type { AgentMutation, MutationCallback } from './observe.js';
 

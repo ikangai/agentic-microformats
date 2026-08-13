@@ -2,6 +2,25 @@
 
 All notable changes to the Agentic Microformats specification.
 
+## [impl 0.8.0] - August 2026 — typed error surface
+
+Consumer-facing (reference implementation only). Addresses Round-5 C6.
+
+### Added
+- **`AgentError`** `{ kind, retryable, message, status?, retryAfter?,
+  requiresFreshState? }` and classifiers `classifyResponse` /
+  `classifyNetworkError`. HTTP status → kind: validation / auth / forbidden /
+  not-found / conflict / rate-limit / server / client; transport throw →
+  network. Reads `Retry-After` (seconds or HTTP-date); 409 sets
+  `requiresFreshState`.
+- `executeTool` returns `error: AgentError` (was a string); `operate`'s
+  `StepRecord` gains `errorInfo`. Recovery is now a rule (`retryable` +
+  `idempotentHint`, re-read on `conflict`), not prose inference.
+- 16 tests (166 total).
+
+### Changed (pre-1.0, breaking)
+- `ToolResult.error` is now `AgentError`, not `string`.
+
 ## [impl 0.7.0] - August 2026 — tool-format adapters
 
 Consumer-facing (reference implementation only). Addresses Round-5 C7.

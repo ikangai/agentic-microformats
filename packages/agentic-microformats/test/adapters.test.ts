@@ -80,10 +80,26 @@ describe('executeTool — safe execution of a model tool call', () => {
     expect(send).not.toHaveBeenCalled();
   });
 
-  test('unknown tool returns an error, not a throw', async () => {
+  test('unknown tool returns a typed error, not a throw', async () => {
     const agent = new AgentDOM(dom(HTML));
     const r = await executeTool(agent, 'nope', {});
     expect(r.ok).toBe(false);
-    expect(r.error).toMatch(/no action named/i);
+    expect(r.error?.kind).toBe('client');
+    expect(r.error?.message).toMatch(/no action named/i);
+  });
+
+  test('an HTTP error response classifies into a typed AgentError', async () => {
+    const agent = new AgentDOM(dom(HTML));
+    const rateLimited = vi.fn(async () => ({ status: 429, body: { message: 'slow down' }, headers: { 'retry-after': '30' } }));
+    const r = await executeTool(agent, 'add_to_cart', { quantity: 1 }, { sendRequest: rateLimited, origin: 'https://shop.example' });
+    expect(r.ok).toBe(false);
+    expect(r.error).toMatchObject({ kind: 'rate-limit', retryable: true, retryAfter: 30, status: 429, message: 'slow down' });
+  });
+
+  test('a network throw classifies as retryable network error', async () => {
+    const agent = new AgentDOM(dom(HTML));
+    const boom = vi.fn(async () => { throw new Error('ECONNRESET'); });
+    const r = await executeTool(agent, 'add_to_cart', { quantity: 1 }, { sendRequest: boom, origin: 'https://shop.example' });
+    expect(r.error).toMatchObject({ kind: 'network', retryable: true });
   });
 });
