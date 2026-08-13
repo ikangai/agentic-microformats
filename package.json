@@ -2,6 +2,7 @@
   "name": "agentic-microformats-benchmark",
   "version": "0.1.0",
   "description": "Autoresearch benchmark for agentic-microformats annotation strategy",
+  "private": true,
   "scripts": {
     "baseline": "ts-node --project tsconfig.json benchmark/evaluator.ts --pages-dir=benchmark/pages --tasks=benchmark/tasks.json",
     "annotate": "ts-node --project tsconfig.json benchmark/annotator.ts",

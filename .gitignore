@@ -5,3 +5,6 @@ dist/
 benchmark/pages-annotated/
 benchmark/results/
 benchmark/pages-v2-annotated/
+.claude/
+.dev-diary/
+*.tgz
