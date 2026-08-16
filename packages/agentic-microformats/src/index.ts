@@ -47,6 +47,13 @@ export { classifyResponse, classifyNetworkError } from './errors.js';
 export type { AgentError, ErrorKind } from './errors.js';
 export { observe } from './observe.js';
 export type { AgentMutation, MutationCallback } from './observe.js';
+export {
+  selectTools, analyzeIntent, tokenize,
+  compactGraph, expandGraph, toCompactGraph, toCompactGraphJSON, COMPACT_FORMAT_VERSION,
+} from './select.js';
+export type {
+  SelectOptions, SelectionResult, SelectionTrace, IntentAnalysis,
+} from './select.js';
 
 // Class API
 export { AgentDOM } from './agent-dom.js';

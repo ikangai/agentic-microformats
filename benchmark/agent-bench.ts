@@ -21,7 +21,7 @@
  *
  * Usage:
  *   ts-node benchmark/agent-bench.ts [--tasks=./benchmark/tasks-agent.json]
- *                                    [--mode=extraction|html]
+ *                                    [--mode=extraction|html|compact|selected]
  *                                    [--model=claude-sonnet-5]
  *                                    [--backend=claude|openai]           # openai = any OpenAI-compatible
  *                                    [--api-base=http://localhost:1234/v1]  #   server, e.g. LM Studio
@@ -127,6 +127,9 @@ interface EpisodeResult {
   parse_errors: number;
   cost_usd: number;
   output_tokens: number;
+  input_tokens: number;
+  /** Total characters sent across the episode — the cache-independent size signal. */
+  prompt_chars: number;
   duration_ms: number;
   steps: Step[];
 }
@@ -347,12 +350,29 @@ async function fetchPage(baseUrl: string, jar: CookieJar, url: string): Promise<
 // Page representation (extraction via the reference library, or raw HTML)
 // ---------------------------------------------------------------------------
 
-function representPage(html: string, mode: string): string {
+/**
+ * How the current page is put in front of the model. The four modes are the
+ * A/B ladder for the selection layer (0.11.0):
+ *
+ *   html       — raw HTML, the no-annotation control
+ *   extraction — canonical data-agent graph (the standing baseline)
+ *   compact    — extraction + lossless action-template hoisting; the model sees
+ *                exactly the same information, re-encoded. Isolates how much of
+ *                any score change is compression versus dropped content.
+ *   selected   — compact + intent narrowing; the only lossy mode, and the one
+ *                whose pass rate has to hold for narrowing to be worth shipping.
+ */
+function representPage(html: string, mode: string, intent: string): string {
   if (mode === "html") return "```html\n" + html + "\n```";
   // Canonical serialization (spec/graph-serialization.md) — identical to
   // what the demo serves under Accept: application/agent+json.
   const { document } = parseHTML(html);
-  return lib.toGraphJSON(lib.extractAll(document.documentElement));
+  const result = lib.extractAll(document.documentElement);
+  if (mode === "compact") return JSON.stringify(lib.compactGraph(lib.toGraph(result)));
+  if (mode === "selected") {
+    return lib.toCompactGraphJSON(result, lib.selectTools(result, intent));
+  }
+  return lib.toGraphJSON(result);
 }
 
 // ---------------------------------------------------------------------------
@@ -370,6 +390,21 @@ function buildPrompt(task: AgentTask, mode: string, pageUrl: string, pageRepr: s
   const pageLabel = mode === "html"
     ? "CURRENT PAGE HTML"
     : "CURRENT PAGE — structured data extracted from its data-agent-* annotations (the HTML is not shown)";
+
+  // The compact encoding is a documented part of the format a real consumer
+  // would ship, so the model is told how to read it. Without this we would be
+  // measuring whether it can reverse-engineer an undocumented indirection.
+  const encodingNote = (mode === "compact" || mode === "selected")
+    ? `
+NOTE ON ENCODING: repeated actions are hoisted. An action written as
+{"$template":"t1","target":"X","params":{"product_id":"X"}} means: take the full
+action from "actionTemplates"."t1" and override it with the fields shown here —
+"params" here supplies values for template params that have no value of their own.
+All other fields (method, endpoint, required params, min/max) come from the template.
+${mode === "selected" ? `If a "selection" block is present, the resource list is FILTERED to the current
+task; other resources exist on the page but are not shown.
+` : ""}`
+    : "";
 
   return `You are an AI agent operating an e-commerce website (AgentShop) through its Agentic Microformats annotations.
 You act by emitting EXACTLY ONE action per turn, as a single JSON object with no other text, no markdown fences.
@@ -392,7 +427,7 @@ CURRENT URL: ${pageUrl}
 
 ${pageLabel}:
 ${pageRepr}
-
+${encodingNote}
 ACTION HISTORY:
 ${historyText}
 
@@ -541,6 +576,10 @@ async function runEpisode(
   }
 
   const steps: Step[] = [];
+  // Prompt size is the thing the selection layer is supposed to move, and the
+  // provider's input_tokens are cache-dependent — count characters we actually
+  // sent so the comparison is not confounded by cache hits.
+  let promptChars = 0;
   let pageUrl = task.start_url;
   let page = await fetchPage(baseUrl, jar, pageUrl);
   pageUrl = page.finalUrl;
@@ -548,7 +587,8 @@ async function runEpisode(
   let parseErrors = 0;
 
   for (let n = 1; n <= task.max_steps; n++) {
-    const prompt = buildPrompt(task, mode, pageUrl, representPage(page.html, mode), steps, task.max_steps - n + 1, strictPrompt);
+    const prompt = buildPrompt(task, mode, pageUrl, representPage(page.html, mode, task.task), steps, task.max_steps - n + 1, strictPrompt);
+    promptChars += prompt.length;
     const { response, stats, error } = await callModel(prompt, backend, model, apiBase);
     const step: Step = { n, page_url: pageUrl, action_raw: response, stats };
 
@@ -605,6 +645,7 @@ async function runEpisode(
   const failed = await runAssertions(task, baseUrl, jar, steps, answer);
   const cost = steps.reduce((s, st) => s + (st.stats?.cost_usd ?? 0), 0);
   const outTok = steps.reduce((s, st) => s + (st.stats?.output_tokens ?? 0), 0);
+  const inTok = steps.reduce((s, st) => s + (st.stats?.input_tokens ?? 0), 0);
 
   return {
     task_id: task.id, task: task.task,
@@ -615,6 +656,8 @@ async function runEpisode(
     parse_errors: parseErrors,
     cost_usd: Number(cost.toFixed(4)),
     output_tokens: outTok,
+    input_tokens: inTok,
+    prompt_chars: promptChars,
     duration_ms: Date.now() - t0,
     steps,
   };
@@ -706,7 +749,8 @@ async function main() {
           task_id: task.id, task: task.task, passed: false,
           failed_assertions: [`episode error: ${String(e?.message ?? e).substring(0, 200)}`],
           answer: null, steps_used: 0, parse_errors: 0,
-          cost_usd: 0, output_tokens: 0, duration_ms: 0, steps: [],
+          cost_usd: 0, output_tokens: 0, input_tokens: 0, prompt_chars: 0,
+          duration_ms: 0, steps: [],
         });
         console.log(`ERROR: ${String(e?.message ?? e).substring(0, 100)}`);
       }
@@ -716,12 +760,16 @@ async function main() {
     const passed = episodes.filter((e) => e.passed).length;
     const totalCost = episodes.reduce((s, e) => s + e.cost_usd, 0);
     const totalSteps = episodes.reduce((s, e) => s + e.steps_used, 0);
+    const totalPromptChars = episodes.reduce((s, e) => s + e.prompt_chars, 0);
+    const totalInTok = episodes.reduce((s, e) => s + e.input_tokens, 0);
     const runResult = {
       timestamp, harness_version: HARNESS_VERSION, arm: "agent-bench",
       mode, model, backend, tasks_file: tasksFile,
       total_tasks: tasks.length, tasks_passed: passed,
       score: passed / tasks.length,
       total_steps: totalSteps,
+      total_prompt_chars: totalPromptChars,
+      total_input_tokens: totalInTok,
       total_cost_usd: Number(totalCost.toFixed(4)),
       episodes,
     };
@@ -733,6 +781,7 @@ async function main() {
     console.log(`\n${"=".repeat(60)}`);
     console.log(`AGENT BENCH (${mode}) : ${passed}/${tasks.length} (${((passed / tasks.length) * 100).toFixed(1)}%)`);
     console.log(`Steps used : ${totalSteps} across ${tasks.length} episodes | total cost $${totalCost.toFixed(2)}`);
+    console.log(`Prompt size: ${(totalPromptChars / 1000).toFixed(1)}k chars sent | ${totalInTok} input tokens billed`);
     console.log(`Results    : ${outFile}`);
     console.log(`${"=".repeat(60)}\n`);
   } finally {

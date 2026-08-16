@@ -1,6 +1,6 @@
 {
   "name": "agentic-microformats",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "description": "Reference implementation of the Agentic Microformats specification",
   "type": "module",
   "exports": {

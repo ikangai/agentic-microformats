@@ -458,3 +458,105 @@ words/7-section outline, with a verifiable quote on the title.
 ---
 
 <!-- Experiments appended below by the agent -->
+
+---
+
+## Task → Tool Selection (C4) — 2026-08-16
+
+**Question:** a consumer has an intent, not a desire for all twelve tools. We
+hand them the whole graph every step. How much of that is waste, and can it be
+removed without removing the answer?
+
+### The measurement that reframed the task
+
+Before designing anything, where the bytes actually are on the demo catalog:
+
+| section of one product resource | bytes | share |
+|---|---|---|
+| its `add_to_cart` action | **617** | **52%** |
+| description | 201 | 17% |
+| everything else (6 properties) | 362 | 31% |
+
+That action block is **byte-identical across all six products except the SKU**.
+The dominant cost in a collection graph is not *too many tools* — it is **one
+tool repeated per item**. C4 as filed ("no task → tool selection") named the
+second-order lever; the first-order win is deduplication, and it is lossless.
+
+That split the work into two tiers with deliberately different risk.
+
+### Tier 1 — `compactGraph`, lossless
+
+Actions sharing a signature hoist into one `actionTemplates` entry plus
+per-item bindings (`{$template, target, params}`). Two actions share a template
+only when everything but `target`/`endpoint`/param-values matches, so a
+differing `risk` or `method` can never be merged away. Required to round-trip:
+`expandGraph(compactGraph(g))` serializes **byte-identically** to `g` —
+asserted in tests and verified on all five real demo pages, including a
+populated cart with nested resources. Produces *no* template on
+single-resource pages (checkout, product detail): no invented savings.
+
+### Tier 2 — `selectTools`, lossy, fails open
+
+Two bugs surfaced in testing, both caught rather than assumed away:
+
+1. `tokenize('65W')` split into `65` + `W`, destroying the most discriminating
+   token in a product name. The camelCase rule now fires only on letter→capital.
+2. Every product card carries `add_to_cart`, so "add the charger to the cart"
+   matched all six resources identically and narrowing degenerated to a coin
+   flip. Fixed with **IDF weighting**: a token present in every resource
+   contributes zero. Without it the selector cannot distinguish the vocabulary
+   of the *task* from the vocabulary of the *page*.
+
+The load-bearing safety property is the **aggregate guard**: superlative and
+set-wide intents ("the *cheapest* product", "*how many*") range over the whole
+collection, so narrowing them destroys the answer. Six of thirteen tasks are
+superlatives; all six correctly refuse to narrow. Other fail-open branches: no
+content tokens, no discriminating match, collection below a size floor.
+Page-level actions are never dropped — they are the way off a page whose
+narrowed view was wrong. A narrowed graph carries a `selection` disclosure
+block so a model is never misled into "this catalog has one product".
+
+### Result — agent-bench, 13 tasks, both tiers
+
+| tier | mode | score | chars sent | vs extraction | steps | cost |
+|---|---|---|---|---|---|---|
+| haiku | extraction | 12/13 | 354.3k | — | 46 | $0.90 |
+| haiku | compact | 12/13 | 280.6k | **−21%** | 43 | $0.78 |
+| haiku | selected | 12/13 | 270.4k | −24% | 47 | $0.85 |
+| sonnet | extraction | 12/13 | 327.8k | — | 39 | $4.31 |
+| sonnet | compact | 12/13 | 266.8k | **−19%** | 38 | $3.95 |
+| sonnet | selected | 12/13 | 239.2k | −27% | 40 | $4.07 |
+
+**Identical failure set in all six arms** (G06 only — the deliberate
+trust-boundary marker). No regression at either tier.
+
+### Findings
+
+1. **The lossless tier is the win, and it is free.** −21%/−19% chars at equal
+   score and equal-or-fewer steps, at both tiers. Nothing is dropped, so there
+   is no accuracy risk to trade against. This should be on by default.
+2. **The lossy tier adds little on this suite, and that is the honest read.**
+   It saves 3–8 points more than compaction alone while costing slightly *more*
+   in dollars at haiku (more steps). Per-task it is bimodal: where narrowing
+   fires it is decisive (sonnet: G02 −38%, G03 −38%, E02/E05 −28%, G05 −22%,
+   E03 −15% against compact), and where the aggregate guard blocks it there is
+   a flat +2% penalty from the prompt's encoding note. With 6 of 13 tasks
+   superlative, the average washes out.
+3. **Selection's justification is the scaling curve, not this benchmark.** On
+   synthetic catalogs a named-entity intent holds output at ~870 bytes flat at
+   n=12/50/500 where the canonical graph runs 7.1k/29.4k/294.7k — **O(1)
+   instead of O(n) in collection size**. Lossless compaction asymptotes at
+   ~41%. The demo's 6-item catalog is simply too small to exercise this; a real
+   catalog is where narrowing earns its risk.
+4. **Entity resolution was correct 6/6.** Every narrowed task selected the
+   product the task named. The failure mode to fear is not mis-ranking, it is
+   narrowing something that should not have been narrowed — which is what the
+   aggregate guard exists for.
+5. **Harness lesson:** the compact modes required telling the model how to read
+   `$template`, or the arm measures whether it can reverse-engineer an
+   undocumented indirection rather than whether compaction is sound. That note
+   is the +2% floor, and it is a real cost of the encoding, not an artifact.
+
+**Run:** `npm run agent-bench -- --mode=compact|selected [--model=…]`.
+197 TS tests (26 new). Python port: canonical form unchanged and still at
+parity; compaction not yet ported.

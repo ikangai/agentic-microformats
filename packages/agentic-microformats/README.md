@@ -114,11 +114,55 @@ const prepared = agentDom.prepareAction(actions[0], undefined, { origin: locatio
 // prepared.confirmationRequired / prepared.blocked — the safety gates (spec §3.2, §12.5)
 ```
 
+## Narrowing the graph before it hits context (0.11.0)
+
+A catalog page's graph is mostly repetition: on the demo shop the same
+`add_to_cart` block is **52% of every product resource**, byte-identical across
+all six except the SKU. Two tiers cut that down, kept separate because they
+carry very different risk.
+
+**Lossless** — re-encode, drop nothing. Always safe:
+
+```ts
+import { extractAll, toGraph, compactGraph, expandGraph } from 'agentic-microformats';
+
+const result = extractAll(document.documentElement);
+const compact = compactGraph(toGraph(result));   // repeated actions → one template
+// expandGraph(compact) round-trips byte-identically to toGraph(result)
+```
+
+**Lossy** — narrow to the task. Only the caller holds the intent, so only the
+caller can authorize the loss:
+
+```ts
+import { selectTools, toCompactGraphJSON } from 'agentic-microformats';
+
+const selection = selectTools(result, 'Add 3 units of the USB-C Charger 65W to the cart');
+selection.narrowed;  // true
+selection.reason;    // 'intent matched 1/6 resources; kept 1'
+const json = toCompactGraphJSON(result, selection);   // 66% smaller than the full graph
+```
+
+`selectTools` **fails open**: an intent it cannot rank confidently returns the
+whole graph, and `reason` always says which branch ran. Notably it refuses to
+narrow *aggregate* intents — "add the **cheapest** product" ranges over the
+entire collection, and pruning it to the items whose text matches "cheapest"
+would destroy the answer. Page-level actions are never dropped, so an agent can
+always navigate off a page whose narrowed view turned out to be wrong, and a
+pruned graph carries a `selection` block telling the model it is seeing a
+filtered view.
+
+Measured on the 13-task agent benchmark: 47% fewer graph bytes overall, and the
+selector picked the correct product in 6/6 named-entity tasks. See
+[`spec/graph-serialization.md` §5](../../spec/graph-serialization.md) for the
+wire format.
+
 ## Modules
 
 | Module | Purpose |
 |---|---|
 | `extract` | Resources, actions, properties, page meta |
+| `select` | Intent-driven graph narrowing + lossless action-template hoisting |
 | `coerce` | Typehint-driven value coercion (currency, dates, integers, …) |
 | `trust` | Trust regions (`data-agent-trust`) and `data-agent-ignore` — untrusted subtrees are skipped |
 | `params` | Parameter extraction, `min`/`max` constraints, nested dotted-path bodies |

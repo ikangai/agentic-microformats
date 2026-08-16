@@ -2,6 +2,54 @@
 
 All notable changes to the Agentic Microformats specification.
 
+## [0.4.x / impl 0.11.0] - August 2026 — task → tool selection
+
+Addresses Round-5 C4 (the consumer holds an intent, not a desire for all twelve
+tools; we handed them the whole graph every step).
+
+Measurement first: on the demo catalog the `add_to_cart` block is **52% of every
+product resource** and byte-identical across all six products except the SKU.
+The dominant cost in a collection graph is not too many tools — it is one tool
+repeated per item. That reframed the work into two tiers with very different
+risk, kept deliberately separate.
+
+### Added
+- **Compact encoding** (`spec/graph-serialization.md` §5, OPTIONAL) —
+  `actionTemplates` + `$template` references hoist a repeated action into one
+  template plus per-item bindings. **Lossless by requirement**:
+  `expandGraph(compactGraph(g))` must serialize byte-identically to `g`,
+  asserted in the tests. Two actions share a template only when everything but
+  `target`/`endpoint`/param values matches, so a differing `risk` or `method`
+  can never be merged away. Opt-in only (`Accept: application/agent+json;
+  compact=1`) — a naive consumer would misread a reference as an action.
+- **`selectTools(result, intent)`** (impl, Experimental tier) — consumer-side
+  narrowing of the graph to a task. IDF-weighted scoring over resource and
+  action fields: a token carried by *every* resource on the page ("add",
+  "cart") has zero weight, so the selector distinguishes the vocabulary of the
+  task from the vocabulary of the page. Without that it ranks all six catalog
+  products identically and narrowing degenerates.
+- **Aggregate-intent guard** — comparative and set-wide intents ("the
+  *cheapest* product", "*how many*", "*all* items") suppress narrowing
+  entirely: a superlative ranges over the whole collection, so pruning to the
+  items matching its text destroys the answer. Six of the thirteen benchmark
+  tasks are superlatives; all six correctly refuse to narrow.
+- **Disclosure requirement** (§5.4) — a narrowed graph MUST carry a `selection`
+  block stating how many resources of how many are shown. An agent that
+  concludes "this catalog has one product" from a silently pruned graph was
+  misinformed by its producer. Selection is explicitly *excluded* from the wire
+  format: it is lossy, and only the party holding the intent can judge the loss.
+- `--mode=compact` / `--mode=selected` in `benchmark/agent-bench.ts`, plus
+  input-token and prompt-character accounting, so compression and dropped
+  content can be attributed separately.
+
+### Notes
+- Fails open by construction: no content tokens, no discriminating match, an
+  aggregate intent, or a collection below the size floor all return the full
+  graph, and `reason` always names the branch. Page-level actions are never
+  dropped — they are the way off a page whose narrowed view was wrong.
+- 26 tests (197 total). Python port: canonical form unchanged and still at
+  parity; compaction not yet ported.
+
 ## [impl 0.10.0] - August 2026 — API stability tier
 
 Consumer-facing (reference implementation only; no spec vocabulary change).

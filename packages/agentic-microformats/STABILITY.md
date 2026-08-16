@@ -56,6 +56,7 @@ converging — this is where a shape change is most likely before 1.0.
 | `operate` + `AgentAction`, `PageState`, `OperateOptions`, `EpisodeResult`, `StepRecord` | 0.6.0 |
 | `toOpenAITools`, `toAnthropicTools`, `toMCPTools`, `executeTool` + `OpenAITool`, `AnthropicTool`, `MCPTool`, `ExecuteToolOptions`, `ToolResult` | 0.7.0 |
 | `classifyResponse`, `classifyNetworkError` + `AgentError`, `ErrorKind` | 0.8.0 |
+| `compactGraph`, `expandGraph`, `toCompactGraph`, `toCompactGraphJSON`, `COMPACT_FORMAT_VERSION` | 0.11.0 |
 
 ## Experimental
 
@@ -67,6 +68,7 @@ or is a low-level helper. Pin an exact version if you build on these.
 | `registerWebMCPTools` + `ModelContextHost`, `RegisterOptions`, `Registration` | Binds to a live WebMCP host whose runtime contract is not yet standardized. |
 | `observe` + `AgentMutation`, `MutationCallback` | Live DOM mutation observation; API expected to evolve with real usage. |
 | `interpretExecution` | Low-level helper exposed for advanced callers. |
+| `selectTools`, `analyzeIntent`, `tokenize` + `SelectOptions`, `SelectionResult`, `SelectionTrace`, `IntentAnalysis` | Lossy relevance heuristic. The scoring model (IDF weighting, field weights, the relative threshold, the aggregate-intent guard) is expected to change as it meets corpora beyond the demo, and a change in scoring changes which resources an agent sees. Callers who need a frozen view should pass `narrow: false` and select themselves. |
 
 ## Two contracts that version independently of the package
 
