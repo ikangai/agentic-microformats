@@ -60,6 +60,8 @@ export interface PageState {
   history: StepRecord[];
   stepsLeft: number;
   task: string;
+  /** ISO timestamp of this observation — so decide can reason about staleness. */
+  observedAt: string;
 }
 
 export interface OperateOptions {
@@ -123,6 +125,7 @@ export async function operate(opts: OperateOptions): Promise<EpisodeResult> {
       history: steps,
       stepsLeft: maxSteps - n + 1,
       task: opts.task,
+      observedAt: new Date().toISOString(),
     };
 
     let action: AgentAction;

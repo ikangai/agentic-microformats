@@ -385,7 +385,7 @@ def _resolve_description(el: Node, root: Node) -> Optional[str]:
     return None
 
 
-def _extract_action(el: Node, inherited_target: Optional[str], root: Node) -> dict:
+def _extract_action(el: Node, inherited_target: Optional[str], root: Node, resource_version: Optional[str] = None) -> dict:
     method = (el.get_attribute("data-agent-method") or "").upper()
     if method not in _HTTP_METHODS:
         method = "POST"
@@ -478,14 +478,16 @@ def _extract_resource_tree(el: Node, root: Node) -> dict:
         if _is_direct_child_resource(n, nested) and not _should_skip(n)
     ]
     res_id = el.get_attribute("data-agent-id") or ""
+    version = el.get_attribute("data-agent-version")
     actions = [
-        _extract_action(a, res_id, root)
+        _extract_action(a, res_id, root, version)
         for a in el.query_selector_all('[data-agent="action"]')
         if a.closest('[data-agent="resource"]') is el and not _should_skip(a)
     ]
     return {
         "type": el.get_attribute("data-agent-type") or "",
         "id": res_id,
+        "version": version,
         "properties": _extract_properties(el),
         "actions": actions,
         "children": children,
@@ -612,6 +614,8 @@ def _ser_resource(r: dict) -> dict:
         out["type"] = r["type"]
     if r["id"]:
         out["id"] = r["id"]
+    if r.get("version"):
+        out["version"] = r["version"]
     out["properties"] = {name: _ser_property(p) for name, p in r["properties"].items()}
     if r["actions"]:
         out["actions"] = [_ser_action(a) for a in r["actions"]]

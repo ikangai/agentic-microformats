@@ -42,7 +42,7 @@ function resolveDescription(el: AgentElement, root?: AgentElement): string | und
   return undefined;
 }
 
-function extractAction(el: AgentElement, inheritedTargetId?: string, root?: AgentElement): Action {
+function extractAction(el: AgentElement, inheritedTargetId?: string, root?: AgentElement, resourceVersion?: string): Action {
   const name = el.getAttribute('data-agent-name') ?? '';
   const explicitTarget = el.getAttribute('data-agent-target');
   const target = explicitTarget ?? inheritedTargetId;
@@ -103,6 +103,7 @@ function extractAction(el: AgentElement, inheritedTargetId?: string, root?: Agen
     response,
     idempotent,
     crossOrigin,
+    resourceVersion,
     hints: extractHints(el),
     element: el,
   };
@@ -175,6 +176,7 @@ function isDirectChildResource(parent: AgentElement, candidate: AgentElement, al
 function extractResourceTree(el: AgentElement, root?: AgentElement): Resource {
   const type = el.getAttribute('data-agent-type') ?? '';
   const id = el.getAttribute('data-agent-id') ?? '';
+  const version = el.getAttribute('data-agent-version') ?? undefined;
 
   // Find direct child resources (nested)
   const allNestedResources = el.querySelectorAll('[data-agent="resource"]');
@@ -198,13 +200,14 @@ function extractResourceTree(el: AgentElement, root?: AgentElement): Resource {
     const actionEl = allActions[i];
     const closestResource = actionEl.closest('[data-agent="resource"]');
     if (closestResource === el && !shouldSkip(actionEl)) {
-      actions.push(extractAction(actionEl, id, root));
+      actions.push(extractAction(actionEl, id, root, version));
     }
   }
 
   return {
     type,
     id,
+    version,
     properties: extractProperties(el),
     actions,
     children: directChildren,

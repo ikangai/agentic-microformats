@@ -467,9 +467,11 @@ breaks, and what did we never see because we have only ever been the producer?
 > `toOpenAITools`/`toAnthropicTools`/`toMCPTools` + `executeTool` (safe
 > execution of a model's tool call). **C6 shipped (0.8.0):** typed `AgentError`
 > (`kind`/`retryable`/`retryAfter`/`requiresFreshState`) from `executeTool` and
-> `operate`, so recovery is a rule not prose inference. Still open: C4 (task→tool
-> selection), C5 (action-graph freshness), C8 (Python parity), C9 (stability
-> tier), C10 (trust posture).
+> `operate`, so recovery is a rule not prose inference. **C5 shipped (0.9.0):**
+> `data-agent-version` → automatic `If-Match` → `409`/`conflict` → re-read;
+> `PageState.observedAt`. Still open: C4 (task→tool selection), C8 (Python
+> parity — extraction/graph at parity; content/webmcp/operate still TS-only),
+> C9 (stability tier), C10 (trust posture).
 
 ## The frame: we ship a parser; the consumer needs a driver
 

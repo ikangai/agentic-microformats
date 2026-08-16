@@ -23,7 +23,7 @@ export interface ValidationIssue {
 
 const KNOWN_ATTRIBUTES = new Set([
   'data-agent',
-  'data-agent-type', 'data-agent-id', 'data-agent-prop', 'data-agent-typehint',
+  'data-agent-type', 'data-agent-id', 'data-agent-version', 'data-agent-prop', 'data-agent-typehint',
   'data-agent-currency', 'data-agent-value',
   'data-agent-name', 'data-agent-target', 'data-agent-method', 'data-agent-endpoint',
   'data-agent-params', 'data-agent-headers', 'data-agent-on-success', 'data-agent-response',

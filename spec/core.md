@@ -343,6 +343,7 @@ invitation, legible to machines and to humans reading the source.
 | `data-agent` | Core | Declares element type: `resource` or `action` |
 | `data-agent-type` | Resource | Semantic type of the resource |
 | `data-agent-id` | Resource | Unique identifier for the resource |
+| `data-agent-version` | Resource | Opaque version / ETag for optimistic concurrency |
 | `data-agent-prop` | Resource | Declares a property of a resource |
 | `data-agent-typehint` | Resource | Data type hint for a property value |
 | `data-agent-currency` | Resource | ISO 4217 currency code for monetary values |
@@ -436,6 +437,18 @@ invisible data loss.)
 prose surrounding it. `data-agent-value="SDK >= 4.2.0"` is meaningless once
 extracted; `data-agent-value="streaming exports: SDK >= 4.2.0"` survives.
 Annotations are read by consumers that never see the page text.
+
+**Freshness / optimistic concurrency (0.4).** A resource MAY carry
+`data-agent-version` — an opaque version or ETag token for its current state.
+When present, an agent performing a state-mutating action on that resource
+MUST send the token as an `If-Match` request header (RFC 9110 preconditions),
+so a write against a version that has since changed is rejected with `409
+Conflict` rather than silently overwriting the change. The reference
+implementation adds this header automatically in `prepareAction`. A `409` is a
+`conflict` error (`requiresFreshState`): the agent re-reads the resource and
+retries against the new version. This is what lets an agent that read the
+graph, then paused to think, avoid a lost update when the page moved underneath
+it. Served graphs SHOULD set the corresponding HTTP `ETag`.
 
 **Navigability.** A resource that has its own canonical page MUST declare it
 as a `url` property (`data-agent-prop="url"` with `data-agent-typehint="url"`),
@@ -1371,6 +1384,7 @@ action-decl       = 'data-agent="action"'
 ; Resource
 resource-type     = 'data-agent-type="' type-value '"'
 resource-id       = 'data-agent-id="' id-value '"'
+resource-version  = 'data-agent-version="' text-value '"'
 prop-decl         = 'data-agent-prop="' prop-name '"'
 typehint          = 'data-agent-typehint="' hint-value '"'
 currency-attr     = 'data-agent-currency="' currency-code '"'

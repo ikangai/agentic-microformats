@@ -57,6 +57,14 @@ class BehaviorTest(unittest.TestCase):
         types = [r.get("type") for r in graph["resources"]]
         self.assertEqual(types, ["real"])
 
+    def test_resource_version_in_graph(self):
+        html = """<html><body>
+          <div data-agent="resource" data-agent-type="doc" data-agent-id="D1" data-agent-version="v7">
+            <span data-agent-prop="name">Doc</span>
+          </div></body></html>"""
+        r = to_graph(html)["resources"][0]
+        self.assertEqual(r["version"], "v7")
+
     def test_currency_coercion_eu_format(self):
         html = """<html><body>
           <div data-agent="resource" data-agent-type="p">

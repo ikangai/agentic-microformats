@@ -79,6 +79,13 @@ export interface Action {
    * an absolute cross-origin endpoint.
    */
   crossOrigin?: boolean;
+  /**
+   * The current version/ETag of the resource this action mutates, taken from
+   * the enclosing resource's `data-agent-version` (spec §5, 0.4). Sent as
+   * `If-Match` on a mutating request so a stale write is rejected (409) rather
+   * than silently overwriting a change made since the graph was read.
+   */
+  resourceVersion?: string;
   hints: InteractionHints;
   element: import('./dom.js').AgentElement;
 }
@@ -86,6 +93,8 @@ export interface Action {
 export interface Resource {
   type: string;
   id: string;
+  /** Opaque version / ETag token (`data-agent-version`) for optimistic concurrency. */
+  version?: string;
   properties: Record<string, Property>;
   actions: Action[];
   children: Resource[];

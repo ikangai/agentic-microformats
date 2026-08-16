@@ -2,6 +2,22 @@
 
 All notable changes to the Agentic Microformats specification.
 
+## [0.4.x / impl 0.9.0] - August 2026 — freshness / optimistic concurrency
+
+Addresses Round-5 C5 (the last correctness gap in the acting loop: stale-state
+lost updates).
+
+### Added
+- **`data-agent-version`** on a resource — an opaque version/ETag token
+  (§4.1, §5, ABNF). A mutating action on a versioned resource automatically
+  sends it as `If-Match` (RFC 9110), so a write against a changed version gets
+  `409 Conflict` instead of silently overwriting. Serialized in the canonical
+  graph; TS + Python at byte parity.
+- Closes the loop with the typed-error layer: `If-Match` → `409` →
+  `conflict` (`requiresFreshState`) → `operate` re-reads and retries.
+- `PageState.observedAt` (ISO) so a consumer's `decide` can reason about age.
+- 5 tests (171 total); TS↔Python byte parity verified on a versioned page.
+
 ## [impl 0.8.0] - August 2026 — typed error surface
 
 Consumer-facing (reference implementation only). Addresses Round-5 C6.

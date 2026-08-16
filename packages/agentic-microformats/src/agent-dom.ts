@@ -130,10 +130,23 @@ export class AgentDOM {
       body = buildNestedParams(action.params);
     }
 
+    // Optimistic concurrency (spec §5, 0.4): a mutating action on a versioned
+    // resource sends If-Match, so a write against a stale version is rejected
+    // (409 conflict) instead of clobbering a change made since the graph was
+    // read. Skipped for safe methods and if the site already set If-Match.
+    const headers: Record<string, string> = { ...(action.headers ?? {}) };
+    if (
+      !this.isSafeMethod(action.method) &&
+      action.resourceVersion &&
+      !Object.keys(headers).some((h) => h.toLowerCase() === 'if-match')
+    ) {
+      headers['If-Match'] = action.resourceVersion;
+    }
+
     return {
       method: action.method,
       url,
-      headers: action.headers ?? {},
+      headers,
       body,
       confirmationRequired: blocked || requiresConfirmation(action.hints, action.method),
       blocked,

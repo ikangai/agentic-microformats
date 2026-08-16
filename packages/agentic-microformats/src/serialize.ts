@@ -69,6 +69,7 @@ function serializeResource(r: Resource): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   if (r.type) out.type = r.type;
   if (r.id) out.id = r.id;
+  if (r.version) out.version = r.version;
 
   const properties: Record<string, unknown> = {};
   for (const [name, p] of Object.entries(r.properties)) {
