@@ -160,6 +160,15 @@ same annotations a zero-JS agent reads statically also drive live WebMCP
 invocation in a capable browser — Agentic Microformats does not compete with
 WebMCP's runtime, it feeds it.
 
+## API stability
+
+The public surface is tiered — **Stable** (extraction core, canonical graph,
+validation, safety primitives), **Beta** (the consumer runtime: `operate`, the
+SDK adapters, typed errors, content, WebMCP), and **Experimental**. Depend on
+the tier, not the version number; both breaking changes made so far landed in
+Beta, never in Stable. Full contract and the path to 1.0 in
+[STABILITY.md](./STABILITY.md).
+
 ## Spec coverage
 
 Implements core spec **v0.3.x** (`data-agent-idempotent`, endpoint origin

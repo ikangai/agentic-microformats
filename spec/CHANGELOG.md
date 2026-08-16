@@ -2,6 +2,23 @@
 
 All notable changes to the Agentic Microformats specification.
 
+## [impl 0.10.0] - August 2026 — API stability tier
+
+Consumer-facing (reference implementation only; no spec vocabulary change).
+Addresses Round-5 C9.
+
+### Added
+- **`STABILITY.md`** — every public export assigned a tier (**Stable** /
+  **Beta** / **Experimental**), each tier a documented promise plus a deprecation
+  process. Stable = extraction core / canonical graph / validation / safety
+  primitives (Python-parity, unchanged since 0.3.x); Beta = the consumer runtime
+  (`operate`, adapters, typed errors, content, WebMCP); Experimental = exports
+  bound to unratified contracts (`registerWebMCPTools`, `observe`,
+  `interpretExecution`). Ships in the published tarball; linked from the README.
+- Documents two contracts that version independently of the package: the
+  serialized graph (`GRAPH_FORMAT_VERSION`) and the CLI output format. States the
+  path to 1.0. No code change — a promise about the surface that already exists.
+
 ## [0.4.x / impl 0.9.0] - August 2026 — freshness / optimistic concurrency
 
 Addresses Round-5 C5 (the last correctness gap in the acting loop: stale-state
